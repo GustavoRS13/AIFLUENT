@@ -1,0 +1,617 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ── Organization (multi-tenant SaaS) ────────────────────────────────────────
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  logo      String?
+  plan      String   @default("starter")
+  settings  String?
+  lgpdConsent Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users          User[]
+  leads          Lead[]
+  pipelines      Pipeline[]
+  campaigns      Campaign[]
+  tags           Tag[]
+  tasks          Task[]
+  templates      Template[]
+  teams          Team[]
+  integrations   Integration[]
+  conversations  Conversation[]
+  phoneCalls     PhoneCall[]
+  automations    AutomationFlow[]
+  metaAdsCampaigns MetaAdsCampaign[]
+  auditLogs      AuditLog[]
+  achievements   Achievement[]
+  userGoals      UserGoal[]
+}
+
+// ── User ────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  avatar       String?
+  role         String    @default("agent")
+  phone        String?
+  isActive     Boolean   @default(true)
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret  String?
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  teamId         String?
+  team           Team?        @relation(fields: [teamId], references: [id])
+
+  leadsAssigned    Lead[]         @relation("AssignedConsultant")
+  leadsCreated     Lead[]         @relation("CreatedBy")
+  activities       Activity[]
+  tasksAssigned    Task[]         @relation("TaskAssignee")
+  tasksCreated     Task[]         @relation("TaskCreator")
+  messages         Message[]
+  campaignsSent    Campaign[]     @relation("CampaignCreator")
+  conversationMsgs ConversationMessage[] @relation("MessageSender")
+  assignedConvos   Conversation[] @relation("ConversationAssignee")
+  phoneCalls       PhoneCall[]
+  auditLogs        AuditLog[]
+  userAchievements UserAchievement[]
+  userGoals        UserGoal[]
+}
+
+// ── Team ────────────────────────────────────────────────────────────────────
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  members User[]
+}
+
+// ── Lead ────────────────────────────────────────────────────────────────────
+
+model Lead {
+  id             String    @id @default(cuid())
+  firstName      String
+  lastName       String?
+  email          String?
+  phone          String?
+  whatsapp       String?
+  avatar         String?
+  company        String?
+  jobTitle       String?
+  source         String    @default("manual")
+  sourceDetail   String?
+  temperature    String    @default("warm")
+  score          Int       @default(0)
+  aiScore        Float?
+  status         String    @default("new")
+  courseInterest String?
+  languageLevel  String?
+  notes          String?
+  city           String?
+  state          String?
+  country        String    @default("Brasil")
+  customFields   String?
+  lastContactAt  DateTime?
+  nextFollowUpAt DateTime?
+  convertedAt    DateTime?
+  lostAt         DateTime?
+  lostReason     String?
+  metaAdId       String?
+  fbLeadId       String?
+  utmSource      String?
+  utmMedium      String?
+  utmCampaign    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  consultantId   String?
+  consultant     User?        @relation("AssignedConsultant", fields: [consultantId], references: [id])
+  createdById    String?
+  createdBy      User?        @relation("CreatedBy", fields: [createdById], references: [id])
+  stageId        String?
+  stage          PipelineStage? @relation(fields: [stageId], references: [id])
+  listId         String?
+  list           LeadList?    @relation(fields: [listId], references: [id])
+
+  activities    Activity[]
+  tags          LeadTag[]
+  messages      Message[]
+  deals         Deal[]
+  campaignLeads CampaignLead[]
+  conversations Conversation[]
+  phoneCalls    PhoneCall[]
+  stageOrder    Int @default(0)
+}
+
+// ── LeadList ────────────────────────────────────────────────────────────────
+
+model LeadList {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  color       String?
+  leadCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  leads Lead[]
+}
+
+// ── Tag ─────────────────────────────────────────────────────────────────────
+
+model Tag {
+  id    String @id @default(cuid())
+  name  String
+  color String @default("#6366f1")
+  createdAt DateTime @default(now())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  leads LeadTag[]
+}
+
+model LeadTag {
+  id     String @id @default(cuid())
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  tagId  String
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([leadId, tagId])
+}
+
+// ── Pipeline ────────────────────────────────────────────────────────────────
+
+model Pipeline {
+  id        String  @id @default(cuid())
+  name      String
+  isDefault Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  stages PipelineStage[]
+}
+
+model PipelineStage {
+  id     String  @id @default(cuid())
+  name   String
+  color  String  @default("#6366f1")
+  order  Int
+  isWon  Boolean @default(false)
+  isLost Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  pipelineId String
+  pipeline   Pipeline @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+
+  leads Lead[]
+  deals Deal[]
+}
+
+// ── Deal ────────────────────────────────────────────────────────────────────
+
+model Deal {
+  id              String    @id @default(cuid())
+  title           String
+  value           Float?
+  currency        String    @default("BRL")
+  probability     Int       @default(50)
+  status          String    @default("open")
+  closedAt        DateTime?
+  expectedCloseAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  leadId  String
+  lead    Lead          @relation(fields: [leadId], references: [id])
+  stageId String
+  stage   PipelineStage @relation(fields: [stageId], references: [id])
+}
+
+// ── Activity ────────────────────────────────────────────────────────────────
+
+model Activity {
+  id          String   @id @default(cuid())
+  type        String
+  title       String
+  description String?
+  metadata    String?
+  createdAt   DateTime @default(now())
+
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  userId String?
+  user   User?  @relation(fields: [userId], references: [id])
+}
+
+// ── Campaign ────────────────────────────────────────────────────────────────
+
+model Campaign {
+  id              String    @id @default(cuid())
+  name            String
+  type            String
+  status          String    @default("draft")
+  channel         String
+  subject         String?
+  content         String?
+  templateId      String?
+  scheduledAt     DateTime?
+  sentAt          DateTime?
+  completedAt     DateTime?
+  totalRecipients Int       @default(0)
+  totalSent       Int       @default(0)
+  totalDelivered  Int       @default(0)
+  totalOpened     Int       @default(0)
+  totalClicked    Int       @default(0)
+  totalReplied    Int       @default(0)
+  totalConverted  Int       @default(0)
+  totalFailed     Int       @default(0)
+  totalBounced    Int       @default(0)
+  settings        String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdById    String
+  createdBy      User     @relation("CampaignCreator", fields: [createdById], references: [id])
+
+  leads     CampaignLead[]
+  sequences CampaignSequence[]
+}
+
+model CampaignLead {
+  id          String    @id @default(cuid())
+  status      String    @default("pending")
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  openedAt    DateTime?
+  clickedAt   DateTime?
+  repliedAt   DateTime?
+  failedAt    DateTime?
+  failReason  String?
+
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  leadId     String
+  lead       Lead     @relation(fields: [leadId], references: [id])
+
+  @@unique([campaignId, leadId])
+}
+
+model CampaignSequence {
+  id        String @id @default(cuid())
+  order     Int
+  delay     Int    @default(0)
+  delayUnit String @default("hours")
+  channel   String
+  subject   String?
+  content   String
+  condition String?
+  createdAt DateTime @default(now())
+
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+}
+
+// ── Template ────────────────────────────────────────────────────────────────
+
+model Template {
+  id         String  @id @default(cuid())
+  name       String
+  category   String
+  channel    String
+  subject    String?
+  content    String
+  variables  String?
+  isActive   Boolean @default(true)
+  usageCount Int     @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+// ── Message (legacy direct messages) ────────────────────────────────────────
+
+model Message {
+  id         String   @id @default(cuid())
+  channel    String
+  direction  String
+  content    String
+  mediaUrl   String?
+  mediaType  String?
+  status     String   @default("sent")
+  externalId String?
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  userId String?
+  user   User?  @relation(fields: [userId], references: [id])
+}
+
+// ── Unified Inbox: Conversation ─────────────────────────────────────────────
+
+model Conversation {
+  id            String    @id @default(cuid())
+  channel       String
+  status        String    @default("open")
+  priority      String    @default("normal")
+  subject       String?
+  lastMessageAt DateTime?
+  unreadCount   Int       @default(0)
+  aiSuggestion  String?
+  metadata      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  leadId         String
+  lead           Lead @relation(fields: [leadId], references: [id])
+  assigneeId     String?
+  assignee       User?  @relation("ConversationAssignee", fields: [assigneeId], references: [id])
+
+  messages ConversationMessage[]
+}
+
+model ConversationMessage {
+  id          String   @id @default(cuid())
+  direction   String
+  content     String
+  contentType String   @default("text")
+  mediaUrl    String?
+  mediaType   String?
+  status      String   @default("sent")
+  externalId  String?
+  aiGenerated Boolean  @default(false)
+  metadata    String?
+  createdAt   DateTime @default(now())
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String?
+  sender         User?  @relation("MessageSender", fields: [senderId], references: [id])
+}
+
+// ── Phone Calls ─────────────────────────────────────────────────────────────
+
+model PhoneCall {
+  id            String    @id @default(cuid())
+  direction     String
+  status        String    @default("initiated")
+  phoneNumber   String
+  duration      Int?
+  recordingUrl  String?
+  transcription String?
+  aiSummary     String?
+  aiSentiment   String?
+  notes         String?
+  startedAt     DateTime  @default(now())
+  endedAt       DateTime?
+  createdAt     DateTime  @default(now())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  userId         String
+  user           User @relation(fields: [userId], references: [id])
+  leadId         String?
+  lead           Lead?  @relation(fields: [leadId], references: [id])
+}
+
+// ── Automation Flows ────────────────────────────────────────────────────────
+
+model AutomationFlow {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  trigger     String
+  isActive    Boolean  @default(false)
+  lastRunAt   DateTime?
+  runCount    Int      @default(0)
+  settings    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  steps      AutomationStep[]
+  executions AutomationExecution[]
+}
+
+model AutomationStep {
+  id        String @id @default(cuid())
+  type      String
+  order     Int
+  config    String?
+  delay     Int    @default(0)
+  delayUnit String @default("minutes")
+  condition String?
+  createdAt DateTime @default(now())
+
+  flowId String
+  flow   AutomationFlow @relation(fields: [flowId], references: [id], onDelete: Cascade)
+}
+
+model AutomationExecution {
+  id        String    @id @default(cuid())
+  status    String    @default("running")
+  triggeredBy String?
+  startedAt DateTime  @default(now())
+  completedAt DateTime?
+  error     String?
+  metadata  String?
+
+  flowId String
+  flow   AutomationFlow @relation(fields: [flowId], references: [id], onDelete: Cascade)
+}
+
+// ── Meta Ads ────────────────────────────────────────────────────────────────
+
+model MetaAdsCampaign {
+  id              String    @id @default(cuid())
+  externalId      String?
+  name            String
+  platform        String
+  objective       String
+  status          String    @default("draft")
+  budget          Float?
+  budgetType      String    @default("daily")
+  spend           Float     @default(0)
+  impressions     Int       @default(0)
+  clicks          Int       @default(0)
+  leads           Int       @default(0)
+  conversions     Int       @default(0)
+  cpc             Float?
+  cpl             Float?
+  ctr             Float?
+  roas            Float?
+  startDate       DateTime?
+  endDate         DateTime?
+  targeting       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+// ── Audit Log (LGPD compliance) ─────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String
+  entityId  String?
+  details   String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  userId         String?
+  user           User?  @relation(fields: [userId], references: [id])
+}
+
+// ── Gamification ────────────────────────────────────────────────────────────
+
+model Achievement {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  icon        String
+  category    String
+  threshold   Int
+  xpReward    Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id          String   @id @default(cuid())
+  unlockedAt  DateTime @default(now())
+
+  userId        String
+  user          User @relation(fields: [userId], references: [id])
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+
+  @@unique([userId, achievementId])
+}
+
+model UserGoal {
+  id          String   @id @default(cuid())
+  type        String
+  target      Int
+  current     Int      @default(0)
+  period      String   @default("monthly")
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  userId         String
+  user           User @relation(fields: [userId], references: [id])
+}
+
+// ── Task ────────────────────────────────────────────────────────────────────
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  type        String    @default("task")
+  priority    String    @default("medium")
+  status      String    @default("pending")
+  dueDate     DateTime?
+  completedAt DateTime?
+  reminderAt  DateTime?
+  isRecurring Boolean   @default(false)
+  recurringRule String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  assigneeId     String?
+  assignee       User?  @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  creatorId      String
+  creator        User   @relation("TaskCreator", fields: [creatorId], references: [id])
+}
+
+// ── Integration ─────────────────────────────────────────────────────────────
+
+model Integration {
+  id         String    @id @default(cuid())
+  type       String
+  name       String
+  config     String?
+  isActive   Boolean   @default(true)
+  lastSyncAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
