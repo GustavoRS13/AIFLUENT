@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search,
@@ -75,10 +76,13 @@ export function Header() {
           </button>
 
           {/* New Lead */}
-          <button className="flex h-9 items-center gap-2 rounded-lg bg-indigo-600 px-3 text-sm font-medium text-white shadow-lg shadow-indigo-500/20 transition-colors hover:bg-indigo-500">
+          <Link
+            href="/leads?new=1"
+            className="flex h-9 items-center gap-2 rounded-lg bg-indigo-600 px-3 text-sm font-medium text-white shadow-lg shadow-indigo-500/20 transition-colors hover:bg-indigo-500"
+          >
             <UserPlus className="h-4 w-4" />
             <span className="hidden sm:inline">Novo Lead</span>
-          </button>
+          </Link>
 
           {/* AI Assistant */}
           <button className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700/50 text-slate-400 transition-colors hover:border-indigo-500/30 hover:bg-indigo-500/10 hover:text-indigo-400">
