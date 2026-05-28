@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from 'react'
-import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Users,
@@ -80,13 +79,12 @@ export default function LeadsPage() {
   const [importOpen, setImportOpen] = React.useState(false)
   const [newLeadOpen, setNewLeadOpen] = React.useState(false)
 
-  // Open new-lead modal when navigated from header with ?new=1
-  const searchParams = useSearchParams()
   React.useEffect(() => {
-    if (searchParams.get('new') === '1') {
+    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('new') === '1') {
       setNewLeadOpen(true)
+      window.history.replaceState({}, '', '/leads')
     }
-  }, [searchParams])
+  }, [])
 
   // ── Fetch leads ─────────────────────────────────────────────────────────
 
