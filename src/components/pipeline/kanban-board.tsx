@@ -14,6 +14,7 @@ import {
   type DragOverEvent,
 } from '@dnd-kit/core'
 import { sortableKeyboardCoordinates, arrayMove } from '@dnd-kit/sortable'
+import { Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { usePipelineStore, type PipelineStage } from '@/stores/pipeline-store'
 import { KanbanColumn } from './kanban-column'
@@ -25,9 +26,13 @@ interface KanbanBoardProps {
   onAddLead?: (stageId: string) => void
   onMoveLead?: (leadId: string, stageId: string, newOrder: number) => void
   filteredStages?: PipelineStage[]
+  onAddStage?: () => void
+  onRenameStage?: (stageId: string, name: string) => void
+  onUpdateStageColor?: (stageId: string, color: string) => void
+  onDeleteStage?: (stageId: string) => void
 }
 
-export function KanbanBoard({ onCardClick, onAddLead, onMoveLead, filteredStages }: KanbanBoardProps) {
+export function KanbanBoard({ onCardClick, onAddLead, onMoveLead, filteredStages, onAddStage, onRenameStage, onUpdateStageColor, onDeleteStage }: KanbanBoardProps) {
   const { stages, setStages, setDraggedLead } = usePipelineStore()
   const [activeCard, setActiveCard] = useState<KanbanCardType | null>(null)
   const displayStages = filteredStages || stages
@@ -188,8 +193,22 @@ export function KanbanBoard({ onCardClick, onAddLead, onMoveLead, filteredStages
             stage={stage}
             onCardClick={onCardClick}
             onAddLead={onAddLead}
+            onRenameStage={onRenameStage}
+            onUpdateStageColor={onUpdateStageColor}
+            onDeleteStage={onDeleteStage}
           />
         ))}
+
+        {/* Add stage column button */}
+        {onAddStage && (
+          <button
+            onClick={onAddStage}
+            className="flex flex-col items-center justify-center shrink-0 w-[300px] min-h-[200px] rounded-lg border-2 border-dashed border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/30 text-gray-400 hover:text-indigo-500 transition-all duration-200 group"
+          >
+            <Plus className="w-6 h-6 mb-1 group-hover:scale-110 transition-transform" />
+            <span className="text-sm font-medium">Nova etapa</span>
+          </button>
+        )}
       </div>
 
       {/* Drag overlay - rendered outside of columns for smooth cross-column dragging */}

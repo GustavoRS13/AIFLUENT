@@ -100,7 +100,7 @@ function computeOrigins(stages: PipelineStage[]) {
 }
 
 export default function PipelinePage() {
-  const { stages, setStages } = usePipelineStore()
+  const { stages, setStages, addStage, renameStage, updateStageColor, deleteStage } = usePipelineStore()
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedOrigin, setSelectedOrigin] = useState(0)
@@ -157,6 +157,24 @@ export default function PipelinePage() {
   const handleMoveLead = useCallback(async (leadId: string, stageId: string, newOrder: number) => {
     try { await fetch('/api/pipeline', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ leadId, stageId, newOrder }) }) } catch {}
   }, [])
+
+  const handleAddStage = useCallback(() => {
+    const defaultColors = ['#6366f1', '#8b5cf6', '#06b6d4', '#f59e0b', '#f97316', '#10b981', '#ef4444', '#ec4899', '#3b82f6', '#a855f7']
+    const color = defaultColors[stages.length % defaultColors.length]
+    addStage(`Nova Etapa ${stages.length + 1}`, color)
+  }, [stages.length, addStage])
+
+  const handleRenameStage = useCallback((stageId: string, name: string) => {
+    renameStage(stageId, name)
+  }, [renameStage])
+
+  const handleUpdateStageColor = useCallback((stageId: string, color: string) => {
+    updateStageColor(stageId, color)
+  }, [updateStageColor])
+
+  const handleDeleteStage = useCallback((stageId: string) => {
+    deleteStage(stageId)
+  }, [deleteStage])
 
   const filteredStages = stages.map((stage) => ({
     ...stage,
@@ -340,6 +358,10 @@ export default function PipelinePage() {
                 onMoveLead={handleMoveLead}
                 onAddLead={(stageId) => console.log('Add to:', stageId)}
                 onCardClick={(card) => console.log('Click:', card.id)}
+                onAddStage={handleAddStage}
+                onRenameStage={handleRenameStage}
+                onUpdateStageColor={handleUpdateStageColor}
+                onDeleteStage={handleDeleteStage}
               />
             </motion.div>
           )}
