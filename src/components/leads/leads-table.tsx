@@ -60,8 +60,8 @@ const sourceIcon: Record<LeadSource, React.ReactNode> = {
   website: <Globe className="h-3.5 w-3.5 text-violet-400" />,
   referral: <UsersIcon className="h-3.5 w-3.5 text-amber-400" />,
   event: <MapPin className="h-3.5 w-3.5 text-cyan-400" />,
-  manual: <UserPlus className="h-3.5 w-3.5 text-slate-400" />,
-  import: <ArrowRightLeft className="h-3.5 w-3.5 text-slate-400" />,
+  manual: <UserPlus className="h-3.5 w-3.5 text-gray-500" />,
+  import: <ArrowRightLeft className="h-3.5 w-3.5 text-gray-500" />,
   meta_ads: <Target className="h-3.5 w-3.5 text-orange-400" />,
   facebook_lead_ad: <MessagesSquare className="h-3.5 w-3.5 text-blue-400" />,
 }
@@ -93,7 +93,7 @@ const statusVariant: Record<LeadStatus, 'default' | 'primary' | 'success' | 'war
 // ── Score circle ────────────────────────────────────────────────────────────
 
 function ScoreCircle({ score }: { score: number | null }) {
-  if (score == null) return <span className="text-slate-600">--</span>
+  if (score == null) return <span className="text-gray-400">--</span>
   const pct = Math.min(score, 100)
   const r = 14
   const circumference = 2 * Math.PI * r
@@ -111,7 +111,7 @@ function ScoreCircle({ score }: { score: number | null }) {
           fill="none"
           stroke="currentColor"
           strokeWidth="3"
-          className="text-slate-800"
+          className="text-gray-800"
         />
         <circle
           cx="18"
@@ -184,11 +184,11 @@ export function LeadsTable({ leads, onView, onEdit, onDelete }: LeadsTableProps)
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-slate-100">
+              <p className="truncate text-sm font-medium text-gray-900">
                 {row.name}
               </p>
               {row.courseInterest && (
-                <p className="truncate text-xs text-slate-500">
+                <p className="truncate text-xs text-gray-400">
                   {row.courseInterest}
                 </p>
               )}
@@ -204,9 +204,9 @@ export function LeadsTable({ leads, onView, onEdit, onDelete }: LeadsTableProps)
         accessorFn: (row) => row.email,
         cell: (row) =>
           row.email ? (
-            <span className="text-xs text-slate-400">{row.email}</span>
+            <span className="text-xs text-gray-500">{row.email}</span>
           ) : (
-            <span className="text-xs text-slate-600">--</span>
+            <span className="text-xs text-gray-400">--</span>
           ),
       },
       {
@@ -214,11 +214,11 @@ export function LeadsTable({ leads, onView, onEdit, onDelete }: LeadsTableProps)
         header: 'Telefone',
         cell: (row) =>
           row.phone ? (
-            <span className="text-xs text-slate-400 font-mono">
+            <span className="text-xs text-gray-500 font-mono">
               {formatPhone(row.phone)}
             </span>
           ) : (
-            <span className="text-xs text-slate-600">--</span>
+            <span className="text-xs text-gray-400">--</span>
           ),
       },
       {
@@ -229,7 +229,7 @@ export function LeadsTable({ leads, onView, onEdit, onDelete }: LeadsTableProps)
         cell: (row) => (
           <div className="flex items-center gap-1.5">
             {sourceIcon[row.source]}
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-gray-500">
               {sourceLabel[row.source]}
             </span>
           </div>
@@ -261,9 +261,9 @@ export function LeadsTable({ leads, onView, onEdit, onDelete }: LeadsTableProps)
         accessorFn: (row) => row.consultant,
         cell: (row) =>
           row.consultant ? (
-            <span className="text-xs text-slate-400">{row.consultant}</span>
+            <span className="text-xs text-gray-500">{row.consultant}</span>
           ) : (
-            <span className="text-xs text-slate-600">Sem consultor</span>
+            <span className="text-xs text-gray-400">Sem consultor</span>
           ),
       },
       {
@@ -272,7 +272,7 @@ export function LeadsTable({ leads, onView, onEdit, onDelete }: LeadsTableProps)
         sortable: true,
         accessorFn: (row) => row.lastInteraction,
         cell: (row) => (
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-gray-400">
             {relativeTime(row.lastInteraction)}
           </span>
         ),
@@ -294,7 +294,7 @@ export function LeadsTable({ leads, onView, onEdit, onDelete }: LeadsTableProps)
         cell: (row) => (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors">
+              <button className="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors">
                 <MoreHorizontal className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
@@ -362,20 +362,20 @@ export function LeadsTable({ leads, onView, onEdit, onDelete }: LeadsTableProps)
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="flex items-center gap-3 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-4 py-2.5 backdrop-blur-sm">
+            <div className="flex items-center gap-3 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-4 py-2.5">
               <span className="text-sm text-indigo-300 font-medium">
                 {selectedLeads.size} selecionado{selectedLeads.size > 1 ? 's' : ''}
               </span>
               <div className="h-4 w-px bg-indigo-500/30" />
-              <Button variant="ghost" size="sm" className="text-xs text-slate-300">
+              <Button variant="ghost" size="sm" className="text-xs text-gray-700">
                 <UsersIcon className="mr-1.5 h-3.5 w-3.5" />
                 Atribuir
               </Button>
-              <Button variant="ghost" size="sm" className="text-xs text-slate-300">
+              <Button variant="ghost" size="sm" className="text-xs text-gray-700">
                 <ArrowRightLeft className="mr-1.5 h-3.5 w-3.5" />
                 Mover
               </Button>
-              <Button variant="ghost" size="sm" className="text-xs text-slate-300">
+              <Button variant="ghost" size="sm" className="text-xs text-gray-700">
                 <Tag className="mr-1.5 h-3.5 w-3.5" />
                 Tag
               </Button>
@@ -392,7 +392,7 @@ export function LeadsTable({ leads, onView, onEdit, onDelete }: LeadsTableProps)
                 variant="ghost"
                 size="sm"
                 onClick={clearSelection}
-                className="text-xs text-slate-400"
+                className="text-xs text-gray-500"
               >
                 Limpar selecao
               </Button>
@@ -402,7 +402,7 @@ export function LeadsTable({ leads, onView, onEdit, onDelete }: LeadsTableProps)
       </AnimatePresence>
 
       {/* Data table */}
-      <div className="rounded-xl border border-slate-700/50 bg-slate-900/30 backdrop-blur-sm overflow-hidden">
+      <div className="rounded-xl border border-gray-200 bg-gray-50 overflow-hidden">
         <DataTable
           columns={columns}
           data={leads}

@@ -172,9 +172,9 @@ const activityColors: Record<ActivityType, { icon: string; bg: string; line: str
     line: 'bg-yellow-500/20',
   },
   note_added: {
-    icon: 'text-slate-400',
-    bg: 'bg-slate-500/10 border-slate-500/20',
-    line: 'bg-slate-500/20',
+    icon: 'text-gray-500',
+    bg: 'bg-gray-100 border-gray-300',
+    line: 'bg-gray-200',
   },
 }
 
@@ -184,14 +184,14 @@ export function ActivityTimeline() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.7 }}
-      className="rounded-2xl border border-white/5 bg-slate-800/50 backdrop-blur-sm p-6"
+      className="rounded-2xl border border-gray-200 bg-gray-50 p-6"
     >
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-slate-100">Atividades Recentes</h3>
-          <p className="mt-1 text-sm text-slate-400">Timeline de ações da equipe</p>
+          <h3 className="text-lg font-semibold text-gray-900">Atividades Recentes</h3>
+          <p className="mt-1 text-sm text-gray-500">Timeline de ações da equipe</p>
         </div>
-        <button className="rounded-lg border border-white/5 bg-slate-700/30 px-3 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-700/50 hover:text-slate-100">
+        <button className="rounded-lg border border-gray-200 bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900">
           Ver todas
         </button>
       </div>
@@ -215,7 +215,7 @@ export function ActivityTimeline() {
                 <div
                   className={cn(
                     'absolute left-[17px] top-10 h-[calc(100%-24px)] w-[1px]',
-                    'bg-slate-700/40'
+                    'bg-gray-100'
                   )}
                 />
               )}
@@ -234,21 +234,21 @@ export function ActivityTimeline() {
               <div className="min-w-0 flex-1 pt-0.5">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-sm text-slate-300 group-hover:text-slate-100 transition-colors">
+                    <p className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
                       {activity.title}
                     </p>
-                    <p className="mt-0.5 text-xs text-slate-500">
-                      <span className="font-medium text-slate-400">
+                    <p className="mt-0.5 text-xs text-gray-400">
+                      <span className="font-medium text-gray-500">
                         {activity.leadName}
                       </span>
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     {/* User avatar */}
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-700/50 text-[9px] font-bold text-slate-400">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-[9px] font-bold text-gray-500">
                       {getInitials(activity.userName)}
                     </div>
-                    <span className="whitespace-nowrap text-[10px] text-slate-600">
+                    <span className="whitespace-nowrap text-[10px] text-gray-400">
                       {activity.timeAgo}
                     </span>
                   </div>

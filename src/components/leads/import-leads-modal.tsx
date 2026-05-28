@@ -226,11 +226,11 @@ export function ImportLeadsModal({ open, onOpenChange, onImportComplete }: Impor
                 'flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-12 transition-all',
                 dragActive
                   ? 'border-indigo-500 bg-indigo-500/10'
-                  : 'border-slate-700/50 bg-slate-800/30 hover:border-slate-600'
+                  : 'border-gray-200 bg-white hover:border-gray-300'
               )}
             >
-              <Upload className={cn('h-10 w-10 mb-4', dragActive ? 'text-indigo-400' : 'text-slate-500')} />
-              <p className="text-sm text-slate-300 mb-1">
+              <Upload className={cn('h-10 w-10 mb-4', dragActive ? 'text-indigo-400' : 'text-gray-400')} />
+              <p className="text-sm text-gray-700 mb-1">
                 Arraste um arquivo aqui ou
               </p>
               <label className="cursor-pointer">
@@ -244,7 +244,7 @@ export function ImportLeadsModal({ open, onOpenChange, onImportComplete }: Impor
                   onChange={handleFileInput}
                 />
               </label>
-              <p className="mt-3 text-xs text-slate-500">
+              <p className="mt-3 text-xs text-gray-400">
                 Formatos aceitos: CSV, XLSX
               </p>
             </div>
@@ -253,10 +253,10 @@ export function ImportLeadsModal({ open, onOpenChange, onImportComplete }: Impor
           {/* Step 2: Mapping */}
           {step === 'mapping' && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 rounded-lg bg-slate-800/50 px-3 py-2 text-sm text-slate-300">
+              <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-700">
                 <FileSpreadsheet className="h-4 w-4 text-indigo-400" />
                 <span className="font-medium">{file?.name}</span>
-                <span className="text-slate-500">
+                <span className="text-gray-400">
                   ({csvRows.length} linhas)
                 </span>
               </div>
@@ -265,12 +265,12 @@ export function ImportLeadsModal({ open, onOpenChange, onImportComplete }: Impor
                 {csvHeaders.map((header) => (
                   <div
                     key={header}
-                    className="flex items-center gap-3 rounded-lg border border-slate-800/50 bg-slate-900/30 px-3 py-2"
+                    className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2"
                   >
-                    <span className="min-w-[140px] text-sm text-slate-400 truncate">
+                    <span className="min-w-[140px] text-sm text-gray-500 truncate">
                       {header}
                     </span>
-                    <ArrowRight className="h-3.5 w-3.5 text-slate-600 shrink-0" />
+                    <ArrowRight className="h-3.5 w-3.5 text-gray-400 shrink-0" />
                     <select
                       value={mapping[header] ?? ''}
                       onChange={(e) =>
@@ -279,7 +279,7 @@ export function ImportLeadsModal({ open, onOpenChange, onImportComplete }: Impor
                           [header]: e.target.value,
                         }))
                       }
-                      className="flex-1 rounded-md border border-slate-700/50 bg-slate-800/50 px-2 py-1.5 text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                      className="flex-1 rounded-md border border-gray-200 bg-gray-50 px-2 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                     >
                       {leadFields.map((f) => (
                         <option key={f.value} value={f.value}>
@@ -315,17 +315,17 @@ export function ImportLeadsModal({ open, onOpenChange, onImportComplete }: Impor
           {/* Step 3: Preview */}
           {step === 'preview' && (
             <div className="space-y-4">
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-gray-500">
                 Pre-visualizacao das primeiras {previewRows.length} linhas:
               </p>
-              <div className="overflow-auto rounded-lg border border-slate-800/50">
+              <div className="overflow-auto rounded-lg border border-gray-200">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-slate-800/50 bg-slate-900/50">
+                    <tr className="border-b border-gray-200 bg-gray-50">
                       {mappedHeaders.map((h) => (
                         <th
                           key={h}
-                          className="px-3 py-2 text-left text-slate-400 font-medium"
+                          className="px-3 py-2 text-left text-gray-500 font-medium"
                         >
                           {leadFields.find((f) => f.value === mapping[h])?.label ?? mapping[h]}
                         </th>
@@ -336,14 +336,14 @@ export function ImportLeadsModal({ open, onOpenChange, onImportComplete }: Impor
                     {previewRows.map((row, i) => (
                       <tr
                         key={i}
-                        className="border-b border-slate-800/30"
+                        className="border-b border-gray-200"
                       >
                         {mappedHeaders.map((h) => {
                           const idx = csvHeaders.indexOf(h)
                           return (
                             <td
                               key={h}
-                              className="px-3 py-1.5 text-slate-300"
+                              className="px-3 py-1.5 text-gray-700"
                             >
                               {row[idx] || '--'}
                             </td>
@@ -355,9 +355,9 @@ export function ImportLeadsModal({ open, onOpenChange, onImportComplete }: Impor
                 </table>
               </div>
 
-              <div className="rounded-lg bg-slate-800/30 px-3 py-2 text-sm">
-                <span className="text-slate-400">Total para importar: </span>
-                <span className="font-semibold text-slate-200">{csvRows.length} leads</span>
+              <div className="rounded-lg bg-white px-3 py-2 text-sm">
+                <span className="text-gray-500">Total para importar: </span>
+                <span className="font-semibold text-gray-800">{csvRows.length} leads</span>
               </div>
 
               <div className="flex justify-between pt-2">
@@ -384,7 +384,7 @@ export function ImportLeadsModal({ open, onOpenChange, onImportComplete }: Impor
               <div className="w-full max-w-xs space-y-2">
                 <Progress value={importProgress} showLabel />
               </div>
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-gray-500">
                 Importando leads... nao feche esta janela.
               </p>
             </div>
@@ -397,7 +397,7 @@ export function ImportLeadsModal({ open, onOpenChange, onImportComplete }: Impor
                 <CheckCircle2 className="h-8 w-8 text-emerald-400" />
               </div>
               <div className="text-center">
-                <p className="text-lg font-semibold text-slate-100">
+                <p className="text-lg font-semibold text-gray-900">
                   Importacao concluida
                 </p>
                 <div className="mt-2 space-y-1">

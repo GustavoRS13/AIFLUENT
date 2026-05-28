@@ -150,7 +150,7 @@ export default function WhatsAppPage() {
             <MessageSquare className="h-5 w-5 text-emerald-400" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-slate-100">WhatsApp</h1>
+            <h1 className="text-xl font-semibold text-gray-900">WhatsApp</h1>
             <div className="flex items-center gap-2">
               <div className={cn(
                 'flex items-center gap-1 text-xs',
@@ -171,8 +171,8 @@ export default function WhatsAppPage() {
             { label: 'Não lidas', value: String(totalUnread) },
           ].map((stat) => (
             <div key={stat.label} className="text-center">
-              <p className="text-lg font-bold text-white">{stat.value}</p>
-              <p className="text-[10px] text-slate-500">{stat.label}</p>
+              <p className="text-lg font-bold text-gray-900">{stat.value}</p>
+              <p className="text-[10px] text-gray-400">{stat.label}</p>
             </div>
           ))}
 
@@ -187,17 +187,17 @@ export default function WhatsAppPage() {
       </div>
 
       {/* Main content: 3-column layout */}
-      <div className="flex-1 flex rounded-2xl overflow-hidden border border-white/5 bg-slate-900/50 backdrop-blur min-h-0">
+      <div className="flex-1 flex rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 min-h-0">
         {/* Left: Conversation list */}
-        <div className="w-80 border-r border-white/5 flex flex-col shrink-0">
-          <div className="p-3 border-b border-white/5">
+        <div className="w-80 border-r border-gray-200 flex flex-col shrink-0">
+          <div className="p-3 border-b border-gray-200">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar conversas..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-800/50 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none transition-colors"
+                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors"
               />
             </div>
           </div>
@@ -208,25 +208,25 @@ export default function WhatsAppPage() {
                 key={conv.id}
                 onClick={() => setSelectedConv(conv.id)}
                 className={cn(
-                  'w-full flex items-start gap-3 p-3 text-left transition-colors hover:bg-slate-800/50',
-                  selectedConv === conv.id && 'bg-slate-800/70'
+                  'w-full flex items-start gap-3 p-3 text-left transition-colors hover:bg-gray-50',
+                  selectedConv === conv.id && 'bg-gray-100'
                 )}
               >
                 <div className="relative shrink-0">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                    <span className="text-xs font-bold text-white">{conv.avatar}</span>
+                    <span className="text-xs font-bold text-gray-900">{conv.avatar}</span>
                   </div>
                   {conv.status === 'online' && (
-                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-900" />
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
                   )}
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-white truncate">{conv.name}</p>
-                    <span className="text-[10px] text-slate-500 shrink-0">{conv.lastMessageTime}</span>
+                    <p className="text-sm font-medium text-gray-900 truncate">{conv.name}</p>
+                    <span className="text-[10px] text-gray-400 shrink-0">{conv.lastMessageTime}</span>
                   </div>
-                  <p className="text-xs text-slate-400 truncate mt-0.5">{conv.lastMessage}</p>
+                  <p className="text-xs text-gray-500 truncate mt-0.5">{conv.lastMessage}</p>
                 </div>
 
                 {conv.unreadCount > 0 && (
@@ -243,36 +243,36 @@ export default function WhatsAppPage() {
         <div className="flex-1 flex flex-col min-w-0">
           {/* Chat header */}
           {currentConv && (
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                    <span className="text-xs font-bold text-white">{currentConv.avatar}</span>
+                    <span className="text-xs font-bold text-gray-900">{currentConv.avatar}</span>
                   </div>
                   {currentConv.status === 'online' && (
-                    <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-slate-900" />
+                    <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white" />
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-white">{currentConv.name}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-sm font-medium text-gray-900">{currentConv.name}</p>
+                  <p className="text-xs text-gray-400">
                     {currentConv.status === 'online' ? 'Online' : 'Visto por último recentemente'}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <button className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors">
+                <button className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
                   <Phone className="w-4 h-4" />
                 </button>
-                <button className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors">
+                <button className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
                   <Video className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setShowContactInfo(!showContactInfo)}
                   className={cn(
                     'p-2 rounded-lg transition-colors',
-                    showContactInfo ? 'text-indigo-400 bg-indigo-500/10' : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                    showContactInfo ? 'text-indigo-400 bg-indigo-500/10' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                   )}
                 >
                   <User className="w-4 h-4" />
@@ -296,7 +296,7 @@ export default function WhatsAppPage() {
                     'max-w-[70%] rounded-2xl px-4 py-2.5 text-sm',
                     msg.sender === 'me'
                       ? 'bg-emerald-600/80 text-white rounded-br-sm'
-                      : 'bg-slate-800/60 text-slate-200 rounded-bl-sm'
+                      : 'bg-gray-50 text-gray-800 rounded-bl-sm'
                   )}
                 >
                   <p className="leading-relaxed">{msg.text}</p>
@@ -326,10 +326,10 @@ export default function WhatsAppPage() {
                 exit={{ opacity: 0, y: 10 }}
                 className="px-4 pb-2"
               >
-                <div className="bg-slate-800/60 border border-white/5 rounded-xl p-3">
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-medium text-slate-400">Respostas Rápidas</p>
-                    <button onClick={() => setShowQuickReplies(false)} className="text-slate-500 hover:text-white transition-colors">
+                    <p className="text-xs font-medium text-gray-500">Respostas Rápidas</p>
+                    <button onClick={() => setShowQuickReplies(false)} className="text-gray-400 hover:text-gray-900 transition-colors">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -338,7 +338,7 @@ export default function WhatsAppPage() {
                       <button
                         key={qr.id}
                         onClick={() => handleQuickReply(qr.text)}
-                        className="px-3 py-1.5 bg-slate-700/50 hover:bg-slate-700 text-xs text-slate-300 rounded-lg border border-white/5 transition-colors"
+                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 rounded-lg border border-gray-200 transition-colors"
                       >
                         {qr.label}
                       </button>
@@ -350,17 +350,17 @@ export default function WhatsAppPage() {
           </AnimatePresence>
 
           {/* Message input */}
-          <div className="p-3 border-t border-white/5">
+          <div className="p-3 border-t border-gray-200">
             <div className="flex items-end gap-2">
               <div className="flex items-center gap-1">
-                <button className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors">
+                <button className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
                   <Paperclip className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setShowQuickReplies(!showQuickReplies)}
                   className={cn(
                     'p-2 rounded-lg transition-colors',
-                    showQuickReplies ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                    showQuickReplies ? 'text-emerald-400 bg-emerald-500/10' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                   )}
                 >
                   <Zap className="w-4 h-4" />
@@ -373,12 +373,12 @@ export default function WhatsAppPage() {
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
                   placeholder="Digite uma mensagem..."
-                  className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none transition-colors"
                 />
               </div>
 
               <div className="flex items-center gap-1">
-                <button className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors">
+                <button className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
                   <Smile className="w-4 h-4" />
                 </button>
                 {message.trim() ? (
@@ -406,44 +406,44 @@ export default function WhatsAppPage() {
               animate={{ width: 300, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="border-l border-white/5 overflow-hidden shrink-0"
+              className="border-l border-gray-200 overflow-hidden shrink-0"
             >
               <div className="w-[300px] p-4 space-y-4">
                 <div className="text-center pt-4">
                   <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mx-auto mb-3">
-                    <span className="text-lg font-bold text-white">{currentConv.avatar}</span>
+                    <span className="text-lg font-bold text-gray-900">{currentConv.avatar}</span>
                   </div>
-                  <h3 className="text-base font-semibold text-white">{currentConv.name}</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">{currentConv.phone}</p>
+                  <h3 className="text-base font-semibold text-gray-900">{currentConv.name}</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">{currentConv.phone}</p>
                   <div className={cn(
                     'inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium',
-                    currentConv.status === 'online' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-700/50 text-slate-500'
+                    currentConv.status === 'online' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-gray-100 text-gray-400'
                   )}>
-                    <div className={cn('w-1.5 h-1.5 rounded-full', currentConv.status === 'online' ? 'bg-emerald-400' : 'bg-slate-500')} />
+                    <div className={cn('w-1.5 h-1.5 rounded-full', currentConv.status === 'online' ? 'bg-emerald-400' : 'bg-gray-400')} />
                     {currentConv.status === 'online' ? 'Online' : 'Offline'}
                   </div>
                 </div>
 
-                <div className="bg-slate-800/30 border border-white/5 rounded-xl p-3 space-y-3">
-                  <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wider">Informações</h4>
+                <div className="bg-white border border-gray-200 rounded-xl p-3 space-y-3">
+                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Informações</h4>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
-                      <Phone className="w-3.5 h-3.5 text-slate-500" />
-                      <span className="text-slate-300">{currentConv.phone}</span>
+                      <Phone className="w-3.5 h-3.5 text-gray-400" />
+                      <span className="text-gray-700">{currentConv.phone}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <Mail className="w-3.5 h-3.5 text-slate-500" />
-                      <span className="text-slate-300">{currentConv.name.toLowerCase().replace(' ', '.')}@email.com</span>
+                      <Mail className="w-3.5 h-3.5 text-gray-400" />
+                      <span className="text-gray-700">{currentConv.name.toLowerCase().replace(' ', '.')}@email.com</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                      <span className="text-slate-300">São Paulo, SP</span>
+                      <MapPin className="w-3.5 h-3.5 text-gray-400" />
+                      <span className="text-gray-700">São Paulo, SP</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-slate-800/30 border border-white/5 rounded-xl p-3 space-y-3">
-                  <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wider">Tags</h4>
+                <div className="bg-white border border-gray-200 rounded-xl p-3 space-y-3">
+                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Tags</h4>
                   <div className="flex flex-wrap gap-1.5">
                     {currentConv.tags.map((tag) => (
                       <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full text-xs">
@@ -454,18 +454,18 @@ export default function WhatsAppPage() {
                   </div>
                 </div>
 
-                <div className="bg-slate-800/30 border border-white/5 rounded-xl p-3 space-y-3">
-                  <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wider">Ações Rápidas</h4>
+                <div className="bg-white border border-gray-200 rounded-xl p-3 space-y-3">
+                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Ações Rápidas</h4>
                   <div className="space-y-2">
-                    <button className="w-full flex items-center gap-2 px-3 py-2 bg-slate-700/30 hover:bg-slate-700/50 text-sm text-slate-300 rounded-lg transition-colors">
+                    <button className="w-full flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-100 text-sm text-gray-700 rounded-lg transition-colors">
                       <Star className="w-3.5 h-3.5 text-amber-400" />
                       Marcar como prioritário
                     </button>
-                    <button className="w-full flex items-center gap-2 px-3 py-2 bg-slate-700/30 hover:bg-slate-700/50 text-sm text-slate-300 rounded-lg transition-colors">
+                    <button className="w-full flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-100 text-sm text-gray-700 rounded-lg transition-colors">
                       <User className="w-3.5 h-3.5 text-indigo-400" />
                       Ver perfil do lead
                     </button>
-                    <button className="w-full flex items-center gap-2 px-3 py-2 bg-slate-700/30 hover:bg-slate-700/50 text-sm text-slate-300 rounded-lg transition-colors">
+                    <button className="w-full flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-100 text-sm text-gray-700 rounded-lg transition-colors">
                       <FileText className="w-3.5 h-3.5 text-violet-400" />
                       Criar negócio
                     </button>
@@ -484,25 +484,25 @@ export default function WhatsAppPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
             onClick={(e) => e.target === e.currentTarget && setShowBulkSend(false)}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-md bg-slate-900 border border-white/10 rounded-2xl shadow-2xl"
+              className="w-full max-w-md bg-white border border-gray-200 rounded-2xl shadow-2xl"
             >
-              <div className="flex items-center justify-between p-6 border-b border-white/5">
-                <h2 className="text-lg font-semibold text-white">Envio em Massa</h2>
-                <button onClick={() => setShowBulkSend(false)} className="text-slate-400 hover:text-white transition-colors">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">Envio em Massa</h2>
+                <button onClick={() => setShowBulkSend(false)} className="text-gray-500 hover:text-gray-900 transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
               <div className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm text-slate-400 mb-2">Selecionar Template</label>
-                  <select className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-white focus:border-emerald-500 focus:outline-none transition-colors">
+                  <label className="block text-sm text-gray-500 mb-2">Selecionar Template</label>
+                  <select className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-emerald-500 focus:outline-none transition-colors">
                     <option>Boas-vindas</option>
                     <option>Follow-up</option>
                     <option>Promoção</option>
@@ -510,8 +510,8 @@ export default function WhatsAppPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-400 mb-2">Segmento de Leads</label>
-                  <select className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-white focus:border-emerald-500 focus:outline-none transition-colors">
+                  <label className="block text-sm text-gray-500 mb-2">Segmento de Leads</label>
+                  <select className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-emerald-500 focus:outline-none transition-colors">
                     <option>Todos os leads</option>
                     <option>Leads quentes</option>
                     <option>Leads frios</option>
@@ -519,19 +519,19 @@ export default function WhatsAppPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-400 mb-2">Prévia da Mensagem</label>
+                  <label className="block text-sm text-gray-500 mb-2">Prévia da Mensagem</label>
                   <textarea
                     rows={3}
                     defaultValue="Olá {{nome}}! Temos uma novidade especial para você..."
-                    className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none transition-colors resize-none"
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none transition-colors resize-none"
                   />
                 </div>
-                <p className="text-xs text-slate-500">Estimativa: 234 destinatários</p>
+                <p className="text-xs text-gray-400">Estimativa: 234 destinatários</p>
               </div>
-              <div className="flex items-center justify-end gap-3 p-6 border-t border-white/5">
+              <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
                 <button
                   onClick={() => setShowBulkSend(false)}
-                  className="px-4 py-2.5 text-sm text-slate-400 hover:text-white transition-colors"
+                  className="px-4 py-2.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
                 >
                   Cancelar
                 </button>

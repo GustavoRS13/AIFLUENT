@@ -104,14 +104,14 @@ export function ActiveCampaigns() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.6 }}
-      className="rounded-2xl border border-white/5 bg-slate-800/50 backdrop-blur-sm p-6"
+      className="rounded-2xl border border-gray-200 bg-gray-50 p-6"
     >
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-slate-100">Campanhas Ativas</h3>
-          <p className="mt-1 text-sm text-slate-400">Campanhas em andamento</p>
+          <h3 className="text-lg font-semibold text-gray-900">Campanhas Ativas</h3>
+          <p className="mt-1 text-sm text-gray-500">Campanhas em andamento</p>
         </div>
-        <button className="rounded-lg border border-white/5 bg-slate-700/30 px-3 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-700/50 hover:text-slate-100">
+        <button className="rounded-lg border border-gray-200 bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900">
           Ver todas
         </button>
       </div>
@@ -128,7 +128,7 @@ export function ActiveCampaigns() {
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.6 + index * 0.05 }}
-              className="group rounded-xl border border-slate-700/20 bg-slate-800/30 p-4 transition-all hover:border-slate-600/30 hover:bg-slate-800/50"
+              className="group rounded-xl border border-gray-200 bg-white p-4 transition-all hover:border-gray-300/30 hover:bg-gray-50"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 min-w-0">
@@ -141,32 +141,32 @@ export function ActiveCampaigns() {
                     <ChannelIcon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-slate-200">
+                    <p className="truncate text-sm font-medium text-gray-800">
                       {campaign.name}
                     </p>
                     <div className="mt-1 flex items-center gap-2">
                       <Badge variant={statusCfg.variant} size="sm" dot>
                         {statusCfg.label}
                       </Badge>
-                      <span className="text-[10px] text-slate-500 capitalize">
+                      <span className="text-[10px] text-gray-400 capitalize">
                         {campaign.channel}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <button className="shrink-0 rounded-md p-1 text-slate-500 opacity-0 transition-all hover:bg-slate-700/50 hover:text-slate-300 group-hover:opacity-100">
+                <button className="shrink-0 rounded-md p-1 text-gray-400 opacity-0 transition-all hover:bg-gray-100 hover:text-gray-700 group-hover:opacity-100">
                   <MoreHorizontal className="h-4 w-4" />
                 </button>
               </div>
 
               <div className="mt-3">
                 <div className="mb-1.5 flex items-center justify-between text-xs">
-                  <span className="text-slate-400">
+                  <span className="text-gray-500">
                     {campaign.sent.toLocaleString('pt-BR')} / {campaign.total.toLocaleString('pt-BR')} enviados
                   </span>
                   {campaign.openRate > 0 && (
-                    <span className="font-medium text-slate-300">
+                    <span className="font-medium text-gray-700">
                       {campaign.openRate}% aberturas
                     </span>
                   )}

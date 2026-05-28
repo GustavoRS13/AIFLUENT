@@ -163,7 +163,7 @@ export default function CampaignsPage() {
           <Button variant="ghost" size="sm" onClick={() => setViewMetrics(null)}>
             Voltar
           </Button>
-          <h2 className="text-lg font-semibold text-slate-100">{camp?.name}</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{camp?.name}</h2>
         </div>
         <CampaignMetrics data={getMockMetrics()} onExport={() => {}} />
       </div>
@@ -175,8 +175,8 @@ export default function CampaignsPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Campanhas</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900">Campanhas</h1>
+          <p className="text-sm text-gray-400 mt-1">
             Gerencie disparos em massa via WhatsApp, Email e SMS
           </p>
         </div>
@@ -221,12 +221,12 @@ export default function CampaignsPage() {
             onSearch={setSearch}
           />
         </div>
-        <div className="flex items-center gap-1 rounded-lg border border-slate-700/50 bg-slate-800/50 p-0.5">
+        <div className="flex items-center gap-1 rounded-lg border border-gray-200 bg-gray-50 p-0.5">
           <button
             onClick={() => setViewMode('grid')}
             className={cn(
               'p-1.5 rounded-md transition-colors',
-              viewMode === 'grid' ? 'bg-slate-700/60 text-slate-100' : 'text-slate-500 hover:text-slate-300'
+              viewMode === 'grid' ? 'bg-gray-200 text-gray-900' : 'text-gray-400 hover:text-gray-700'
             )}
           >
             <LayoutGrid className="h-4 w-4" />
@@ -235,7 +235,7 @@ export default function CampaignsPage() {
             onClick={() => setViewMode('list')}
             className={cn(
               'p-1.5 rounded-md transition-colors',
-              viewMode === 'list' ? 'bg-slate-700/60 text-slate-100' : 'text-slate-500 hover:text-slate-300'
+              viewMode === 'list' ? 'bg-gray-200 text-gray-900' : 'text-gray-400 hover:text-gray-700'
             )}
           >
             <List className="h-4 w-4" />
@@ -245,7 +245,7 @@ export default function CampaignsPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-slate-800/50 border border-slate-700/50">
+        <TabsList className="bg-gray-50 border border-gray-200">
           {[
             { value: 'all', label: 'Todas', icon: BarChart3 },
             { value: 'whatsapp', label: 'WhatsApp', icon: MessageSquare },
@@ -274,11 +274,11 @@ export default function CampaignsPage() {
           <TabsContent key={tabValue} value={tabValue}>
             {filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-800/50 border border-slate-700/50 text-slate-500 mb-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-50 border border-gray-200 text-gray-400 mb-4">
                   <MessageSquare className="h-6 w-6" />
                 </div>
-                <h3 className="text-base font-semibold text-slate-200">Nenhuma campanha encontrada</h3>
-                <p className="mt-1.5 max-w-sm text-sm text-slate-500">
+                <h3 className="text-base font-semibold text-gray-800">Nenhuma campanha encontrada</h3>
+                <p className="mt-1.5 max-w-sm text-sm text-gray-400">
                   {search
                     ? 'Tente buscar com outros termos'
                     : 'Crie sua primeira campanha para comecar a engajar seus leads'}

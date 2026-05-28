@@ -45,8 +45,8 @@ const sourceIcon: Record<LeadSource, React.ReactNode> = {
   website: <Globe className="h-3 w-3 text-violet-400" />,
   referral: <UsersIcon className="h-3 w-3 text-amber-400" />,
   event: <MapPin className="h-3 w-3 text-cyan-400" />,
-  manual: <UserPlus className="h-3 w-3 text-slate-400" />,
-  import: <ArrowRightLeft className="h-3 w-3 text-slate-400" />,
+  manual: <UserPlus className="h-3 w-3 text-gray-500" />,
+  import: <ArrowRightLeft className="h-3 w-3 text-gray-500" />,
   meta_ads: <Target className="h-3 w-3 text-orange-400" />,
   facebook_lead_ad: <MessagesSquare className="h-3 w-3 text-blue-400" />,
 }
@@ -88,7 +88,7 @@ function ScoreBar({ score }: { score: number | null }) {
         : 'from-rose-500 to-rose-400'
   return (
     <div className="flex items-center gap-2">
-      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-800">
+      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
         <motion.div
           className={cn('h-full rounded-full bg-gradient-to-r', color)}
           initial={{ width: 0 }}
@@ -96,7 +96,7 @@ function ScoreBar({ score }: { score: number | null }) {
           transition={{ duration: 0.6, ease: 'easeOut' }}
         />
       </div>
-      <span className="text-[10px] font-bold text-slate-400 tabular-nums">
+      <span className="text-[10px] font-bold text-gray-500 tabular-nums">
         {pct}
       </span>
     </div>
@@ -132,10 +132,10 @@ export function LeadsGrid({ leads, onView }: LeadsGridProps) {
   if (leads.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-800/50">
-          <UsersIcon className="h-8 w-8 text-slate-600" />
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-50">
+          <UsersIcon className="h-8 w-8 text-gray-400" />
         </div>
-        <p className="text-sm text-slate-500">Nenhum lead encontrado.</p>
+        <p className="text-sm text-gray-400">Nenhum lead encontrado.</p>
       </div>
     )
   }
@@ -150,7 +150,7 @@ export function LeadsGrid({ leads, onView }: LeadsGridProps) {
           transition={{ duration: 0.25, delay: i * 0.03 }}
           onClick={() => onView?.(lead)}
           className={cn(
-            'group cursor-pointer rounded-xl border border-slate-700/50 bg-slate-900/50 backdrop-blur-sm p-4',
+            'group cursor-pointer rounded-xl border border-gray-200 bg-gray-50 p-4',
             'transition-all duration-300',
             'hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/5 hover:border-indigo-500/20'
           )}
@@ -167,12 +167,12 @@ export function LeadsGrid({ leads, onView }: LeadsGridProps) {
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-slate-100">
+                <p className="truncate text-sm font-semibold text-gray-900">
                   {lead.name}
                 </p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   {sourceIcon[lead.source]}
-                  <span className="text-[11px] text-slate-500">
+                  <span className="text-[11px] text-gray-400">
                     {sourceLabel[lead.source]}
                   </span>
                 </div>
@@ -186,14 +186,14 @@ export function LeadsGrid({ leads, onView }: LeadsGridProps) {
           {/* Contact info */}
           <div className="mt-3 space-y-1.5">
             {lead.phone && (
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <Phone className="h-3 w-3 text-slate-500" />
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <Phone className="h-3 w-3 text-gray-400" />
                 <span className="font-mono">{formatPhone(lead.phone)}</span>
               </div>
             )}
             {lead.email && (
-              <div className="flex items-center gap-2 text-xs text-slate-400 truncate">
-                <Mail className="h-3 w-3 text-slate-500" />
+              <div className="flex items-center gap-2 text-xs text-gray-500 truncate">
+                <Mail className="h-3 w-3 text-gray-400" />
                 <span className="truncate">{lead.email}</span>
               </div>
             )}
@@ -201,11 +201,11 @@ export function LeadsGrid({ leads, onView }: LeadsGridProps) {
 
           {/* Course interest */}
           {lead.courseInterest && (
-            <div className="mt-3 rounded-md bg-slate-800/50 px-2.5 py-1.5">
-              <p className="text-[11px] text-slate-500 uppercase tracking-wide">
+            <div className="mt-3 rounded-md bg-gray-50 px-2.5 py-1.5">
+              <p className="text-[11px] text-gray-400 uppercase tracking-wide">
                 Interesse
               </p>
-              <p className="text-xs text-slate-300 font-medium truncate">
+              <p className="text-xs text-gray-700 font-medium truncate">
                 {lead.courseInterest}
               </p>
             </div>
@@ -219,17 +219,17 @@ export function LeadsGrid({ leads, onView }: LeadsGridProps) {
           )}
 
           {/* Footer */}
-          <div className="mt-3 flex items-center justify-between border-t border-slate-800/50 pt-3">
+          <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3">
             <Badge variant={statusVariant[lead.status]} size="sm">
               {statusLabel[lead.status]}
             </Badge>
             <div className="flex items-center gap-2">
               {lead.consultant && (
-                <span className="text-[10px] text-slate-500 truncate max-w-[80px]">
+                <span className="text-[10px] text-gray-400 truncate max-w-[80px]">
                   {lead.consultant}
                 </span>
               )}
-              <span className="text-[10px] text-slate-600">
+              <span className="text-[10px] text-gray-400">
                 {relativeTime(lead.lastInteraction)}
               </span>
             </div>
@@ -241,13 +241,13 @@ export function LeadsGrid({ leads, onView }: LeadsGridProps) {
               {lead.tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-slate-800/80 px-2 py-0.5 text-[10px] text-slate-400"
+                  className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500"
                 >
                   {tag}
                 </span>
               ))}
               {lead.tags.length > 3 && (
-                <span className="rounded-full bg-slate-800/80 px-2 py-0.5 text-[10px] text-slate-500">
+                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-400">
                   +{lead.tags.length - 3}
                 </span>
               )}

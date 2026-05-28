@@ -16,7 +16,7 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      'flex h-10 w-full items-center justify-between rounded-lg border border-slate-700/50 bg-slate-800/50 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 transition-all duration-200',
+      'flex h-10 w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 transition-all duration-200',
       'focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50',
       'disabled:cursor-not-allowed disabled:opacity-50',
       '[&>span]:line-clamp-1',
@@ -26,7 +26,7 @@ const SelectTrigger = React.forwardRef<
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 text-slate-400" />
+      <ChevronDown className="h-4 w-4 text-gray-500" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ))
@@ -41,7 +41,7 @@ const SelectScrollUpButton = React.forwardRef<
     className={cn('flex cursor-default items-center justify-center py-1', className)}
     {...props}
   >
-    <ChevronUp className="h-4 w-4 text-slate-400" />
+    <ChevronUp className="h-4 w-4 text-gray-500" />
   </SelectPrimitive.ScrollUpButton>
 ))
 SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName
@@ -55,7 +55,7 @@ const SelectScrollDownButton = React.forwardRef<
     className={cn('flex cursor-default items-center justify-center py-1', className)}
     {...props}
   >
-    <ChevronDown className="h-4 w-4 text-slate-400" />
+    <ChevronDown className="h-4 w-4 text-gray-500" />
   </SelectPrimitive.ScrollDownButton>
 ))
 SelectScrollDownButton.displayName = SelectPrimitive.ScrollDownButton.displayName
@@ -68,7 +68,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        'relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-lg border border-slate-700/50 bg-slate-900/90 backdrop-blur-xl text-slate-300 shadow-xl shadow-black/20',
+        'relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-lg border border-gray-200 bg-white text-gray-700 shadow-xl shadow-gray-200/50',
         'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
         position === 'popper' &&
           'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
@@ -99,7 +99,7 @@ const SelectLabel = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Label
     ref={ref}
-    className={cn('px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider', className)}
+    className={cn('px-2 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider', className)}
     {...props}
   />
 ))
@@ -112,7 +112,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex w-full cursor-default select-none items-center rounded-md py-1.5 pl-8 pr-2 text-sm text-slate-300 outline-none transition-colors focus:bg-slate-700/50 focus:text-slate-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'relative flex w-full cursor-default select-none items-center rounded-md py-1.5 pl-8 pr-2 text-sm text-gray-700 outline-none transition-colors focus:bg-gray-100 focus:text-gray-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className
     )}
     {...props}
@@ -133,7 +133,7 @@ const SelectSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Separator
     ref={ref}
-    className={cn('-mx-1 my-1 h-px bg-slate-700/50', className)}
+    className={cn('-mx-1 my-1 h-px bg-gray-200', className)}
     {...props}
   />
 ))

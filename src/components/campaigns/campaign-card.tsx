@@ -135,7 +135,7 @@ export function CampaignCard({
   return (
     <motion.div
       className={cn(
-        'group rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm p-5',
+        'group rounded-xl border border-gray-200 bg-gray-50 p-5',
         'transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/5 hover:border-indigo-500/20 cursor-pointer'
       )}
       initial={{ opacity: 0, y: 12 }}
@@ -155,15 +155,15 @@ export function CampaignCard({
             <ChannelIcon className={cn('h-5 w-5', channel.color)} />
           </div>
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-slate-100 truncate">
+            <h3 className="text-sm font-semibold text-gray-900 truncate">
               {campaign.name}
             </h3>
             <div className="flex items-center gap-2 mt-0.5">
               <span className={cn('text-xs font-medium', channel.color)}>
                 {channel.label}
               </span>
-              <span className="text-slate-600">|</span>
-              <span className="text-xs text-slate-500 capitalize">
+              <span className="text-gray-400">|</span>
+              <span className="text-xs text-gray-400 capitalize">
                 {campaign.type}
               </span>
             </div>
@@ -183,7 +183,7 @@ export function CampaignCard({
 
           <DropdownMenu>
             <DropdownMenuTrigger
-              className="p-1 rounded-md text-slate-400 hover:text-slate-100 hover:bg-slate-700/50 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="p-1 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={(e) => e.stopPropagation()}
             >
               <MoreHorizontal className="h-4 w-4" />
@@ -232,14 +232,14 @@ export function CampaignCard({
       {/* Metrics Row */}
       <div className="grid grid-cols-5 gap-2 mb-4">
         {[
-          { icon: Send, label: 'Enviados', value: sent, color: 'text-slate-400' },
+          { icon: Send, label: 'Enviados', value: sent, color: 'text-gray-500' },
           { icon: Eye, label: 'Entregues', value: delivered, color: 'text-blue-400' },
           { icon: Eye, label: 'Abertos', value: opened, color: 'text-indigo-400' },
           { icon: MessageCircle, label: 'Respondidos', value: replied, color: 'text-emerald-400' },
           { icon: Target, label: 'Convertidos', value: converted, color: 'text-amber-400' },
         ].map((metric) => (
           <div key={metric.label} className="text-center">
-            <p className="text-xs text-slate-500 mb-0.5">{metric.label}</p>
+            <p className="text-xs text-gray-400 mb-0.5">{metric.label}</p>
             <p className={cn('text-sm font-semibold tabular-nums', metric.color)}>
               {formatCompact(metric.value)}
             </p>
@@ -257,14 +257,14 @@ export function CampaignCard({
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
             <div className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-            <span className="text-xs text-slate-400">
-              Abertura <span className="text-slate-200 font-medium">{openRate}%</span>
+            <span className="text-xs text-gray-500">
+              Abertura <span className="text-gray-800 font-medium">{openRate}%</span>
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            <span className="text-xs text-slate-400">
-              Resposta <span className="text-slate-200 font-medium">{responseRate}%</span>
+            <span className="text-xs text-gray-500">
+              Resposta <span className="text-gray-800 font-medium">{responseRate}%</span>
             </span>
           </div>
         </div>
@@ -275,7 +275,7 @@ export function CampaignCard({
               {getInitials(campaign.createdBy)}
             </AvatarFallback>
           </Avatar>
-          <div className="flex items-center gap-1 text-xs text-slate-500">
+          <div className="flex items-center gap-1 text-xs text-gray-400">
             <Clock className="h-3 w-3" />
             {formatDate(campaign.createdAt)}
           </div>

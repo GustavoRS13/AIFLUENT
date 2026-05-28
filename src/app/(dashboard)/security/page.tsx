@@ -17,7 +17,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
       onClick={() => onChange(!checked)}
       className={cn(
         'relative w-11 h-6 rounded-full transition-colors',
-        checked ? 'bg-indigo-600' : 'bg-slate-700'
+        checked ? 'bg-indigo-600' : 'bg-gray-200'
       )}
     >
       <motion.div
@@ -59,8 +59,8 @@ export default function SecurityPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Seguranca</h1>
-          <p className="text-slate-400 mt-1">Protecao enterprise, LGPD e controle de acesso</p>
+          <h1 className="text-3xl font-bold text-gray-900">Seguranca</h1>
+          <p className="text-gray-500 mt-1">Protecao enterprise, LGPD e controle de acesso</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
           <Shield className="w-4 h-4 text-emerald-400" />
@@ -77,12 +77,12 @@ export default function SecurityPage() {
           { label: 'Ultimo Backup', value: '12h', icon: RefreshCw, color: 'text-indigo-400', status: 'good' },
           { label: 'Conformidade LGPD', value: '94%', icon: FileText, color: 'text-purple-400', status: 'good' },
         ].map((card) => (
-          <div key={card.label} className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-4">
+          <div key={card.label} className="bg-white border border-gray-200 rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <card.icon className={cn('w-4 h-4', card.color)} />
-              <span className="text-xs text-slate-500">{card.label}</span>
+              <span className="text-xs text-gray-400">{card.label}</span>
             </div>
-            <p className="text-2xl font-bold text-white">{card.value}</p>
+            <p className="text-2xl font-bold text-gray-900">{card.value}</p>
           </div>
         ))}
       </div>
@@ -103,7 +103,7 @@ export default function SecurityPage() {
               'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors',
               tab === t.key
                 ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30'
-                : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             )}
           >
             <t.icon className="w-4 h-4" />
@@ -115,8 +115,8 @@ export default function SecurityPage() {
       {/* Overview Tab */}
       {tab === 'overview' && (
         <div className="space-y-4">
-          <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6 space-y-5">
-            <h3 className="text-lg font-semibold text-white">Configuracoes de Seguranca</h3>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-5">
+            <h3 className="text-lg font-semibold text-gray-900">Configuracoes de Seguranca</h3>
             {[
               { key: 'twoFa', label: 'Autenticacao 2FA', desc: 'Exigir autenticacao de dois fatores para todos os usuarios', checked: twoFaEnabled, onChange: setTwoFaEnabled },
               { key: 'session', label: 'Timeout de Sessao', desc: 'Encerrar sessoes inativas apos 30 minutos', checked: sessionTimeout, onChange: setSessionTimeout },
@@ -124,10 +124,10 @@ export default function SecurityPage() {
               { key: 'backup', label: 'Backup Automatico', desc: 'Backup diario automatico dos dados', checked: autoBackup, onChange: setAutoBackup },
               { key: 'encryption', label: 'Criptografia de Dados', desc: 'Criptografia AES-256 para dados sensiveis', checked: dataEncryption, onChange: setDataEncryption },
             ].map((setting) => (
-              <div key={setting.key} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
+              <div key={setting.key} className="flex items-center justify-between py-3 border-b border-gray-200 last:border-0">
                 <div>
-                  <p className="text-sm font-medium text-white">{setting.label}</p>
-                  <p className="text-xs text-slate-500">{setting.desc}</p>
+                  <p className="text-sm font-medium text-gray-900">{setting.label}</p>
+                  <p className="text-xs text-gray-400">{setting.desc}</p>
                 </div>
                 <Toggle checked={setting.checked} onChange={setting.onChange} />
               </div>
@@ -135,21 +135,21 @@ export default function SecurityPage() {
           </div>
 
           {/* Active Sessions */}
-          <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-white">Sessoes Ativas</h3>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900">Sessoes Ativas</h3>
             {[
               { device: 'MacBook Pro - Chrome', ip: '189.34.12.45', location: 'Sao Paulo, BR', current: true, icon: Monitor },
               { device: 'iPhone 15 Pro - Safari', ip: '189.34.12.45', location: 'Sao Paulo, BR', current: false, icon: Smartphone },
               { device: 'iPad - Chrome', ip: '189.34.12.45', location: 'Sao Paulo, BR', current: false, icon: Monitor },
             ].map((session, i) => (
-              <div key={i} className="flex items-center gap-4 p-3 rounded-xl bg-slate-800/20">
-                <session.icon className="w-5 h-5 text-slate-400" />
+              <div key={i} className="flex items-center gap-4 p-3 rounded-xl bg-gray-50">
+                <session.icon className="w-5 h-5 text-gray-500" />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-white">{session.device}</p>
+                    <p className="text-sm font-medium text-gray-900">{session.device}</p>
                     {session.current && <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">Atual</span>}
                   </div>
-                  <p className="text-xs text-slate-500">{session.ip} · {session.location}</p>
+                  <p className="text-xs text-gray-400">{session.ip} · {session.location}</p>
                 </div>
                 {!session.current && (
                   <button className="text-xs text-rose-400 hover:text-rose-300 transition-colors">Encerrar</button>
@@ -163,9 +163,9 @@ export default function SecurityPage() {
       {/* 2FA Tab */}
       {tab === '2fa' && (
         <div className="space-y-4">
-          <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-white">Autenticacao JWT + 2FA</h3>
-            <p className="text-sm text-slate-400">Proteja contas com autenticacao de dois fatores via aplicativo autenticador.</p>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900">Autenticacao JWT + 2FA</h3>
+            <p className="text-sm text-gray-500">Proteja contas com autenticacao de dois fatores via aplicativo autenticador.</p>
 
             <div className="space-y-3">
               {[
@@ -177,13 +177,13 @@ export default function SecurityPage() {
                 { name: 'Lucas Estagiario', email: 'lucas@aifluent.com', role: 'Agente', enabled: false },
                 { name: 'Julia Assistente', email: 'julia@aifluent.com', role: 'Agente', enabled: false },
               ].map((user) => (
-                <div key={user.email} className="flex items-center gap-4 p-3 rounded-xl bg-slate-800/20">
+                <div key={user.email} className="flex items-center gap-4 p-3 rounded-xl bg-gray-50">
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
-                    <span className="text-[10px] font-bold text-white">{user.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}</span>
+                    <span className="text-[10px] font-bold text-gray-900">{user.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}</span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-white">{user.name}</p>
-                    <p className="text-xs text-slate-500">{user.email} · {user.role}</p>
+                    <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                    <p className="text-xs text-gray-400">{user.email} · {user.role}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     {user.enabled ? (
@@ -207,22 +207,22 @@ export default function SecurityPage() {
       {tab === 'permissions' && (
         <div className="space-y-4">
           {permissions.map((perm) => (
-            <div key={perm.role} className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6">
+            <div key={perm.role} className="bg-white border border-gray-200 rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
                     <Key className="w-5 h-5 text-indigo-400" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-white">{perm.role}</h3>
-                    <p className="text-xs text-slate-500">{perm.users} usuario(s)</p>
+                    <h3 className="text-sm font-semibold text-gray-900">{perm.role}</h3>
+                    <p className="text-xs text-gray-400">{perm.users} usuario(s)</p>
                   </div>
                 </div>
                 <button className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">Editar</button>
               </div>
               <div className="flex flex-wrap gap-2">
                 {perm.perms.map((p) => (
-                  <span key={p} className="text-xs text-slate-300 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-white/5">
+                  <span key={p} className="text-xs text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
                     {p}
                   </span>
                 ))}
@@ -236,8 +236,8 @@ export default function SecurityPage() {
       {tab === 'audit' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Logs de Auditoria</h3>
-            <button className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 border border-white/5 rounded-lg text-xs text-slate-400 hover:text-white transition-colors">
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Logs de Auditoria</h3>
+            <button className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-500 hover:text-gray-900 transition-colors">
               <Download className="w-3.5 h-3.5" />
               Exportar CSV
             </button>
@@ -249,7 +249,7 @@ export default function SecurityPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
-                className="flex items-center gap-4 p-3 bg-slate-800/30 border border-white/5 rounded-xl"
+                className="flex items-center gap-4 p-3 bg-white border border-gray-200 rounded-xl"
               >
                 <div className={cn(
                   'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
@@ -262,11 +262,11 @@ export default function SecurityPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white">{log.action}</p>
-                  <p className="text-xs text-slate-500">{log.user} · {log.entity}</p>
+                  <p className="text-sm font-medium text-gray-900">{log.action}</p>
+                  <p className="text-xs text-gray-400">{log.user} · {log.entity}</p>
                 </div>
-                <span className="text-xs text-slate-600 font-mono">{log.ip}</span>
-                <span className="text-xs text-slate-500">{log.time}</span>
+                <span className="text-xs text-gray-400 font-mono">{log.ip}</span>
+                <span className="text-xs text-gray-400">{log.time}</span>
               </motion.div>
             ))}
           </div>
@@ -279,9 +279,9 @@ export default function SecurityPage() {
           <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/20 rounded-2xl p-6 space-y-4">
             <div className="flex items-center gap-2">
               <FileText className="w-5 h-5 text-purple-400" />
-              <h3 className="text-lg font-semibold text-white">Conformidade LGPD</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Conformidade LGPD</h3>
             </div>
-            <p className="text-sm text-slate-300">
+            <p className="text-sm text-gray-700">
               A plataforma esta em conformidade com a Lei Geral de Protecao de Dados (LGPD - Lei 13.709/2018).
             </p>
 
@@ -294,10 +294,10 @@ export default function SecurityPage() {
               { label: 'Notificacao de Incidentes', desc: 'Sistema de notificacao em caso de vazamento de dados', status: false },
               { label: 'DPO Definido', desc: 'Encarregado de protecao de dados designado', status: false },
             ].map((item) => (
-              <div key={item.label} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
+              <div key={item.label} className="flex items-center justify-between py-3 border-b border-gray-200 last:border-0">
                 <div>
-                  <p className="text-sm font-medium text-white">{item.label}</p>
-                  <p className="text-xs text-slate-500">{item.desc}</p>
+                  <p className="text-sm font-medium text-gray-900">{item.label}</p>
+                  <p className="text-xs text-gray-400">{item.desc}</p>
                 </div>
                 {item.status ? (
                   <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
@@ -308,8 +308,8 @@ export default function SecurityPage() {
             ))}
           </div>
 
-          <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-white">Acoes LGPD</h3>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900">Acoes LGPD</h3>
             <div className="grid grid-cols-3 gap-3">
               {[
                 { label: 'Exportar Dados do Lead', desc: 'Gera relatorio com todos os dados pessoais', icon: Download },
@@ -318,11 +318,11 @@ export default function SecurityPage() {
               ].map((action) => (
                 <button
                   key={action.label}
-                  className="flex flex-col items-center gap-2 p-4 bg-slate-800/30 border border-white/5 rounded-xl hover:bg-slate-800/50 transition-colors text-center"
+                  className="flex flex-col items-center gap-2 p-4 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-center"
                 >
                   <action.icon className="w-6 h-6 text-indigo-400" />
-                  <span className="text-xs font-medium text-white">{action.label}</span>
-                  <span className="text-[10px] text-slate-500">{action.desc}</span>
+                  <span className="text-xs font-medium text-gray-900">{action.label}</span>
+                  <span className="text-[10px] text-gray-400">{action.desc}</span>
                 </button>
               ))}
             </div>

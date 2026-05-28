@@ -54,8 +54,8 @@ const kpis = [
 function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name: string; color: string }>; label?: string }) {
   if (!active || !payload) return null
   return (
-    <div className="bg-slate-800 border border-white/10 rounded-lg p-3 shadow-xl">
-      <p className="text-slate-300 text-xs mb-2">{label}</p>
+    <div className="bg-gray-100 border border-gray-200 rounded-lg p-3 shadow-xl">
+      <p className="text-gray-700 text-xs mb-2">{label}</p>
       {payload.map((entry, i) => (
         <p key={i} className="text-sm" style={{ color: entry.color }}>
           {entry.name}: {typeof entry.value === 'number' && entry.name === 'receita'
@@ -74,25 +74,25 @@ export default function ReportsPage() {
     <div className="p-8 space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Relatórios</h1>
-          <p className="text-slate-400 mt-1">Análise completa de performance comercial</p>
+          <h1 className="text-3xl font-bold text-gray-900">Relatórios</h1>
+          <p className="text-gray-500 mt-1">Análise completa de performance comercial</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 bg-slate-800/50 rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-gray-50 rounded-lg p-1">
             {['7d', '30d', '3m', '6m', '1a'].map((p) => (
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
                 className={cn(
                   'px-3 py-1.5 text-sm rounded-md transition-colors',
-                  period === p ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                  period === p ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:text-white'
                 )}
               >
                 {p}
               </button>
             ))}
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 rounded-xl border border-white/5 transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl border border-gray-200 transition-colors">
             <Download className="w-4 h-4" />
             Exportar
           </button>
@@ -106,7 +106,7 @@ export default function ReportsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6"
+            className="bg-white border border-gray-200 rounded-2xl p-6"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="p-2 bg-indigo-500/10 rounded-lg">
@@ -117,15 +117,15 @@ export default function ReportsPage() {
                 {Math.abs(kpi.change)}%
               </div>
             </div>
-            <p className="text-2xl font-bold text-white">{kpi.value}</p>
-            <p className="text-sm text-slate-400 mt-1">{kpi.title}</p>
+            <p className="text-2xl font-bold text-gray-900">{kpi.value}</p>
+            <p className="text-sm text-gray-500 mt-1">{kpi.title}</p>
           </motion.div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Leads & Conversões</h3>
+        <div className="bg-white border border-gray-200 rounded-2xl p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Leads & Conversões</h3>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={monthlyData}>
               <defs>
@@ -144,8 +144,8 @@ export default function ReportsPage() {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Leads por Origem</h3>
+        <div className="bg-white border border-gray-200 rounded-2xl p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Leads por Origem</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -166,7 +166,7 @@ export default function ReportsPage() {
           </ResponsiveContainer>
           <div className="flex flex-wrap gap-3 mt-4 justify-center">
             {sourceData.map((s) => (
-              <div key={s.name} className="flex items-center gap-1.5 text-xs text-slate-400">
+              <div key={s.name} className="flex items-center gap-1.5 text-xs text-gray-500">
                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
                 {s.name} ({s.value}%)
               </div>
@@ -176,8 +176,8 @@ export default function ReportsPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Performance por Consultor</h3>
+        <div className="bg-white border border-gray-200 rounded-2xl p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance por Consultor</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={consultantData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -190,22 +190,22 @@ export default function ReportsPage() {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Performance de Campanhas</h3>
+        <div className="bg-white border border-gray-200 rounded-2xl p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance de Campanhas</h3>
           <div className="space-y-4">
             {campaignData.map((c) => (
               <div key={c.name} className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-white font-medium">{c.name}</span>
-                  <span className="text-xs text-slate-400">{((c.convertidos / c.enviados) * 100).toFixed(1)}% conv.</span>
+                  <span className="text-sm text-gray-900 font-medium">{c.name}</span>
+                  <span className="text-xs text-gray-500">{((c.convertidos / c.enviados) * 100).toFixed(1)}% conv.</span>
                 </div>
                 <div className="flex gap-1 h-2">
                   <div className="bg-indigo-500 rounded-l" style={{ width: `${(c.abertos / c.enviados) * 100}%` }} />
                   <div className="bg-violet-500" style={{ width: `${(c.respondidos / c.enviados) * 100}%` }} />
                   <div className="bg-emerald-500 rounded-r" style={{ width: `${(c.convertidos / c.enviados) * 100}%` }} />
-                  <div className="flex-1 bg-slate-700/50 rounded-r" />
+                  <div className="flex-1 bg-gray-100 rounded-r" />
                 </div>
-                <div className="flex gap-4 text-xs text-slate-500">
+                <div className="flex gap-4 text-xs text-gray-400">
                   <span>Enviados: {c.enviados.toLocaleString()}</span>
                   <span>Abertos: {c.abertos.toLocaleString()}</span>
                   <span>Respondidos: {c.respondidos.toLocaleString()}</span>

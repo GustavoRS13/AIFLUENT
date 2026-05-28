@@ -22,17 +22,17 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} dark`}>
+    <html lang="pt-BR" className={inter.variable}>
       <body className="min-h-dvh bg-background text-foreground antialiased">
         {children}
         <Toaster
           position="top-right"
-          theme="dark"
+          theme="light"
           toastOptions={{
             style: {
-              background: 'rgba(15, 23, 42, 0.9)',
-              border: '1px solid rgba(148, 163, 184, 0.1)',
-              color: '#e2e8f0',
+              background: 'rgba(255, 255, 255, 0.95)',
+              border: '1px solid rgba(0, 0, 0, 0.08)',
+              color: '#0f172a',
               backdropFilter: 'blur(12px)',
             },
           }}

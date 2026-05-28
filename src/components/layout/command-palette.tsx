@@ -221,8 +221,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                 className="fixed left-1/2 top-[20%] z-50 w-full max-w-lg -translate-x-1/2 rounded-xl glass-card overflow-hidden shadow-2xl"
               >
                 {/* Search input */}
-                <div className="flex items-center gap-3 border-b border-slate-700/50 px-4 py-3">
-                  <Search className="h-5 w-5 shrink-0 text-slate-500" />
+                <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-3">
+                  <Search className="h-5 w-5 shrink-0 text-gray-400" />
                   <Dialog.Title className="sr-only">
                     Paleta de comandos
                   </Dialog.Title>
@@ -231,10 +231,10 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                     placeholder="Buscar acoes, paginas, leads..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    className="flex-1 bg-transparent text-sm text-slate-200 outline-none placeholder:text-slate-500"
+                    className="flex-1 bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
                     autoFocus
                   />
-                  <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
+                  <kbd className="rounded border border-gray-200 bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-400">
                     ESC
                   </kbd>
                 </div>
@@ -243,7 +243,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                 <div className="max-h-80 overflow-y-auto p-2">
                   {filtered.length === 0 && (
                     <div className="px-4 py-8 text-center">
-                      <p className="text-sm text-slate-500">
+                      <p className="text-sm text-gray-400">
                         Nenhum resultado encontrado
                       </p>
                     </div>
@@ -257,7 +257,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
                     return (
                       <div key={section.key} className="mb-2">
-                        <p className="mb-1 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+                        <p className="mb-1 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
                           {section.title}
                         </p>
                         {sectionItems.map((item) => {
@@ -274,7 +274,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                                 'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
                                 isSelected
                                   ? 'bg-indigo-500/10 text-indigo-400'
-                                  : 'text-slate-400 hover:bg-slate-800/50'
+                                  : 'text-gray-500 hover:bg-gray-50'
                               )}
                             >
                               <item.icon className="h-4 w-4 shrink-0" />
@@ -283,20 +283,20 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                                   className={cn(
                                     'font-medium',
                                     isSelected
-                                      ? 'text-slate-200'
-                                      : 'text-slate-300'
+                                      ? 'text-gray-800'
+                                      : 'text-gray-700'
                                   )}
                                 >
                                   {item.label}
                                 </p>
                                 {item.description && (
-                                  <p className="text-xs text-slate-500 truncate">
+                                  <p className="text-xs text-gray-400 truncate">
                                     {item.description}
                                   </p>
                                 )}
                               </div>
                               {item.shortcut && (
-                                <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
+                                <kbd className="rounded border border-gray-200 bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-400">
                                   {item.shortcut}
                                 </kbd>
                               )}
@@ -312,21 +312,21 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                 </div>
 
                 {/* Footer hints */}
-                <div className="flex items-center gap-4 border-t border-slate-700/50 px-4 py-2.5">
-                  <div className="flex items-center gap-1 text-[10px] text-slate-500">
-                    <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 font-medium">
+                <div className="flex items-center gap-4 border-t border-gray-200 px-4 py-2.5">
+                  <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                    <kbd className="rounded border border-gray-200 bg-gray-100 px-1 py-0.5 font-medium">
                       ↑↓
                     </kbd>
                     <span>navegar</span>
                   </div>
-                  <div className="flex items-center gap-1 text-[10px] text-slate-500">
-                    <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 font-medium">
+                  <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                    <kbd className="rounded border border-gray-200 bg-gray-100 px-1 py-0.5 font-medium">
                       ↵
                     </kbd>
                     <span>selecionar</span>
                   </div>
-                  <div className="flex items-center gap-1 text-[10px] text-slate-500">
-                    <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 font-medium">
+                  <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                    <kbd className="rounded border border-gray-200 bg-gray-100 px-1 py-0.5 font-medium">
                       esc
                     </kbd>
                     <span>fechar</span>

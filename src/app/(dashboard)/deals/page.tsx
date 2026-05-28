@@ -43,7 +43,7 @@ type Deal = {
 // ── Config ──────────────────────────────────────────────────────────────────
 
 const stageConfig: Record<DealStage, { label: string; color: string; bg: string }> = {
-  prospeccao: { label: 'Prospecção', color: 'text-slate-400', bg: 'bg-slate-400/10 border-slate-400/20' },
+  prospeccao: { label: 'Prospecção', color: 'text-gray-500', bg: 'bg-gray-100 border-gray-300' },
   qualificacao: { label: 'Qualificação', color: 'text-blue-400', bg: 'bg-blue-400/10 border-blue-400/20' },
   proposta: { label: 'Proposta', color: 'text-violet-400', bg: 'bg-violet-400/10 border-violet-400/20' },
   negociacao: { label: 'Negociação', color: 'text-amber-400', bg: 'bg-amber-400/10 border-amber-400/20' },
@@ -103,8 +103,8 @@ export default function DealsPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Negócios</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900">Negócios</h1>
+          <p className="text-sm text-gray-400 mt-1">
             Gerencie suas negociações e acompanhe o pipeline de vendas
           </p>
         </div>
@@ -130,7 +130,7 @@ export default function DealsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6"
+            className="bg-white border border-gray-200 rounded-2xl p-6"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="p-2 bg-indigo-500/10 rounded-lg">
@@ -141,8 +141,8 @@ export default function DealsPage() {
                 {stat.change}%
               </div>
             </div>
-            <p className="text-2xl font-bold text-white">{typeof stat.value === 'number' ? stat.value : stat.value}</p>
-            <p className="text-sm text-slate-400 mt-1">{stat.title}</p>
+            <p className="text-2xl font-bold text-gray-900">{typeof stat.value === 'number' ? stat.value : stat.value}</p>
+            <p className="text-sm text-gray-500 mt-1">{stat.title}</p>
           </motion.div>
         ))}
       </div>
@@ -165,7 +165,7 @@ export default function DealsPage() {
                 'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
                 stageFilter === f.key
                   ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30'
-                  : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               )}
             >
               {f.label}
@@ -173,12 +173,12 @@ export default function DealsPage() {
           ))}
         </div>
 
-        <div className="flex items-center gap-1 rounded-lg border border-slate-700/50 bg-slate-800/50 p-0.5">
+        <div className="flex items-center gap-1 rounded-lg border border-gray-200 bg-gray-50 p-0.5">
           <button
             onClick={() => setViewMode('table')}
             className={cn(
               'p-1.5 rounded-md transition-colors',
-              viewMode === 'table' ? 'bg-slate-700/60 text-slate-100' : 'text-slate-500 hover:text-slate-300'
+              viewMode === 'table' ? 'bg-gray-200 text-gray-900' : 'text-gray-400 hover:text-gray-700'
             )}
             title="Lista"
           >
@@ -188,7 +188,7 @@ export default function DealsPage() {
             onClick={() => setViewMode('pipeline')}
             className={cn(
               'p-1.5 rounded-md transition-colors',
-              viewMode === 'pipeline' ? 'bg-slate-700/60 text-slate-100' : 'text-slate-500 hover:text-slate-300'
+              viewMode === 'pipeline' ? 'bg-gray-200 text-gray-900' : 'text-gray-400 hover:text-gray-700'
             )}
             title="Pipeline"
           >
@@ -234,13 +234,13 @@ export default function DealsPage() {
 
 function DealsTable({ deals }: { deals: Deal[] }) {
   return (
-    <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl overflow-hidden">
+    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-gray-200">
               {['Negócio', 'Valor', 'Empresa', 'Estágio', 'Probabilidade', 'Previsão', 'Responsável'].map((h) => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   {h}
                 </th>
               ))}
@@ -253,12 +253,12 @@ function DealsTable({ deals }: { deals: Deal[] }) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
-                className="border-b border-white/5 hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                className="border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer group"
               >
                 <td className="px-4 py-3">
                   <div>
-                    <p className="text-sm font-medium text-white">{deal.title}</p>
-                    <p className="text-xs text-slate-500">{deal.leadName}</p>
+                    <p className="text-sm font-medium text-gray-900">{deal.title}</p>
+                    <p className="text-xs text-gray-400">{deal.leadName}</p>
                   </div>
                 </td>
                 <td className="px-4 py-3">
@@ -268,8 +268,8 @@ function DealsTable({ deals }: { deals: Deal[] }) {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <Building2 className="w-3.5 h-3.5 text-slate-500" />
-                    <span className="text-sm text-slate-300">{deal.company}</span>
+                    <Building2 className="w-3.5 h-3.5 text-gray-400" />
+                    <span className="text-sm text-gray-700">{deal.company}</span>
                   </div>
                 </td>
                 <td className="px-4 py-3">
@@ -283,34 +283,34 @@ function DealsTable({ deals }: { deals: Deal[] }) {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-16 h-1.5 rounded-full bg-slate-700/50 overflow-hidden">
+                    <div className="w-16 h-1.5 rounded-full bg-gray-100 overflow-hidden">
                       <div
                         className={cn(
                           'h-full rounded-full transition-all',
                           deal.probability >= 75 ? 'bg-emerald-500' :
                           deal.probability >= 50 ? 'bg-amber-500' :
-                          deal.probability >= 25 ? 'bg-blue-500' : 'bg-slate-500'
+                          deal.probability >= 25 ? 'bg-blue-500' : 'bg-gray-400'
                         )}
                         style={{ width: `${deal.probability}%` }}
                       />
                     </div>
-                    <span className="text-xs text-slate-400">{deal.probability}%</span>
+                    <span className="text-xs text-gray-500">{deal.probability}%</span>
                   </div>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                    <span className="text-sm text-slate-400">{formatDate(deal.expectedClose)}</span>
+                    <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                    <span className="text-sm text-gray-500">{formatDate(deal.expectedClose)}</span>
                   </div>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center">
-                      <span className="text-[10px] font-bold text-white">
+                      <span className="text-[10px] font-bold text-gray-900">
                         {deal.assignedTo.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                       </span>
                     </div>
-                    <span className="text-xs text-slate-400 hidden lg:block">{deal.assignedTo.split(' ')[0]}</span>
+                    <span className="text-xs text-gray-500 hidden lg:block">{deal.assignedTo.split(' ')[0]}</span>
                   </div>
                 </td>
               </motion.tr>
@@ -321,8 +321,8 @@ function DealsTable({ deals }: { deals: Deal[] }) {
 
       {deals.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Handshake className="w-10 h-10 text-slate-600 mb-3" />
-          <p className="text-sm text-slate-500">Nenhum negócio encontrado</p>
+          <Handshake className="w-10 h-10 text-gray-400 mb-3" />
+          <p className="text-sm text-gray-400">Nenhum negócio encontrado</p>
         </div>
       )}
     </div>
@@ -346,11 +346,11 @@ function DealsPipeline({ deals }: { deals: Deal[] }) {
                 <span className={cn('text-sm font-medium', stageConfig[stage].color)}>
                   {stageConfig[stage].label}
                 </span>
-                <span className="text-xs text-slate-500 bg-slate-800/50 px-1.5 py-0.5 rounded-full">
+                <span className="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded-full">
                   {stageDeals.length}
                 </span>
               </div>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-gray-400">
                 {formatCurrency(stageTotal)}
               </span>
             </div>
@@ -363,14 +363,14 @@ function DealsPipeline({ deals }: { deals: Deal[] }) {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-xl p-4 hover:bg-slate-800/50 hover:border-white/10 transition-all cursor-pointer group"
+                  className="bg-white border border-gray-200 rounded-xl p-4 hover:bg-gray-50 hover:border-gray-200 transition-all cursor-pointer group"
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h4 className="text-sm font-medium text-white leading-tight line-clamp-2">
+                    <h4 className="text-sm font-medium text-gray-900 leading-tight line-clamp-2">
                       {deal.title}
                     </h4>
                     <button className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
-                      <MoreHorizontal className="w-4 h-4 text-slate-500" />
+                      <MoreHorizontal className="w-4 h-4 text-gray-400" />
                     </button>
                   </div>
 
@@ -379,50 +379,50 @@ function DealsPipeline({ deals }: { deals: Deal[] }) {
                   </p>
 
                   <div className="space-y-1.5">
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
                       <Building2 className="w-3 h-3 shrink-0" />
                       <span className="truncate">{deal.company}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
                       <User className="w-3 h-3 shrink-0" />
                       <span className="truncate">{deal.leadName}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
                       <Calendar className="w-3 h-3 shrink-0" />
                       <span>{formatDate(deal.expectedClose)}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
                     <div className="flex items-center gap-2">
                       <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center">
-                        <span className="text-[8px] font-bold text-white">
+                        <span className="text-[8px] font-bold text-gray-900">
                           {deal.assignedTo.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                         </span>
                       </div>
-                      <span className="text-xs text-slate-500">{deal.assignedTo.split(' ')[0]}</span>
+                      <span className="text-xs text-gray-400">{deal.assignedTo.split(' ')[0]}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <div className="w-10 h-1 rounded-full bg-slate-700/50 overflow-hidden">
+                      <div className="w-10 h-1 rounded-full bg-gray-100 overflow-hidden">
                         <div
                           className={cn(
                             'h-full rounded-full',
                             deal.probability >= 75 ? 'bg-emerald-500' :
                             deal.probability >= 50 ? 'bg-amber-500' :
-                            deal.probability >= 25 ? 'bg-blue-500' : 'bg-slate-500'
+                            deal.probability >= 25 ? 'bg-blue-500' : 'bg-gray-400'
                           )}
                           style={{ width: `${deal.probability}%` }}
                         />
                       </div>
-                      <span className="text-[10px] text-slate-500">{deal.probability}%</span>
+                      <span className="text-[10px] text-gray-400">{deal.probability}%</span>
                     </div>
                   </div>
                 </motion.div>
               ))}
 
               {stageDeals.length === 0 && (
-                <div className="border-2 border-dashed border-slate-700/50 rounded-xl p-6 text-center">
-                  <p className="text-xs text-slate-600">Nenhum negócio</p>
+                <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center">
+                  <p className="text-xs text-gray-400">Nenhum negócio</p>
                 </div>
               )}
             </div>
@@ -441,85 +441,85 @@ function NewDealModal({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-2xl shadow-2xl"
+        className="w-full max-w-lg bg-white border border-gray-200 rounded-2xl shadow-2xl"
       >
-        <div className="flex items-center justify-between p-6 border-b border-white/5">
-          <h2 className="text-lg font-semibold text-white">Novo Negócio</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">Novo Negócio</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-900 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="p-6 space-y-4">
           <div>
-            <label className="block text-sm text-slate-400 mb-2">Título do Negócio</label>
+            <label className="block text-sm text-gray-500 mb-2">Título do Negócio</label>
             <input
               placeholder="Ex: MBA Executivo - Empresa X"
-              className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Valor (R$)</label>
+              <label className="block text-sm text-gray-500 mb-2">Valor (R$)</label>
               <input
                 type="number"
                 placeholder="0,00"
-                className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors"
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors"
               />
             </div>
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Probabilidade (%)</label>
+              <label className="block text-sm text-gray-500 mb-2">Probabilidade (%)</label>
               <input
                 type="number"
                 placeholder="50"
-                className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors"
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors"
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm text-slate-400 mb-2">Empresa</label>
+            <label className="block text-sm text-gray-500 mb-2">Empresa</label>
             <input
               placeholder="Nome da empresa"
-              className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors"
             />
           </div>
           <div>
-            <label className="block text-sm text-slate-400 mb-2">Lead</label>
+            <label className="block text-sm text-gray-500 mb-2">Lead</label>
             <input
               placeholder="Nome do contato"
-              className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Estágio</label>
-              <select className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-colors">
+              <label className="block text-sm text-gray-500 mb-2">Estágio</label>
+              <select className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors">
                 {Object.entries(stageConfig).map(([key, cfg]) => (
                   <option key={key} value={key}>{cfg.label}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Previsão de Fechamento</label>
+              <label className="block text-sm text-gray-500 mb-2">Previsão de Fechamento</label>
               <input
                 type="date"
-                className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-colors"
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors"
               />
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-white/5">
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
           <button
             onClick={onClose}
-            className="px-4 py-2.5 text-sm text-slate-400 hover:text-white transition-colors"
+            className="px-4 py-2.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
           >
             Cancelar
           </button>

@@ -80,17 +80,17 @@ function StatCard({ icon: Icon, title, value, change, index, iconColor, iconBg }
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="group relative overflow-hidden rounded-2xl border border-white/5 bg-slate-800/50 backdrop-blur-sm p-5 transition-all duration-300 hover:border-white/10 hover:bg-slate-800/70"
+      className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all duration-300 hover:border-gray-200 hover:bg-gray-100"
     >
       {/* Subtle gradient overlay on hover */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 
       <div className="relative flex items-start justify-between">
         <div className="space-y-3">
-          <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-400">
             {title}
           </p>
-          <p className="text-2xl font-bold tracking-tight text-slate-100">
+          <p className="text-2xl font-bold tracking-tight text-gray-900">
             {formatAnimatedValue()}
           </p>
         </div>
@@ -119,7 +119,7 @@ function StatCard({ icon: Icon, title, value, change, index, iconColor, iconBg }
           {isPositive ? '+' : ''}
           {change}%
         </span>
-        <span className="text-xs text-slate-500">vs. mês anterior</span>
+        <span className="text-xs text-gray-400">vs. mês anterior</span>
       </div>
     </motion.div>
   )

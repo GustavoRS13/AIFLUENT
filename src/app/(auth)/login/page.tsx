@@ -60,14 +60,14 @@ export default function LoginPage() {
           {/* Brand */}
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-400 shadow-xl shadow-indigo-500/30">
-              <span className="text-xl font-extrabold text-white tracking-tight">
+              <span className="text-xl font-extrabold text-gray-900 tracking-tight">
                 AI
               </span>
             </div>
             <h1 className="gradient-text text-2xl font-bold tracking-tight">
               AIFLUENT
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-gray-400">
               CRM Inteligente
             </p>
           </div>
@@ -77,12 +77,12 @@ export default function LoginPage() {
             <div className="space-y-1.5">
               <label
                 htmlFor="email"
-                className="text-xs font-medium text-slate-400"
+                className="text-xs font-medium text-gray-500"
               >
                 E-mail
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <input
                   id="email"
                   type="email"
@@ -90,7 +90,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
                   required
-                  className="h-10 w-full rounded-lg border border-slate-700/50 bg-slate-800/50 pl-10 pr-4 text-sm text-slate-200 outline-none transition-colors placeholder:text-slate-600 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20"
+                  className="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20"
                 />
               </div>
             </div>
@@ -98,12 +98,12 @@ export default function LoginPage() {
             <div className="space-y-1.5">
               <label
                 htmlFor="password"
-                className="text-xs font-medium text-slate-400"
+                className="text-xs font-medium text-gray-500"
               >
                 Senha
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <input
                   id="password"
                   type="password"
@@ -111,16 +111,16 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="h-10 w-full rounded-lg border border-slate-700/50 bg-slate-800/50 pl-10 pr-4 text-sm text-slate-200 outline-none transition-colors placeholder:text-slate-600 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20"
+                  className="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20"
                 />
               </div>
             </div>
 
             <div className="flex items-center justify-between text-xs">
-              <label className="flex items-center gap-2 text-slate-400">
+              <label className="flex items-center gap-2 text-gray-500">
                 <input
                   type="checkbox"
-                  className="h-3.5 w-3.5 rounded border-slate-700 bg-slate-800"
+                  className="h-3.5 w-3.5 rounded border-gray-200 bg-gray-100"
                 />
                 Lembrar de mim
               </label>
@@ -155,14 +155,14 @@ export default function LoginPage() {
 
           {/* Divider */}
           <div className="mt-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-slate-700/50" />
-            <span className="text-[10px] uppercase tracking-widest text-slate-600">
+            <div className="h-px flex-1 bg-gray-100" />
+            <span className="text-[10px] uppercase tracking-widest text-gray-400">
               ou
             </span>
-            <div className="h-px flex-1 bg-slate-700/50" />
+            <div className="h-px flex-1 bg-gray-100" />
           </div>
 
-          <p className="mt-4 text-center text-xs text-slate-500">
+          <p className="mt-4 text-center text-xs text-gray-400">
             Ainda nao tem conta?{' '}
             <a
               href="#"

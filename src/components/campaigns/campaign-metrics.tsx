@@ -76,8 +76,8 @@ export function CampaignMetrics({ data, onExport }: CampaignMetricsProps) {
       icon: Send,
       label: 'Enviados',
       value: data.sent,
-      color: 'from-slate-500 to-slate-600',
-      textColor: 'text-slate-300',
+      color: 'from-gray-400 to-gray-500',
+      textColor: 'text-gray-700',
       dropoff: null as number | null,
     },
     {
@@ -123,7 +123,7 @@ export function CampaignMetrics({ data, onExport }: CampaignMetricsProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-indigo-400" />
-          <h3 className="text-lg font-semibold text-slate-100">Metricas da Campanha</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Metricas da Campanha</h3>
         </div>
         {onExport && (
           <Button variant="secondary" size="sm" onClick={onExport}>
@@ -134,8 +134,8 @@ export function CampaignMetrics({ data, onExport }: CampaignMetricsProps) {
       </div>
 
       {/* Funnel Visualization */}
-      <div className="rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm p-6">
-        <h4 className="text-sm font-medium text-slate-400 mb-6">Funil de Conversao</h4>
+      <div className="rounded-xl border border-gray-200 bg-gray-50 p-6">
+        <h4 className="text-sm font-medium text-gray-500 mb-6">Funil de Conversao</h4>
 
         <div className="space-y-3">
           {funnel.map((step, idx) => {
@@ -159,22 +159,22 @@ export function CampaignMetrics({ data, onExport }: CampaignMetricsProps) {
 
                 <div className="flex items-center gap-3">
                   <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br', step.color)}>
-                    <Icon className="h-4 w-4 text-white" />
+                    <Icon className="h-4 w-4 text-gray-900" />
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-slate-400">{step.label}</span>
+                      <span className="text-xs text-gray-500">{step.label}</span>
                       <div className="flex items-center gap-2">
                         <span className={cn('text-sm font-bold tabular-nums', step.textColor)}>
                           {formatCompact(step.value)}
                         </span>
-                        <span className="text-[10px] text-slate-500">({rate}%)</span>
+                        <span className="text-[10px] text-gray-400">({rate}%)</span>
                       </div>
                     </div>
 
                     <motion.div
-                      className="h-2.5 rounded-full overflow-hidden bg-slate-900/50"
+                      className="h-2.5 rounded-full overflow-hidden bg-gray-50"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: idx * 0.1 }}
@@ -197,8 +197,8 @@ export function CampaignMetrics({ data, onExport }: CampaignMetricsProps) {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Delivery Over Time */}
-        <div className="rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm p-5">
-          <h4 className="text-sm font-medium text-slate-400 mb-4">Entregas por Hora</h4>
+        <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
+          <h4 className="text-sm font-medium text-gray-500 mb-4">Entregas por Hora</h4>
           <div className="flex items-end gap-0.5 h-32">
             {data.deliveryOverTime.map((point, i) => (
               <motion.div
@@ -208,24 +208,24 @@ export function CampaignMetrics({ data, onExport }: CampaignMetricsProps) {
                 animate={{ height: `${(point.count / maxDelivery) * 100}%` }}
                 transition={{ duration: 0.5, delay: i * 0.02 }}
               >
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-[10px] text-slate-300 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white border border-gray-200 rounded px-1.5 py-0.5 text-[10px] text-gray-700 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                   {point.hour}: {point.count}
                 </div>
               </motion.div>
             ))}
           </div>
           <div className="flex justify-between mt-1.5">
-            <span className="text-[10px] text-slate-600">00h</span>
-            <span className="text-[10px] text-slate-600">06h</span>
-            <span className="text-[10px] text-slate-600">12h</span>
-            <span className="text-[10px] text-slate-600">18h</span>
-            <span className="text-[10px] text-slate-600">23h</span>
+            <span className="text-[10px] text-gray-400">00h</span>
+            <span className="text-[10px] text-gray-400">06h</span>
+            <span className="text-[10px] text-gray-400">12h</span>
+            <span className="text-[10px] text-gray-400">18h</span>
+            <span className="text-[10px] text-gray-400">23h</span>
           </div>
         </div>
 
         {/* Responses Over Time */}
-        <div className="rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm p-5">
-          <h4 className="text-sm font-medium text-slate-400 mb-4">Respostas por Hora</h4>
+        <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
+          <h4 className="text-sm font-medium text-gray-500 mb-4">Respostas por Hora</h4>
           <div className="flex items-end gap-0.5 h-32">
             {data.responsesOverTime.map((point, i) => (
               <motion.div
@@ -235,32 +235,32 @@ export function CampaignMetrics({ data, onExport }: CampaignMetricsProps) {
                 animate={{ height: `${(point.count / maxResponses) * 100}%` }}
                 transition={{ duration: 0.5, delay: i * 0.02 }}
               >
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-[10px] text-slate-300 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white border border-gray-200 rounded px-1.5 py-0.5 text-[10px] text-gray-700 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                   {point.hour}: {point.count}
                 </div>
               </motion.div>
             ))}
           </div>
           <div className="flex justify-between mt-1.5">
-            <span className="text-[10px] text-slate-600">00h</span>
-            <span className="text-[10px] text-slate-600">06h</span>
-            <span className="text-[10px] text-slate-600">12h</span>
-            <span className="text-[10px] text-slate-600">18h</span>
-            <span className="text-[10px] text-slate-600">23h</span>
+            <span className="text-[10px] text-gray-400">00h</span>
+            <span className="text-[10px] text-gray-400">06h</span>
+            <span className="text-[10px] text-gray-400">12h</span>
+            <span className="text-[10px] text-gray-400">18h</span>
+            <span className="text-[10px] text-gray-400">23h</span>
           </div>
         </div>
       </div>
 
       {/* Heatmap */}
-      <div className="rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm p-5">
-        <h4 className="text-sm font-medium text-slate-400 mb-4">Melhores Horarios para Envio</h4>
+      <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
+        <h4 className="text-sm font-medium text-gray-500 mb-4">Melhores Horarios para Envio</h4>
 
         <div className="overflow-x-auto">
           <div className="min-w-[600px]">
             {/* Hour labels */}
             <div className="flex ml-10 mb-1">
               {Array.from({ length: 24 }, (_, i) => (
-                <div key={i} className="flex-1 text-center text-[9px] text-slate-600">
+                <div key={i} className="flex-1 text-center text-[9px] text-gray-400">
                   {i % 3 === 0 ? `${i.toString().padStart(2, '0')}` : ''}
                 </div>
               ))}
@@ -269,7 +269,7 @@ export function CampaignMetrics({ data, onExport }: CampaignMetricsProps) {
             {/* Heatmap rows */}
             {data.bestHours.map((row, dayIdx) => (
               <div key={dayIdx} className="flex items-center gap-1 mb-0.5">
-                <span className="w-8 text-right text-[10px] text-slate-500 shrink-0 mr-1">
+                <span className="w-8 text-right text-[10px] text-gray-400 shrink-0 mr-1">
                   {dayLabels[dayIdx]}
                 </span>
                 <div className="flex flex-1 gap-0.5">
@@ -284,7 +284,7 @@ export function CampaignMetrics({ data, onExport }: CampaignMetricsProps) {
                       animate={{ opacity: 1 }}
                       transition={{ delay: (dayIdx * 24 + hourIdx) * 0.002 }}
                     >
-                      <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-[10px] text-slate-300 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                      <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-white border border-gray-200 rounded px-1.5 py-0.5 text-[10px] text-gray-700 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                         {dayLabels[dayIdx]} {hourIdx}h: {Math.round(value * 100)}%
                       </div>
                     </motion.div>
@@ -297,7 +297,7 @@ export function CampaignMetrics({ data, onExport }: CampaignMetricsProps) {
 
         {/* Legend */}
         <div className="flex items-center justify-center gap-2 mt-3">
-          <span className="text-[10px] text-slate-500">Menos</span>
+          <span className="text-[10px] text-gray-400">Menos</span>
           {[0.1, 0.3, 0.5, 0.7, 0.9].map((v) => (
             <div
               key={v}
@@ -305,7 +305,7 @@ export function CampaignMetrics({ data, onExport }: CampaignMetricsProps) {
               style={{ backgroundColor: `rgba(99, 102, 241, ${0.05 + v * 0.85})` }}
             />
           ))}
-          <span className="text-[10px] text-slate-500">Mais</span>
+          <span className="text-[10px] text-gray-400">Mais</span>
         </div>
       </div>
     </div>

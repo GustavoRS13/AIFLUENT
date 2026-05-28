@@ -195,25 +195,25 @@ export default function PipelinePage() {
               <GitBranch className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-100">
+              <h1 className="text-xl font-bold text-gray-900">
                 Pipeline de Vendas
               </h1>
-              <p className="text-xs text-slate-500">{pipelineName}</p>
+              <p className="text-xs text-gray-400">{pipelineName}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Buscar leads..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={cn(
-                  'h-8 w-56 rounded-lg border border-slate-700/40 bg-slate-800/40 backdrop-blur-sm pl-8 pr-3 text-xs text-slate-200',
-                  'placeholder:text-slate-500',
+                  'h-8 w-56 rounded-lg border border-gray-200 bg-gray-50 pl-8 pr-3 text-xs text-gray-800',
+                  'placeholder:text-gray-400',
                   'focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500/30',
                   'transition-all duration-200'
                 )}
@@ -224,8 +224,8 @@ export default function PipelinePage() {
             <button
               className={cn(
                 'flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium',
-                'text-slate-400 border border-slate-700/40 bg-slate-800/40 backdrop-blur-sm',
-                'hover:text-slate-200 hover:bg-slate-800/60 hover:border-slate-600/50',
+                'text-gray-500 border border-gray-200 bg-gray-50',
+                'hover:text-gray-800 hover:bg-gray-50 hover:border-gray-200',
                 'transition-all duration-150'
               )}
             >
@@ -239,8 +239,8 @@ export default function PipelinePage() {
               disabled={loading}
               className={cn(
                 'flex items-center justify-center h-8 w-8 rounded-lg',
-                'text-slate-400 border border-slate-700/40 bg-slate-800/40 backdrop-blur-sm',
-                'hover:text-slate-200 hover:bg-slate-800/60 hover:border-slate-600/50',
+                'text-gray-500 border border-gray-200 bg-gray-50',
+                'hover:text-gray-800 hover:bg-gray-50 hover:border-gray-200',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
                 'transition-all duration-150'
               )}
@@ -266,7 +266,7 @@ export default function PipelinePage() {
               className="flex flex-col items-center gap-3"
             >
               <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
-              <span className="text-sm text-slate-500">
+              <span className="text-sm text-gray-400">
                 Carregando pipeline...
               </span>
             </motion.div>
@@ -281,7 +281,7 @@ export default function PipelinePage() {
               <div className="h-12 w-12 rounded-full bg-rose-500/10 flex items-center justify-center">
                 <GitBranch className="h-6 w-6 text-rose-400" />
               </div>
-              <p className="text-sm text-slate-400">{error}</p>
+              <p className="text-sm text-gray-500">{error}</p>
               <button
                 onClick={fetchPipeline}
                 className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"

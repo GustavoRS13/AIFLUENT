@@ -222,8 +222,8 @@ export default function TemplatesPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Templates</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900">Templates</h1>
+          <p className="text-sm text-gray-400 mt-1">
             Gerencie templates de mensagens para WhatsApp, Email e SMS
           </p>
         </div>
@@ -249,15 +249,15 @@ export default function TemplatesPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-5"
+            className="bg-white border border-gray-200 rounded-2xl p-5"
           >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-indigo-500/10 rounded-lg">
                 <stat.icon className="w-4 h-4 text-indigo-400" />
               </div>
               <div>
-                <p className="text-xl font-bold text-white">{stat.value}</p>
-                <p className="text-xs text-slate-400">{stat.title}</p>
+                <p className="text-xl font-bold text-gray-900">{stat.value}</p>
+                <p className="text-xs text-gray-500">{stat.title}</p>
               </div>
             </div>
           </motion.div>
@@ -284,7 +284,7 @@ export default function TemplatesPage() {
                   'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
                   channelFilter === f.key
                     ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30'
-                    : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                 )}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -295,12 +295,12 @@ export default function TemplatesPage() {
         </div>
 
         <div className="relative w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar templates..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none transition-colors"
+            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors"
           />
         </div>
       </div>
@@ -317,12 +317,12 @@ export default function TemplatesPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ delay: i * 0.05 }}
-                className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-5 hover:bg-slate-800/50 hover:border-white/10 transition-all group"
+                className="bg-white border border-gray-200 rounded-2xl p-5 hover:bg-gray-50 hover:border-gray-200 transition-all group"
               >
                 {/* Header */}
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-white truncate">{template.name}</h3>
+                    <h3 className="text-sm font-semibold text-gray-900 truncate">{template.name}</h3>
                     <div className="flex items-center gap-2 mt-1">
                       <span className={cn(
                         'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border',
@@ -341,15 +341,15 @@ export default function TemplatesPage() {
                     'px-2 py-0.5 text-[10px] font-medium rounded-full',
                     template.status === 'active'
                       ? 'bg-emerald-500/10 text-emerald-400'
-                      : 'bg-slate-700/50 text-slate-400'
+                      : 'bg-gray-100 text-gray-500'
                   )}>
                     {template.status === 'active' ? 'Ativo' : 'Rascunho'}
                   </span>
                 </div>
 
                 {/* Content preview */}
-                <div className="bg-slate-900/50 rounded-xl p-3 mb-3">
-                  <p className="text-xs text-slate-400 leading-relaxed line-clamp-3 whitespace-pre-wrap">
+                <div className="bg-gray-50 rounded-xl p-3 mb-3">
+                  <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 whitespace-pre-wrap">
                     {template.content}
                   </p>
                 </div>
@@ -364,8 +364,8 @@ export default function TemplatesPage() {
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-between pt-3 border-t border-white/5">
-                  <div className="flex items-center gap-1 text-xs text-slate-500">
+                <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                  <div className="flex items-center gap-1 text-xs text-gray-400">
                     <BarChart3 className="w-3 h-3" />
                     {template.usageCount.toLocaleString('pt-BR')} usos
                   </div>
@@ -373,18 +373,18 @@ export default function TemplatesPage() {
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => setPreviewTemplate(template)}
-                      className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-md transition-colors"
+                      className="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
                       title="Visualizar"
                     >
                       <Eye className="w-3.5 h-3.5" />
                     </button>
-                    <button className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-md transition-colors" title="Duplicar">
+                    <button className="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors" title="Duplicar">
                       <Copy className="w-3.5 h-3.5" />
                     </button>
-                    <button className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-md transition-colors" title="Editar">
+                    <button className="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors" title="Editar">
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
-                    <button className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-md transition-colors" title="Excluir">
+                    <button className="p-1.5 text-gray-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-md transition-colors" title="Excluir">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -397,9 +397,9 @@ export default function TemplatesPage() {
 
       {filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <FileText className="w-10 h-10 text-slate-600 mb-3" />
-          <h3 className="text-base font-semibold text-slate-200">Nenhum template encontrado</h3>
-          <p className="mt-1 text-sm text-slate-500">Tente buscar com outros termos ou crie um novo template</p>
+          <FileText className="w-10 h-10 text-gray-400 mb-3" />
+          <h3 className="text-base font-semibold text-gray-800">Nenhum template encontrado</h3>
+          <p className="mt-1 text-sm text-gray-400">Tente buscar com outros termos ou crie um novo template</p>
         </div>
       )}
 
@@ -440,18 +440,18 @@ function TemplatePreviewModal({ template, onClose }: { template: Template; onClo
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-2xl shadow-2xl"
+        className="w-full max-w-lg bg-white border border-gray-200 rounded-2xl shadow-2xl"
       >
-        <div className="flex items-center justify-between p-6 border-b border-white/5">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
-            <h2 className="text-lg font-semibold text-white">{template.name}</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{template.name}</h2>
             <div className="flex items-center gap-2 mt-1">
               <span className={cn(
                 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border',
@@ -466,21 +466,21 @@ function TemplatePreviewModal({ template, onClose }: { template: Template; onClo
               </span>
             </div>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-900 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="p-6 space-y-4">
           <div>
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Template Original</p>
-            <div className="bg-slate-800/50 border border-white/5 rounded-xl p-4">
-              <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{template.content}</p>
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Template Original</p>
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{template.content}</p>
             </div>
           </div>
 
           <div>
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Prévia (com variáveis preenchidas)</p>
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Prévia (com variáveis preenchidas)</p>
             <div className={cn(
               'rounded-xl p-4',
               template.channel === 'whatsapp'
@@ -489,12 +489,12 @@ function TemplatePreviewModal({ template, onClose }: { template: Template; onClo
                 ? 'bg-blue-900/20 border border-blue-500/10'
                 : 'bg-amber-900/20 border border-amber-500/10'
             )}>
-              <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">{previewText}</p>
+              <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">{previewText}</p>
             </div>
           </div>
 
           <div>
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Variáveis</p>
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Variáveis</p>
             <div className="flex flex-wrap gap-2">
               {template.variables.map((v) => (
                 <span key={v} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-lg text-xs font-mono">
@@ -504,17 +504,17 @@ function TemplatePreviewModal({ template, onClose }: { template: Template; onClo
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-xs text-slate-500">
+          <div className="flex items-center gap-4 text-xs text-gray-400">
             <span>Usos: {template.usageCount.toLocaleString('pt-BR')}</span>
             <span>Criado: {new Date(template.createdAt).toLocaleDateString('pt-BR')}</span>
             <span>Atualizado: {new Date(template.updatedAt).toLocaleDateString('pt-BR')}</span>
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-white/5">
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
           <button
             onClick={onClose}
-            className="px-4 py-2.5 text-sm text-slate-400 hover:text-white transition-colors"
+            className="px-4 py-2.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
           >
             Fechar
           </button>
@@ -541,43 +541,43 @@ function NewTemplateModal({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-2xl shadow-2xl"
+        className="w-full max-w-lg bg-white border border-gray-200 rounded-2xl shadow-2xl"
       >
-        <div className="flex items-center justify-between p-6 border-b border-white/5">
-          <h2 className="text-lg font-semibold text-white">Novo Template</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">Novo Template</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-900 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="p-6 space-y-4">
           <div>
-            <label className="block text-sm text-slate-400 mb-2">Nome do Template</label>
+            <label className="block text-sm text-gray-500 mb-2">Nome do Template</label>
             <input
               placeholder="Ex: Follow-up de 7 dias"
-              className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Canal</label>
-              <select className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-colors">
+              <label className="block text-sm text-gray-500 mb-2">Canal</label>
+              <select className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors">
                 <option value="whatsapp">WhatsApp</option>
                 <option value="email">Email</option>
                 <option value="sms">SMS</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Categoria</label>
-              <select className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-colors">
+              <label className="block text-sm text-gray-500 mb-2">Categoria</label>
+              <select className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors">
                 {Object.entries(categoryConfig).map(([key, cfg]) => (
                   <option key={key} value={key}>{cfg.label}</option>
                 ))}
@@ -586,18 +586,18 @@ function NewTemplateModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <label className="block text-sm text-slate-400 mb-2">Conteúdo</label>
+            <label className="block text-sm text-gray-500 mb-2">Conteúdo</label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={5}
               placeholder="Digite o conteúdo do template..."
-              className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors resize-none"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors resize-none"
             />
           </div>
 
           <div>
-            <p className="text-xs text-slate-500 mb-2">Inserir variável:</p>
+            <p className="text-xs text-gray-400 mb-2">Inserir variável:</p>
             <div className="flex flex-wrap gap-2">
               {['nome', 'curso', 'valor', 'consultor'].map((v) => (
                 <button
@@ -612,16 +612,16 @@ function NewTemplateModal({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-white/5">
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
           <button
             onClick={onClose}
-            className="px-4 py-2.5 text-sm text-slate-400 hover:text-white transition-colors"
+            className="px-4 py-2.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
           >
             Cancelar
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium rounded-xl transition-colors"
+            className="px-4 py-2.5 bg-gray-200 hover:bg-gray-200 text-gray-900 text-sm font-medium rounded-xl transition-colors"
           >
             Salvar Rascunho
           </button>

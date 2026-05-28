@@ -43,7 +43,7 @@ const mockCampaigns: AdCampaign[] = [
 const statusConfig = {
   active: { label: 'Ativo', color: 'text-emerald-400 bg-emerald-500/10' },
   paused: { label: 'Pausado', color: 'text-amber-400 bg-amber-500/10' },
-  draft: { label: 'Rascunho', color: 'text-slate-400 bg-slate-500/10' },
+  draft: { label: 'Rascunho', color: 'text-gray-500 bg-gray-100' },
   completed: { label: 'Concluido', color: 'text-blue-400 bg-blue-500/10' },
 }
 
@@ -76,11 +76,11 @@ export default function MetaAdsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Meta Ads</h1>
-          <p className="text-slate-400 mt-1">Gerencie campanhas Facebook e Instagram Ads</p>
+          <h1 className="text-3xl font-bold text-gray-900">Meta Ads</h1>
+          <p className="text-gray-500 mt-1">Gerencie campanhas Facebook e Instagram Ads</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-slate-800/50 border border-white/5 rounded-xl text-sm text-slate-300 hover:text-white transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 hover:text-gray-900 transition-colors">
             <RefreshCw className="w-4 h-4" />
             Sincronizar
           </button>
@@ -105,7 +105,7 @@ export default function MetaAdsPage() {
             key={kpi.label}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-4"
+            className="bg-white border border-gray-200 rounded-2xl p-4"
           >
             <div className="flex items-center justify-between mb-3">
               <kpi.icon className={cn('w-5 h-5', kpi.color)} />
@@ -114,8 +114,8 @@ export default function MetaAdsPage() {
                 {kpi.change}
               </span>
             </div>
-            <p className="text-xl font-bold text-white">{kpi.value}</p>
-            <p className="text-xs text-slate-500 mt-1">{kpi.label}</p>
+            <p className="text-xl font-bold text-gray-900">{kpi.value}</p>
+            <p className="text-xs text-gray-400 mt-1">{kpi.label}</p>
           </motion.div>
         ))}
       </div>
@@ -135,7 +135,7 @@ export default function MetaAdsPage() {
               'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors',
               tab === t.key
                 ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30'
-                : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             )}
           >
             <t.icon className="w-4 h-4" />
@@ -153,7 +153,7 @@ export default function MetaAdsPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-5 hover:bg-slate-800/50 transition-colors"
+              className="bg-white border border-gray-200 rounded-2xl p-5 hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-4">
                 {/* Platform Icon */}
@@ -169,12 +169,12 @@ export default function MetaAdsPage() {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-white truncate">{campaign.name}</h3>
+                    <h3 className="text-sm font-semibold text-gray-900 truncate">{campaign.name}</h3>
                     <span className={cn('text-[10px] px-2 py-0.5 rounded font-medium', statusConfig[campaign.status].color)}>
                       {statusConfig[campaign.status].label}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-gray-400 mt-0.5">
                     {campaign.objective} · {campaign.budgetType === 'daily' ? `${formatCurrency(campaign.budget)}/dia` : formatCurrency(campaign.budget)}
                   </p>
                 </div>
@@ -182,24 +182,24 @@ export default function MetaAdsPage() {
                 {/* Metrics */}
                 <div className="flex items-center gap-6 shrink-0">
                   <div className="text-center">
-                    <p className="text-sm font-bold text-white">{formatCurrency(campaign.spend)}</p>
-                    <p className="text-[10px] text-slate-500">Gasto</p>
+                    <p className="text-sm font-bold text-gray-900">{formatCurrency(campaign.spend)}</p>
+                    <p className="text-[10px] text-gray-400">Gasto</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-bold text-white">{formatNumber(campaign.impressions)}</p>
-                    <p className="text-[10px] text-slate-500">Impressoes</p>
+                    <p className="text-sm font-bold text-gray-900">{formatNumber(campaign.impressions)}</p>
+                    <p className="text-[10px] text-gray-400">Impressoes</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-bold text-white">{campaign.leads}</p>
-                    <p className="text-[10px] text-slate-500">Leads</p>
+                    <p className="text-sm font-bold text-gray-900">{campaign.leads}</p>
+                    <p className="text-[10px] text-gray-400">Leads</p>
                   </div>
                   <div className="text-center">
                     <p className="text-sm font-bold text-emerald-400">{formatCurrency(campaign.cpl)}</p>
-                    <p className="text-[10px] text-slate-500">CPL</p>
+                    <p className="text-[10px] text-gray-400">CPL</p>
                   </div>
                   <div className="text-center">
                     <p className="text-sm font-bold text-purple-400">{campaign.roas > 0 ? `${campaign.roas}x` : '-'}</p>
-                    <p className="text-[10px] text-slate-500">ROAS</p>
+                    <p className="text-[10px] text-gray-400">ROAS</p>
                   </div>
                 </div>
 
@@ -214,7 +214,7 @@ export default function MetaAdsPage() {
                       <Play className="w-4 h-4" />
                     </button>
                   ) : null}
-                  <button className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors">
+                  <button className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors">
                     <ExternalLink className="w-4 h-4" />
                   </button>
                 </div>
@@ -227,14 +227,14 @@ export default function MetaAdsPage() {
       {/* Leads Tab */}
       {tab === 'leads' && (
         <div className="space-y-4">
-          <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Leads Captados via Meta Ads</h3>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Leads Captados via Meta Ads</h3>
             <div className="flex items-center gap-2 mb-4">
               <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
                 <Zap className="w-4 h-4 text-emerald-400" />
                 <span className="text-xs text-emerald-400 font-medium">Sincronizacao automatica ativa</span>
               </div>
-              <span className="text-xs text-slate-500">Ultimo sync: 5 min atras</span>
+              <span className="text-xs text-gray-400">Ultimo sync: 5 min atras</span>
             </div>
 
             <div className="space-y-2">
@@ -246,22 +246,22 @@ export default function MetaAdsPage() {
                 { name: 'Elena Ferreira', campaign: 'Campanha Corporativo B2B', source: 'Facebook Lead Ad', time: '3h', temp: 'cold' },
                 { name: 'Felipe Martins', campaign: 'Business English - Lead Gen', source: 'Instagram Reels', time: '5h', temp: 'warm' },
               ].map((lead, i) => (
-                <div key={i} className="flex items-center gap-4 p-3 rounded-xl bg-slate-800/20 hover:bg-slate-800/40 transition-colors">
+                <div key={i} className="flex items-center gap-4 p-3 rounded-xl bg-gray-50 hover:bg-gray-50 transition-colors">
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shrink-0">
-                    <span className="text-[10px] font-bold text-white">{lead.name.split(' ').map((n) => n[0]).join('')}</span>
+                    <span className="text-[10px] font-bold text-gray-900">{lead.name.split(' ').map((n) => n[0]).join('')}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white">{lead.name}</p>
-                    <p className="text-xs text-slate-500">{lead.campaign}</p>
+                    <p className="text-sm font-medium text-gray-900">{lead.name}</p>
+                    <p className="text-xs text-gray-400">{lead.campaign}</p>
                   </div>
-                  <span className="text-xs text-slate-500">{lead.source}</span>
+                  <span className="text-xs text-gray-400">{lead.source}</span>
                   <span className={cn(
                     'text-[10px] px-2 py-0.5 rounded font-medium',
                     lead.temp === 'hot' ? 'text-rose-400 bg-rose-500/10' : lead.temp === 'warm' ? 'text-amber-400 bg-amber-500/10' : 'text-blue-400 bg-blue-500/10'
                   )}>
                     {lead.temp === 'hot' ? 'Quente' : lead.temp === 'warm' ? 'Morno' : 'Frio'}
                   </span>
-                  <span className="text-xs text-slate-500">{lead.time}</span>
+                  <span className="text-xs text-gray-400">{lead.time}</span>
                 </div>
               ))}
             </div>
@@ -285,15 +285,15 @@ export default function MetaAdsPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-5 hover:bg-slate-800/50 transition-colors"
+              className="bg-white border border-gray-200 rounded-2xl p-5 hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
                   <Layers className="w-5 h-5 text-indigo-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">{audience.name}</h3>
-                  <p className="text-xs text-slate-500">{audience.type} · {audience.size} pessoas</p>
+                  <h3 className="text-sm font-semibold text-gray-900">{audience.name}</h3>
+                  <p className="text-xs text-gray-400">{audience.type} · {audience.size} pessoas</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -315,7 +315,7 @@ export default function MetaAdsPage() {
           <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-2xl p-6 space-y-4">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-amber-400" />
-              <h3 className="text-lg font-semibold text-white">Insights Inteligentes</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Insights Inteligentes</h3>
             </div>
 
             {[
@@ -337,8 +337,8 @@ export default function MetaAdsPage() {
                   'bg-indigo-500/5 border-indigo-500/20'
                 )}
               >
-                <h4 className="text-sm font-semibold text-white mb-1">{insight.title}</h4>
-                <p className="text-xs text-slate-300">{insight.desc}</p>
+                <h4 className="text-sm font-semibold text-gray-900 mb-1">{insight.title}</h4>
+                <p className="text-xs text-gray-700">{insight.desc}</p>
               </motion.div>
             ))}
           </div>

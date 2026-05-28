@@ -215,7 +215,7 @@ Atenciosamente,
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <motion.div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/70"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -224,28 +224,28 @@ Atenciosamente,
 
       {/* Modal */}
       <motion.div
-        className="relative z-10 w-full max-w-3xl max-h-[90vh] rounded-2xl border border-slate-700/50 bg-slate-900/95 backdrop-blur-xl shadow-2xl shadow-black/40 flex flex-col overflow-hidden"
+        className="relative z-10 w-full max-w-3xl max-h-[90vh] rounded-2xl border border-gray-200 bg-white shadow-2xl shadow-black/40 flex flex-col overflow-hidden"
         initial={{ opacity: 0, y: 30, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 30, scale: 0.96 }}
         transition={{ type: 'spring', stiffness: 300, damping: 28 }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-700/50 shrink-0">
+        <div className="flex items-center justify-between p-5 border-b border-gray-200 shrink-0">
           <div>
-            <h2 className="text-lg font-semibold text-slate-100">Nova Campanha</h2>
-            <p className="text-sm text-slate-500 mt-0.5">Crie e configure seu disparo</p>
+            <h2 className="text-lg font-semibold text-gray-900">Nova Campanha</h2>
+            <p className="text-sm text-gray-400 mt-0.5">Crie e configure seu disparo</p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-md text-slate-400 hover:text-slate-100 hover:bg-slate-700/50 transition-colors"
+            className="p-1.5 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Stepper */}
-        <div className="px-5 pt-4 pb-2 border-b border-slate-700/50 shrink-0">
+        <div className="px-5 pt-4 pb-2 border-b border-gray-200 shrink-0">
           <div className="flex items-center gap-1">
             {STEPS.map((s, idx) => {
               const StepIcon = s.icon
@@ -258,8 +258,8 @@ Atenciosamente,
                     className={cn(
                       'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
                       isActive && 'bg-indigo-500/15 text-indigo-400',
-                      isCompleted && 'text-emerald-400 cursor-pointer hover:bg-slate-800/50',
-                      !isActive && !isCompleted && 'text-slate-500'
+                      isCompleted && 'text-emerald-400 cursor-pointer hover:bg-gray-50',
+                      !isActive && !isCompleted && 'text-gray-400'
                     )}
                     disabled={s.id > step}
                   >
@@ -268,7 +268,7 @@ Atenciosamente,
                         'flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold border transition-all',
                         isActive && 'bg-indigo-500/20 border-indigo-500/40 text-indigo-400',
                         isCompleted && 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400',
-                        !isActive && !isCompleted && 'border-slate-700 text-slate-500'
+                        !isActive && !isCompleted && 'border-gray-200 text-gray-400'
                       )}
                     >
                       {isCompleted ? <Check className="h-3 w-3" /> : s.id}
@@ -276,7 +276,7 @@ Atenciosamente,
                     <span className="hidden sm:inline">{s.label}</span>
                   </button>
                   {idx < STEPS.length - 1 && (
-                    <ChevronRight className="h-3.5 w-3.5 text-slate-600 shrink-0" />
+                    <ChevronRight className="h-3.5 w-3.5 text-gray-400 shrink-0" />
                   )}
                 </React.Fragment>
               )
@@ -305,7 +305,7 @@ Atenciosamente,
                 />
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
                     Canal de envio
                   </label>
                   <div className="grid grid-cols-3 gap-3">
@@ -320,14 +320,14 @@ Atenciosamente,
                             'flex flex-col items-center gap-2 p-4 rounded-xl border transition-all',
                             selected
                               ? cn(ch.bg, 'ring-1 ring-offset-0', ch.value === 'whatsapp' ? 'ring-emerald-500/40' : ch.value === 'email' ? 'ring-blue-500/40' : 'ring-violet-500/40')
-                              : 'border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50 hover:border-slate-600/50'
+                              : 'border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-200'
                           )}
                         >
-                          <Icon className={cn('h-6 w-6', selected ? ch.color : 'text-slate-400')} />
-                          <span className={cn('text-sm font-medium', selected ? 'text-slate-100' : 'text-slate-400')}>
+                          <Icon className={cn('h-6 w-6', selected ? ch.color : 'text-gray-500')} />
+                          <span className={cn('text-sm font-medium', selected ? 'text-gray-900' : 'text-gray-500')}>
                             {ch.label}
                           </span>
-                          <span className="text-[10px] text-slate-500 text-center">
+                          <span className="text-[10px] text-gray-400 text-center">
                             {ch.description}
                           </span>
                         </button>
@@ -337,7 +337,7 @@ Atenciosamente,
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
                     Tipo de campanha
                   </label>
                   <div className="grid grid-cols-3 gap-3">
@@ -352,14 +352,14 @@ Atenciosamente,
                             'flex flex-col items-center gap-2 p-4 rounded-xl border transition-all',
                             selected
                               ? 'bg-indigo-500/10 border-indigo-500/30 ring-1 ring-indigo-500/40'
-                              : 'border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50 hover:border-slate-600/50'
+                              : 'border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-200'
                           )}
                         >
-                          <Icon className={cn('h-5 w-5', selected ? 'text-indigo-400' : 'text-slate-400')} />
-                          <span className={cn('text-sm font-medium', selected ? 'text-slate-100' : 'text-slate-400')}>
+                          <Icon className={cn('h-5 w-5', selected ? 'text-indigo-400' : 'text-gray-500')} />
+                          <span className={cn('text-sm font-medium', selected ? 'text-gray-900' : 'text-gray-500')}>
                             {ct.label}
                           </span>
-                          <span className="text-[10px] text-slate-500 text-center">
+                          <span className="text-[10px] text-gray-400 text-center">
                             {ct.description}
                           </span>
                         </button>
@@ -396,7 +396,7 @@ Atenciosamente,
                           'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-all',
                           form.audience.mode === mode.value
                             ? 'bg-indigo-500/15 border-indigo-500/25 text-indigo-400'
-                            : 'border-slate-700/50 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'
+                            : 'border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                         )}
                       >
                         <ModeIcon className="h-4 w-4" />
@@ -410,7 +410,7 @@ Atenciosamente,
                 {form.audience.mode === 'filters' && (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-300">Origem</label>
+                      <label className="text-sm font-medium text-gray-700">Origem</label>
                       <select
                         value={form.audience.filters.source || ''}
                         onChange={(e) =>
@@ -422,7 +422,7 @@ Atenciosamente,
                             },
                           }))
                         }
-                        className="flex h-10 w-full rounded-lg border border-slate-700/50 bg-slate-800/50 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        className="flex h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                       >
                         <option value="">Todas</option>
                         <option value="instagram">Instagram</option>
@@ -436,7 +436,7 @@ Atenciosamente,
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-300">Temperatura</label>
+                      <label className="text-sm font-medium text-gray-700">Temperatura</label>
                       <select
                         value={form.audience.filters.temperature || ''}
                         onChange={(e) =>
@@ -448,7 +448,7 @@ Atenciosamente,
                             },
                           }))
                         }
-                        className="flex h-10 w-full rounded-lg border border-slate-700/50 bg-slate-800/50 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        className="flex h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                       >
                         <option value="">Todas</option>
                         <option value="hot">Quente</option>
@@ -458,7 +458,7 @@ Atenciosamente,
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-300">Status</label>
+                      <label className="text-sm font-medium text-gray-700">Status</label>
                       <select
                         value={form.audience.filters.status || ''}
                         onChange={(e) =>
@@ -470,7 +470,7 @@ Atenciosamente,
                             },
                           }))
                         }
-                        className="flex h-10 w-full rounded-lg border border-slate-700/50 bg-slate-800/50 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        className="flex h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                       >
                         <option value="">Todos</option>
                         <option value="new">Novo</option>
@@ -485,7 +485,7 @@ Atenciosamente,
                 {/* Tags */}
                 {form.audience.mode === 'tags' && (
                   <div>
-                    <label className="text-sm font-medium text-slate-300 mb-2 block">
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">
                       Selecione as tags
                     </label>
                     <div className="flex flex-wrap gap-2">
@@ -509,7 +509,7 @@ Atenciosamente,
                               'px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
                               selected
                                 ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/25'
-                                : 'bg-slate-800/50 text-slate-400 border-slate-700/50 hover:text-slate-300'
+                                : 'bg-gray-50 text-gray-500 border-gray-200 hover:text-gray-700'
                             )}
                           >
                             {selected && <Check className="inline h-3 w-3 mr-1" />}
@@ -523,9 +523,9 @@ Atenciosamente,
 
                 {/* Manual */}
                 {form.audience.mode === 'manual' && (
-                  <div className="rounded-lg border border-slate-700/50 bg-slate-800/30 p-6 text-center">
-                    <Search className="h-8 w-8 text-slate-500 mx-auto mb-2" />
-                    <p className="text-sm text-slate-400">Busque e selecione leads individualmente</p>
+                  <div className="rounded-lg border border-gray-200 bg-white p-6 text-center">
+                    <Search className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">Busque e selecione leads individualmente</p>
                     <div className="mt-3">
                       <Input placeholder="Buscar por nome, email ou telefone..." />
                     </div>
@@ -542,13 +542,13 @@ Atenciosamente,
                     <Users className="h-5 w-5 text-indigo-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-slate-200">
+                    <p className="text-sm font-medium text-gray-800">
                       <span className="text-indigo-400 font-bold text-lg tabular-nums">
                         {form.audience.selectedCount.toLocaleString('pt-BR')}
                       </span>{' '}
                       leads selecionados
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-gray-400">
                       Estimativa baseada nos filtros aplicados
                     </p>
                   </div>
@@ -568,7 +568,7 @@ Atenciosamente,
               >
                 {/* Template selector overlay */}
                 {showTemplates && (
-                  <div className="rounded-xl border border-slate-700/50 bg-slate-800/50 overflow-hidden mb-4 max-h-96">
+                  <div className="rounded-xl border border-gray-200 bg-gray-50 overflow-hidden mb-4 max-h-96">
                     <TemplateSelector
                       channel={form.channel || undefined}
                       onSelect={(template) => {
@@ -604,7 +604,7 @@ Atenciosamente,
                     Gerar com IA
                   </Button>
 
-                  <div className="h-5 w-px bg-slate-700/50" />
+                  <div className="h-5 w-px bg-gray-100" />
 
                   {/* Variable buttons */}
                   {VARIABLES.map((v) => (
@@ -628,10 +628,10 @@ Atenciosamente,
                     }
                     placeholder="Digite sua mensagem aqui..."
                     rows={8}
-                    className="w-full rounded-xl border border-slate-700/50 bg-slate-800/50 p-4 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 resize-none transition-all"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 resize-none transition-all"
                   />
                   <div className="absolute bottom-3 right-3 flex items-center gap-2">
-                    <span className="text-[10px] text-slate-600 tabular-nums">
+                    <span className="text-[10px] text-gray-400 tabular-nums">
                       {form.content.message.length} caracteres
                     </span>
                   </div>
@@ -639,16 +639,16 @@ Atenciosamente,
 
                 {/* Preview panel */}
                 {form.content.message.trim() && (
-                  <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-4">
-                    <h4 className="text-xs font-medium text-slate-500 mb-2 uppercase tracking-wider">Preview</h4>
+                  <div className="rounded-xl border border-gray-200 bg-white p-4">
+                    <h4 className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Preview</h4>
                     <div
                       className={cn(
                         'rounded-lg p-3 text-sm max-w-sm',
                         form.channel === 'whatsapp'
-                          ? 'bg-emerald-900/30 border border-emerald-800/30 text-slate-200'
+                          ? 'bg-emerald-900/30 border border-emerald-800/30 text-gray-800'
                           : form.channel === 'email'
-                          ? 'bg-blue-900/20 border border-blue-800/30 text-slate-200'
-                          : 'bg-violet-900/20 border border-violet-800/30 text-slate-200'
+                          ? 'bg-blue-900/20 border border-blue-800/30 text-gray-800'
+                          : 'bg-violet-900/20 border border-violet-800/30 text-gray-800'
                       )}
                     >
                       <p className="whitespace-pre-wrap">
@@ -691,14 +691,14 @@ Atenciosamente,
                           'flex flex-col items-center gap-2 p-4 rounded-xl border transition-all',
                           selected
                             ? 'bg-indigo-500/10 border-indigo-500/30 ring-1 ring-indigo-500/40'
-                            : 'border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50 hover:border-slate-600/50'
+                            : 'border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-200'
                         )}
                       >
-                        <Icon className={cn('h-5 w-5', selected ? 'text-indigo-400' : 'text-slate-400')} />
-                        <span className={cn('text-sm font-medium', selected ? 'text-slate-100' : 'text-slate-400')}>
+                        <Icon className={cn('h-5 w-5', selected ? 'text-indigo-400' : 'text-gray-500')} />
+                        <span className={cn('text-sm font-medium', selected ? 'text-gray-900' : 'text-gray-500')}>
                           {opt.label}
                         </span>
-                        <span className="text-[10px] text-slate-500">{opt.description}</span>
+                        <span className="text-[10px] text-gray-400">{opt.description}</span>
                       </button>
                     )
                   })}
@@ -727,15 +727,15 @@ Atenciosamente,
 
                 {form.schedule.mode === 'sequence' && (
                   <div className="space-y-3">
-                    <label className="text-sm font-medium text-slate-300">Etapas da sequencia</label>
+                    <label className="text-sm font-medium text-gray-700">Etapas da sequencia</label>
                     {form.schedule.sequenceSteps.map((seqStep, idx) => (
-                      <div key={idx} className="flex items-start gap-3 rounded-lg border border-slate-700/50 bg-slate-800/30 p-3">
+                      <div key={idx} className="flex items-start gap-3 rounded-lg border border-gray-200 bg-white p-3">
                         <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-400 text-xs font-bold shrink-0 mt-1">
                           {idx + 1}
                         </div>
                         <div className="flex-1 space-y-2">
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-slate-500">Aguardar</span>
+                            <span className="text-xs text-gray-400">Aguardar</span>
                             <input
                               type="number"
                               min="1"
@@ -745,7 +745,7 @@ Atenciosamente,
                                 steps[idx] = { ...steps[idx], delay: parseInt(e.target.value) || 1 }
                                 setForm((prev) => ({ ...prev, schedule: { ...prev.schedule, sequenceSteps: steps } }))
                               }}
-                              className="w-16 h-8 rounded border border-slate-700/50 bg-slate-800/50 px-2 text-sm text-slate-100 text-center focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+                              className="w-16 h-8 rounded border border-gray-200 bg-gray-50 px-2 text-sm text-gray-900 text-center focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
                             />
                             <select
                               value={seqStep.unit}
@@ -754,7 +754,7 @@ Atenciosamente,
                                 steps[idx] = { ...steps[idx], unit: e.target.value as 'minutes' | 'hours' | 'days' }
                                 setForm((prev) => ({ ...prev, schedule: { ...prev.schedule, sequenceSteps: steps } }))
                               }}
-                              className="h-8 rounded border border-slate-700/50 bg-slate-800/50 px-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+                              className="h-8 rounded border border-gray-200 bg-gray-50 px-2 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
                             >
                               <option value="minutes">minutos</option>
                               <option value="hours">horas</option>
@@ -770,7 +770,7 @@ Atenciosamente,
                               setForm((prev) => ({ ...prev, schedule: { ...prev.schedule, sequenceSteps: steps } }))
                             }}
                             rows={2}
-                            className="w-full rounded border border-slate-700/50 bg-slate-800/50 p-2 text-sm text-slate-100 placeholder:text-slate-500 resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+                            className="w-full rounded border border-gray-200 bg-gray-50 p-2 text-sm text-gray-900 placeholder:text-gray-400 resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
                           />
                         </div>
                         {form.schedule.sequenceSteps.length > 1 && (
@@ -779,7 +779,7 @@ Atenciosamente,
                               const steps = form.schedule.sequenceSteps.filter((_, i) => i !== idx)
                               setForm((prev) => ({ ...prev, schedule: { ...prev.schedule, sequenceSteps: steps } }))
                             }}
-                            className="p-1 rounded text-slate-500 hover:text-rose-400 transition-colors mt-1"
+                            className="p-1 rounded text-gray-400 hover:text-rose-400 transition-colors mt-1"
                           >
                             <X className="h-4 w-4" />
                           </button>
@@ -817,7 +817,7 @@ Atenciosamente,
                 transition={{ duration: 0.2 }}
                 className="space-y-4"
               >
-                <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-5 space-y-4">
+                <div className="rounded-xl border border-gray-200 bg-white p-5 space-y-4">
                   {/* Campaign info */}
                   <div className="flex items-center gap-3">
                     {form.channel && (() => {
@@ -831,7 +831,7 @@ Atenciosamente,
                       )
                     })()}
                     <div>
-                      <h3 className="text-base font-semibold text-slate-100">{form.name || 'Sem nome'}</h3>
+                      <h3 className="text-base font-semibold text-gray-900">{form.name || 'Sem nome'}</h3>
                       <div className="flex items-center gap-2 mt-0.5">
                         <Badge variant="primary" size="sm">{form.channel?.toUpperCase()}</Badge>
                         <Badge variant="default" size="sm">{form.type}</Badge>
@@ -839,7 +839,7 @@ Atenciosamente,
                     </div>
                   </div>
 
-                  <div className="h-px bg-slate-700/50" />
+                  <div className="h-px bg-gray-100" />
 
                   {/* Summary items */}
                   {[
@@ -858,19 +858,19 @@ Atenciosamente,
                     const Icon = item.icon
                     return (
                       <div key={item.label} className="flex items-center gap-3">
-                        <Icon className="h-4 w-4 text-slate-500 shrink-0" />
-                        <span className="text-sm text-slate-500 w-24 shrink-0">{item.label}</span>
-                        <span className="text-sm text-slate-200">{item.value}</span>
+                        <Icon className="h-4 w-4 text-gray-400 shrink-0" />
+                        <span className="text-sm text-gray-400 w-24 shrink-0">{item.label}</span>
+                        <span className="text-sm text-gray-800">{item.value}</span>
                       </div>
                     )
                   })}
 
-                  <div className="h-px bg-slate-700/50" />
+                  <div className="h-px bg-gray-100" />
 
                   {/* Message preview */}
                   <div>
-                    <p className="text-xs text-slate-500 mb-2 uppercase tracking-wider font-medium">Preview da mensagem</p>
-                    <div className="rounded-lg bg-slate-900/50 p-3 text-sm text-slate-300 whitespace-pre-wrap max-h-40 overflow-y-auto">
+                    <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider font-medium">Preview da mensagem</p>
+                    <div className="rounded-lg bg-gray-50 p-3 text-sm text-gray-700 whitespace-pre-wrap max-h-40 overflow-y-auto">
                       {form.content.message || 'Nenhuma mensagem configurada'}
                     </div>
                   </div>
@@ -881,7 +881,7 @@ Atenciosamente,
                   <AlertCircle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-amber-300">Estimativa de entrega</p>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-gray-500 mt-0.5">
                       Com base no volume de {form.audience.selectedCount.toLocaleString('pt-BR')} leads,
                       a entrega completa levara aproximadamente{' '}
                       <span className="text-amber-300 font-medium">
@@ -896,7 +896,7 @@ Atenciosamente,
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-5 border-t border-slate-700/50 shrink-0">
+        <div className="flex items-center justify-between p-5 border-t border-gray-200 shrink-0">
           <Button
             variant="ghost"
             onClick={() => step > 1 ? setStep(step - 1) : onClose()}

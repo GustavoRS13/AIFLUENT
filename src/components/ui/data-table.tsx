@@ -130,7 +130,7 @@ function DataTableInner<T>(
 
   // ---------- Sort icon ----------
   const SortIcon = ({ colId }: { colId: string }) => {
-    if (sortColumn !== colId) return <ArrowUpDown className="ml-1 h-3 w-3 text-slate-500" />
+    if (sortColumn !== colId) return <ArrowUpDown className="ml-1 h-3 w-3 text-gray-400" />
     if (sortDir === 'asc') return <ArrowUp className="ml-1 h-3 w-3 text-indigo-400" />
     return <ArrowDown className="ml-1 h-3 w-3 text-indigo-400" />
   }
@@ -139,7 +139,7 @@ function DataTableInner<T>(
     <div ref={ref} className={cn('w-full overflow-auto', className)}>
       <table className="w-full caption-bottom text-sm">
         <thead>
-          <tr className="border-b border-slate-700/50">
+          <tr className="border-b border-gray-200">
             {selectable && (
               <th className="h-10 w-10 px-3">
                 <Checkbox
@@ -153,8 +153,8 @@ function DataTableInner<T>(
               <th
                 key={col.id}
                 className={cn(
-                  'h-10 px-3 text-left align-middle text-xs font-medium text-slate-400 uppercase tracking-wider',
-                  col.sortable && 'cursor-pointer select-none hover:text-slate-300',
+                  'h-10 px-3 text-left align-middle text-xs font-medium text-gray-500 uppercase tracking-wider',
+                  col.sortable && 'cursor-pointer select-none hover:text-gray-700',
                   col.className
                 )}
                 onClick={() => col.sortable && handleSort(col.id)}
@@ -172,7 +172,7 @@ function DataTableInner<T>(
             <tr>
               <td
                 colSpan={columns.length + (selectable ? 1 : 0)}
-                className="h-24 text-center text-slate-500"
+                className="h-24 text-center text-gray-400"
               >
                 {emptyMessage}
               </td>
@@ -185,8 +185,8 @@ function DataTableInner<T>(
                 <tr
                   key={id}
                   className={cn(
-                    'border-b border-slate-800/50 transition-colors',
-                    'hover:bg-slate-800/30',
+                    'border-b border-gray-100 transition-colors',
+                    'hover:bg-gray-50',
                     isSelected && 'bg-indigo-500/5',
                     onRowClick && 'cursor-pointer'
                   )}
@@ -202,7 +202,7 @@ function DataTableInner<T>(
                     </td>
                   )}
                   {columns.map((col) => (
-                    <td key={col.id} className={cn('px-3 py-3 text-slate-300', col.className)}>
+                    <td key={col.id} className={cn('px-3 py-3 text-gray-700', col.className)}>
                       {col.cell
                         ? col.cell(row)
                         : String((row as Record<string, unknown>)[col.id] ?? '')}
@@ -241,7 +241,7 @@ function Checkbox({ checked, indeterminate, onCheckedChange, onClick }: Checkbox
       onClick={onClick}
       className={cn(
         'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors',
-        'border-slate-600 bg-transparent',
+        'border-gray-300 bg-transparent',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500',
         'data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600',
         'data-[state=indeterminate]:bg-indigo-600 data-[state=indeterminate]:border-indigo-600'

@@ -14,7 +14,7 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      'relative inline-flex h-10 items-center gap-1 rounded-lg bg-slate-800/50 p-1 text-slate-400',
+      'relative inline-flex h-10 items-center gap-1 rounded-lg bg-gray-100 p-1 text-gray-500',
       className
     )}
     {...props}
@@ -30,10 +30,10 @@ const TabsTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       'relative inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-all',
-      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950',
+      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white',
       'disabled:pointer-events-none disabled:opacity-50',
-      'data-[state=active]:text-slate-100',
-      'data-[state=inactive]:hover:text-slate-300',
+      'data-[state=active]:text-gray-900',
+      'data-[state=inactive]:hover:text-gray-700',
       className
     )}
     {...props}
@@ -61,7 +61,7 @@ const AnimatedTabTrigger = React.forwardRef<
       'relative inline-flex items-center justify-center whitespace-nowrap px-3 py-1.5 text-sm font-medium transition-colors',
       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500',
       'disabled:pointer-events-none disabled:opacity-50',
-      isActive ? 'text-slate-100' : 'text-slate-400 hover:text-slate-300',
+      isActive ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700',
       className
     )}
     {...props}
@@ -85,7 +85,7 @@ const TabsContent = React.forwardRef<
   <TabsPrimitive.Content
     ref={ref}
     className={cn(
-      'mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950',
+      'mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white',
       className
     )}
     {...props}

@@ -46,8 +46,8 @@ function ViewModeToggle({
       className={cn(
         'relative inline-flex items-center justify-center rounded-md p-2 text-sm transition-colors',
         mode === current
-          ? 'text-slate-100 bg-slate-700/50'
-          : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
+          ? 'text-gray-900 bg-gray-100'
+          : 'text-gray-400 hover:text-gray-700 hover:bg-gray-50'
       )}
       title={label}
     >
@@ -183,8 +183,8 @@ export default function LeadsPage() {
             <Users className="h-5 w-5 text-indigo-400" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-slate-100">Leads</h1>
-            <p className="text-sm text-slate-500">
+            <h1 className="text-xl font-semibold text-gray-900">Leads</h1>
+            <p className="text-sm text-gray-400">
               {loading ? '...' : `${totalLeads} lead${totalLeads !== 1 ? 's' : ''}`}
             </p>
           </div>
@@ -192,7 +192,7 @@ export default function LeadsPage() {
 
         <div className="flex items-center gap-2 flex-wrap">
           {/* View toggle */}
-          <div className="flex items-center rounded-lg border border-slate-700/50 bg-slate-800/30 p-0.5">
+          <div className="flex items-center rounded-lg border border-gray-200 bg-white p-0.5">
             <ViewModeToggle
               mode="table"
               current={viewMode}
@@ -271,8 +271,8 @@ export default function LeadsPage() {
             {viewMode === 'kanban' && (
               <div className="flex items-center justify-center py-20 text-center">
                 <div>
-                  <Columns3 className="mx-auto h-10 w-10 text-slate-600 mb-3" />
-                  <p className="text-sm text-slate-500">
+                  <Columns3 className="mx-auto h-10 w-10 text-gray-400 mb-3" />
+                  <p className="text-sm text-gray-400">
                     Visualizacao Kanban disponivel na pagina Pipeline.
                   </p>
                 </div>
@@ -284,8 +284,8 @@ export default function LeadsPage() {
 
       {/* Pagination */}
       {!loading && totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-slate-800/50 pt-4">
-          <p className="text-sm text-slate-500">
+        <div className="flex items-center justify-between border-t border-gray-200 pt-4">
+          <p className="text-sm text-gray-400">
             Pagina {page} de {totalPages} ({totalLeads} total)
           </p>
           <div className="flex items-center gap-2">
@@ -315,7 +315,7 @@ export default function LeadsPage() {
                       'h-8 w-8 rounded-md text-sm font-medium transition-colors',
                       pageNum === page
                         ? 'bg-indigo-500/20 text-indigo-300'
-                        : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
+                        : 'text-gray-400 hover:text-gray-700 hover:bg-gray-50'
                     )}
                   >
                     {pageNum}
@@ -323,7 +323,7 @@ export default function LeadsPage() {
                 )
               })}
               {totalPages > 5 && (
-                <span className="px-1 text-slate-600">...</span>
+                <span className="px-1 text-gray-400">...</span>
               )}
             </div>
             <Button
@@ -375,7 +375,7 @@ function LoadingSkeleton({ viewMode }: { viewMode: ViewMode }) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="rounded-xl border border-slate-700/50 bg-slate-900/30 p-4 space-y-3">
+          <div key={i} className="rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-3">
             <div className="flex items-center gap-3">
               <Skeleton className="h-10 w-10 rounded-full" />
               <div className="flex-1 space-y-2">
@@ -393,8 +393,8 @@ function LoadingSkeleton({ viewMode }: { viewMode: ViewMode }) {
   }
 
   return (
-    <div className="rounded-xl border border-slate-700/50 bg-slate-900/30 overflow-hidden">
-      <div className="border-b border-slate-700/50 p-3">
+    <div className="rounded-xl border border-gray-200 bg-gray-50 overflow-hidden">
+      <div className="border-b border-gray-200 p-3">
         <div className="flex gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-4 w-20" />
@@ -402,7 +402,7 @@ function LoadingSkeleton({ viewMode }: { viewMode: ViewMode }) {
         </div>
       </div>
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 border-b border-slate-800/30 px-3 py-3">
+        <div key={i} className="flex items-center gap-4 border-b border-gray-200 px-3 py-3">
           <Skeleton className="h-4 w-4 rounded" />
           <Skeleton className="h-8 w-8 rounded-full" />
           <Skeleton className="h-4 w-32" />

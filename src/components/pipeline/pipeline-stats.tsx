@@ -86,7 +86,7 @@ export function PipelineStats({ stages, className }: PipelineStatsProps) {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05, duration: 0.3 }}
-          className="flex items-center gap-2.5 rounded-xl border border-slate-700/40 bg-slate-800/40 backdrop-blur-sm px-3.5 py-2"
+          className="flex items-center gap-2.5 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2"
         >
           <div
             className={cn(
@@ -98,10 +98,10 @@ export function PipelineStats({ stages, className }: PipelineStatsProps) {
             {stat.icon}
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+            <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">
               {stat.label}
             </span>
-            <span className="text-sm font-bold text-slate-100 tabular-nums">
+            <span className="text-sm font-bold text-gray-900 tabular-nums">
               {stat.value}
             </span>
           </div>
@@ -110,21 +110,21 @@ export function PipelineStats({ stages, className }: PipelineStatsProps) {
 
       {/* Mini stage badges */}
       <div className="ml-auto flex items-center gap-1.5">
-        <BarChart3 className="h-3.5 w-3.5 text-slate-500 mr-1" />
+        <BarChart3 className="h-3.5 w-3.5 text-gray-400 mr-1" />
         {stages.map((stage) => (
           <motion.div
             key={stage.id}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.2 }}
-            className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium border border-slate-700/30 bg-slate-800/30"
+            className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium border border-gray-200 bg-white"
             title={stage.name}
           >
             <span
               className="h-1.5 w-1.5 rounded-full"
               style={{ backgroundColor: stage.color }}
             />
-            <span className="text-slate-400">{stage.leads.length}</span>
+            <span className="text-gray-500">{stage.leads.length}</span>
           </motion.div>
         ))}
       </div>

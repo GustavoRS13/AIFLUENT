@@ -111,7 +111,7 @@ const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
       <motion.div
         ref={ref}
         className={cn(
-          'rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm p-5 space-y-3',
+          'rounded-xl border border-gray-200 bg-white p-5 space-y-3',
           className
         )}
         initial={{ opacity: 0, y: 12 }}
@@ -126,7 +126,7 @@ const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
                 {icon}
               </div>
             )}
-            <span className="text-sm font-medium text-slate-400">{title}</span>
+            <span className="text-sm font-medium text-gray-500">{title}</span>
           </div>
           {sparkline && sparkline.length > 1 && (
             <MiniSparkline data={sparkline} />
@@ -135,10 +135,10 @@ const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
 
         {/* Value row */}
         <div className="flex items-end justify-between">
-          <div className="text-2xl font-bold text-slate-100 tabular-nums">
-            {prefix && <span className="text-lg font-medium text-slate-400 mr-0.5">{prefix}</span>}
+          <div className="text-2xl font-bold text-gray-900 tabular-nums">
+            {prefix && <span className="text-lg font-medium text-gray-500 mr-0.5">{prefix}</span>}
             <CountUp value={value} formatter={formatter} />
-            {suffix && <span className="text-lg font-medium text-slate-400 ml-0.5">{suffix}</span>}
+            {suffix && <span className="text-lg font-medium text-gray-500 ml-0.5">{suffix}</span>}
           </div>
 
           {change != null && (

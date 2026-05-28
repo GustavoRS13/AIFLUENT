@@ -17,7 +17,7 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
     return (
       <div className="w-full space-y-1">
         {showLabel && (
-          <div className="flex justify-between text-xs text-slate-400">
+          <div className="flex justify-between text-xs text-gray-500">
             <span>Progress</span>
             <span>{Math.round(percentage)}%</span>
           </div>
@@ -29,7 +29,7 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
           aria-valuemin={0}
           aria-valuemax={max}
           className={cn(
-            'relative h-2 w-full overflow-hidden rounded-full bg-slate-800/50',
+            'relative h-2 w-full overflow-hidden rounded-full bg-gray-100',
             className
           )}
           {...props}

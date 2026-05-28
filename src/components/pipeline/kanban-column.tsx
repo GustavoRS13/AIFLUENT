@@ -37,9 +37,9 @@ export function KanbanColumn({ stage, onCardClick, onAddLead }: KanbanColumnProp
     <div
       className={cn(
         'flex flex-col shrink-0 w-[300px] rounded-xl',
-        'bg-slate-900/40 backdrop-blur-sm border border-slate-800/50',
+        'bg-gray-50 border border-gray-200',
         'transition-all duration-200',
-        isOver && 'border-indigo-500/30 bg-slate-900/60 shadow-lg shadow-indigo-500/5'
+        isOver && 'border-indigo-500/30 bg-gray-50 shadow-lg shadow-indigo-500/5'
       )}
     >
       {/* Colored top border */}
@@ -52,7 +52,7 @@ export function KanbanColumn({ stage, onCardClick, onAddLead }: KanbanColumnProp
       <div className="flex items-center gap-2 px-3 py-2.5">
         <button
           onClick={() => setCollapsed((prev) => !prev)}
-          className="p-0.5 rounded text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-colors"
+          className="p-0.5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
         >
           {collapsed ? (
             <ChevronRight className="h-3.5 w-3.5" />
@@ -66,11 +66,11 @@ export function KanbanColumn({ stage, onCardClick, onAddLead }: KanbanColumnProp
           style={{ backgroundColor: stage.color }}
         />
 
-        <h3 className="text-sm font-semibold text-slate-200 truncate flex-1">
+        <h3 className="text-sm font-semibold text-gray-800 truncate flex-1">
           {stage.name}
         </h3>
 
-        <span className="flex items-center justify-center min-w-[20px] h-5 rounded-full bg-slate-800/60 px-1.5 text-[10px] font-bold text-slate-400 tabular-nums border border-slate-700/30">
+        <span className="flex items-center justify-center min-w-[20px] h-5 rounded-full bg-gray-50 px-1.5 text-[10px] font-bold text-gray-500 tabular-nums border border-gray-200">
           {stage.leads.length}
         </span>
       </div>
@@ -91,12 +91,12 @@ export function KanbanColumn({ stage, onCardClick, onAddLead }: KanbanColumnProp
                 'flex flex-col gap-2 px-2 pb-2 min-h-[60px]',
                 'overflow-y-auto max-h-[calc(100vh-280px)]',
                 // Custom scrollbar
-                'scrollbar-thin scrollbar-thumb-slate-700/50 scrollbar-track-transparent',
+                'scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent',
                 '[&::-webkit-scrollbar]:w-1',
                 '[&::-webkit-scrollbar-track]:bg-transparent',
-                '[&::-webkit-scrollbar-thumb]:bg-slate-700/50',
+                '[&::-webkit-scrollbar-thumb]:bg-gray-100',
                 '[&::-webkit-scrollbar-thumb]:rounded-full',
-                '[&::-webkit-scrollbar-thumb:hover]:bg-slate-600/60'
+                '[&::-webkit-scrollbar-thumb:hover]:bg-gray-100'
               )}
             >
               <SortableContext
@@ -116,7 +116,7 @@ export function KanbanColumn({ stage, onCardClick, onAddLead }: KanbanColumnProp
               {stage.leads.length === 0 && (
                 <div
                   className={cn(
-                    'flex items-center justify-center h-24 rounded-lg border border-dashed border-slate-700/30 text-[11px] text-slate-600',
+                    'flex items-center justify-center h-24 rounded-lg border border-dashed border-gray-200 text-[11px] text-gray-400',
                     isOver && 'border-indigo-500/40 bg-indigo-500/5 text-indigo-400'
                   )}
                 >
@@ -131,8 +131,8 @@ export function KanbanColumn({ stage, onCardClick, onAddLead }: KanbanColumnProp
                 onClick={() => onAddLead?.(stage.id)}
                 className={cn(
                   'flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg text-[11px] font-medium',
-                  'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50',
-                  'border border-dashed border-slate-700/30 hover:border-slate-600/50',
+                  'text-gray-400 hover:text-gray-700 hover:bg-gray-50',
+                  'border border-dashed border-gray-200 hover:border-gray-200',
                   'transition-all duration-150'
                 )}
               >
@@ -149,7 +149,7 @@ export function KanbanColumn({ stage, onCardClick, onAddLead }: KanbanColumnProp
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="px-3 pb-2.5 text-[10px] text-slate-500"
+          className="px-3 pb-2.5 text-[10px] text-gray-400"
         >
           {stage.leads.length} lead{stage.leads.length !== 1 ? 's' : ''}
         </motion.div>

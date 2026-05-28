@@ -8,18 +8,18 @@ import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
         default:
           'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-500/25 hover:from-indigo-500 hover:to-indigo-400',
         secondary:
-          'bg-slate-800 text-slate-100 border border-slate-700/50 hover:bg-slate-700/80',
+          'bg-gray-100 text-gray-900 border border-gray-200 hover:bg-gray-200',
         outline:
-          'border border-slate-700/50 bg-transparent text-slate-300 hover:bg-slate-800/50 hover:text-slate-100',
+          'border border-gray-200 bg-transparent text-gray-700 hover:bg-gray-50 hover:text-gray-900',
         ghost:
-          'text-slate-400 hover:bg-slate-800/50 hover:text-slate-100',
+          'text-gray-500 hover:bg-gray-50 hover:text-gray-900',
         destructive:
           'bg-rose-600 text-white shadow-lg shadow-rose-500/25 hover:bg-rose-500',
       },

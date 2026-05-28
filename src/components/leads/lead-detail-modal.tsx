@@ -80,7 +80,7 @@ function ScoreCircleLg({ score }: { score: number | null }) {
   return (
     <div className="relative inline-flex items-center justify-center">
       <svg width="52" height="52" className="-rotate-90">
-        <circle cx="26" cy="26" r={r} fill="none" stroke="currentColor" strokeWidth="3" className="text-slate-800" />
+        <circle cx="26" cy="26" r={r} fill="none" stroke="currentColor" strokeWidth="3" className="text-gray-800" />
         <circle cx="26" cy="26" r={r} fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" className={color} />
       </svg>
       <span className={cn('absolute text-sm font-bold', color)}>{pct}</span>
@@ -92,11 +92,11 @@ function ScoreCircleLg({ score }: { score: number | null }) {
 
 function FieldRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-3 py-2.5 border-b border-slate-800/50 last:border-0">
-      <div className="mt-0.5 text-slate-500">{icon}</div>
+    <div className="flex items-start gap-3 py-2.5 border-b border-gray-200 last:border-0">
+      <div className="mt-0.5 text-gray-400">{icon}</div>
       <div className="flex-1 min-w-0">
-        <p className="text-[11px] uppercase tracking-wider text-slate-500 mb-0.5">{label}</p>
-        <div className="text-sm text-slate-200">{value || <span className="text-slate-600">--</span>}</div>
+        <p className="text-[11px] uppercase tracking-wider text-gray-400 mb-0.5">{label}</p>
+        <div className="text-sm text-gray-800">{value || <span className="text-gray-400">--</span>}</div>
       </div>
     </div>
   )
@@ -122,7 +122,7 @@ export function LeadDetailModal({ lead, open, onClose, onEdit }: LeadDetailModal
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-black/50"
             onClick={onClose}
           />
 
@@ -132,18 +132,18 @@ export function LeadDetailModal({ lead, open, onClose, onEdit }: LeadDetailModal
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed right-0 top-0 z-50 h-full w-full max-w-lg overflow-y-auto border-l border-slate-700/50 bg-slate-950/95 backdrop-blur-xl shadow-2xl"
+            className="fixed right-0 top-0 z-50 h-full w-full max-w-lg overflow-y-auto border-l border-gray-200 bg-white shadow-2xl"
           >
             {/* Close button */}
             <button
               onClick={onClose}
-              className="absolute right-4 top-4 z-10 rounded-md p-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 transition-colors"
+              className="absolute right-4 top-4 z-10 rounded-md p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
 
             {/* Header */}
-            <div className="border-b border-slate-800/50 p-6 pb-5">
+            <div className="border-b border-gray-200 p-6 pb-5">
               <div className="flex items-start gap-4">
                 <Avatar size="xl">
                   {lead.photo ? (
@@ -154,7 +154,7 @@ export function LeadDetailModal({ lead, open, onClose, onEdit }: LeadDetailModal
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-lg font-semibold text-slate-100 truncate">
+                  <h2 className="text-lg font-semibold text-gray-900 truncate">
                     {lead.name}
                   </h2>
                   <div className="mt-1 flex items-center gap-2 flex-wrap">
@@ -309,7 +309,7 @@ export function LeadDetailModal({ lead, open, onClose, onEdit }: LeadDetailModal
                     />
                   )}
                   <div className="py-8 text-center">
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-gray-400">
                       Historico completo disponivel em breve.
                     </p>
                   </div>
@@ -319,13 +319,13 @@ export function LeadDetailModal({ lead, open, onClose, onEdit }: LeadDetailModal
               {/* Mensagens */}
               <TabsContent value="messages" className="mt-4">
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-800/50">
-                    <Send className="h-5 w-5 text-slate-600" />
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-50">
+                    <Send className="h-5 w-5 text-gray-400" />
                   </div>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-gray-400">
                     Nenhuma mensagem registrada.
                   </p>
-                  <p className="mt-1 text-xs text-slate-600">
+                  <p className="mt-1 text-xs text-gray-400">
                     Inicie uma conversa por WhatsApp ou Email.
                   </p>
                 </div>
@@ -336,14 +336,14 @@ export function LeadDetailModal({ lead, open, onClose, onEdit }: LeadDetailModal
                 <div className="space-y-3">
                   <textarea
                     placeholder="Adicionar uma nota..."
-                    className="w-full resize-none rounded-lg border border-slate-700/50 bg-slate-800/50 p-3 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 min-h-[100px]"
+                    className="w-full resize-none rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 min-h-[100px]"
                   />
                   <Button size="sm">
                     <StickyNote className="h-3.5 w-3.5" />
                     Salvar nota
                   </Button>
                   <div className="pt-4 text-center">
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-gray-400">
                       Nenhuma nota registrada ainda.
                     </p>
                   </div>
@@ -372,13 +372,13 @@ function TimelineItem({
 }) {
   return (
     <div className="relative flex gap-3 pl-6">
-      <div className="absolute left-0 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-slate-800 text-slate-400 ring-2 ring-slate-900">
+      <div className="absolute left-0 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-gray-100 text-gray-500 ring-2 ring-white">
         {icon}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-slate-200">{title}</p>
-        <p className="text-xs text-slate-500">{description}</p>
-        <p className="mt-0.5 text-[10px] text-slate-600">{formatDate(time)}</p>
+        <p className="text-sm font-medium text-gray-800">{title}</p>
+        <p className="text-xs text-gray-400">{description}</p>
+        <p className="mt-0.5 text-[10px] text-gray-400">{formatDate(time)}</p>
       </div>
     </div>
   )

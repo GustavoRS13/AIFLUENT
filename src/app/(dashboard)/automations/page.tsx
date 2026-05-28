@@ -72,8 +72,8 @@ export default function AutomationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Automacoes</h1>
-          <p className="text-slate-400 mt-1">Fluxos automaticos e workflows inteligentes</p>
+          <h1 className="text-3xl font-bold text-gray-900">Automacoes</h1>
+          <p className="text-gray-500 mt-1">Fluxos automaticos e workflows inteligentes</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-medium transition-colors">
           <Plus className="w-4 h-4" />
@@ -89,14 +89,14 @@ export default function AutomationsPage() {
           { label: 'Taxa de Sucesso', value: '94%', icon: CheckCircle2, color: 'text-emerald-400' },
           { label: 'Tempo Economizado', value: '187h', icon: Clock, color: 'text-amber-400' },
         ].map((stat) => (
-          <div key={stat.label} className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-4">
+          <div key={stat.label} className="bg-white border border-gray-200 rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <stat.icon className={cn('w-4 h-4', stat.color)} />
-              <span className="text-xs text-slate-500">{stat.label}</span>
+              <span className="text-xs text-gray-400">{stat.label}</span>
             </div>
-            <p className="text-2xl font-bold text-white">
+            <p className="text-2xl font-bold text-gray-900">
               {stat.value}
-              {'total' in stat && <span className="text-sm text-slate-500 font-normal">/{stat.total}</span>}
+              {'total' in stat && <span className="text-sm text-gray-400 font-normal">/{stat.total}</span>}
             </p>
           </div>
         ))}
@@ -105,20 +105,20 @@ export default function AutomationsPage() {
       {/* Filters */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar automacoes..."
-            className="w-full pl-9 pr-4 py-2.5 bg-slate-800/50 border border-white/5 rounded-xl text-sm text-white placeholder-slate-500 focus:border-indigo-500/30 focus:outline-none transition-colors"
+            className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500/30 focus:outline-none transition-colors"
           />
         </div>
         <button
           onClick={() => setShowActiveOnly(!showActiveOnly)}
           className={cn(
             'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors',
-            showActiveOnly ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30' : 'text-slate-400 hover:text-slate-300 bg-slate-800/50 border border-white/5'
+            showActiveOnly ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30' : 'text-gray-500 hover:text-gray-700 bg-gray-50 border border-gray-200'
           )}
         >
           <Filter className="w-4 h-4" />
@@ -137,29 +137,29 @@ export default function AutomationsPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04 }}
-              className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-5 hover:bg-slate-800/50 transition-colors"
+              className="bg-white border border-gray-200 rounded-2xl p-5 hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-4">
                 {/* Status / Icon */}
                 <div className={cn(
                   'w-10 h-10 rounded-xl flex items-center justify-center shrink-0',
-                  automation.isActive ? 'bg-emerald-500/10' : 'bg-slate-500/10'
+                  automation.isActive ? 'bg-emerald-500/10' : 'bg-gray-100'
                 )}>
-                  <Workflow className={cn('w-5 h-5', automation.isActive ? 'text-emerald-400' : 'text-slate-500')} />
+                  <Workflow className={cn('w-5 h-5', automation.isActive ? 'text-emerald-400' : 'text-gray-400')} />
                 </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-white">{automation.name}</h3>
+                    <h3 className="text-sm font-semibold text-gray-900">{automation.name}</h3>
                     <span className={cn(
                       'text-[10px] px-2 py-0.5 rounded font-medium',
-                      automation.isActive ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-400 bg-slate-500/10'
+                      automation.isActive ? 'text-emerald-400 bg-emerald-500/10' : 'text-gray-500 bg-gray-100'
                     )}>
                       {automation.isActive ? 'Ativo' : 'Inativo'}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">{automation.description}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{automation.description}</p>
                 </div>
 
                 {/* Trigger */}
@@ -171,18 +171,18 @@ export default function AutomationsPage() {
                 {/* Stats */}
                 <div className="flex items-center gap-6 shrink-0">
                   <div className="text-center">
-                    <p className="text-sm font-bold text-white">{automation.stepsCount}</p>
-                    <p className="text-[10px] text-slate-500">Etapas</p>
+                    <p className="text-sm font-bold text-gray-900">{automation.stepsCount}</p>
+                    <p className="text-[10px] text-gray-400">Etapas</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-bold text-white">{formatNumber(automation.runCount)}</p>
-                    <p className="text-[10px] text-slate-500">Execucoes</p>
+                    <p className="text-sm font-bold text-gray-900">{formatNumber(automation.runCount)}</p>
+                    <p className="text-[10px] text-gray-400">Execucoes</p>
                   </div>
                   <div className="text-center">
                     <p className={cn('text-sm font-bold', automation.successRate >= 90 ? 'text-emerald-400' : automation.successRate >= 70 ? 'text-amber-400' : 'text-rose-400')}>
                       {automation.successRate}%
                     </p>
-                    <p className="text-[10px] text-slate-500">Sucesso</p>
+                    <p className="text-[10px] text-gray-400">Sucesso</p>
                   </div>
                 </div>
 
@@ -194,7 +194,7 @@ export default function AutomationsPage() {
                   )}>
                     {automation.isActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                   </button>
-                  <button className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors">
+                  <button className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors">
                     <MoreHorizontal className="w-4 h-4" />
                   </button>
                 </div>
@@ -202,10 +202,10 @@ export default function AutomationsPage() {
 
               {/* Steps Preview */}
               {automation.isActive && automation.lastRunAt && (
-                <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-3">
-                  <span className="text-[10px] text-slate-600">Ultima execucao: {automation.lastRunAt}</span>
+                <div className="mt-3 pt-3 border-t border-gray-200 flex items-center gap-3">
+                  <span className="text-[10px] text-gray-400">Ultima execucao: {automation.lastRunAt}</span>
                   <div className="flex-1" />
-                  <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                  <div className="flex items-center gap-1 text-[10px] text-gray-400">
                     <span>Ver fluxo</span>
                     <ChevronRight className="w-3 h-3" />
                   </div>
@@ -220,18 +220,18 @@ export default function AutomationsPage() {
       <div className="bg-gradient-to-br from-indigo-500/5 to-purple-500/5 border border-indigo-500/10 rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
           <GitBranch className="w-5 h-5 text-indigo-400" />
-          <h3 className="text-lg font-semibold text-white">Exemplo de Fluxo: Boas-vindas WhatsApp</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Exemplo de Fluxo: Boas-vindas WhatsApp</h3>
         </div>
         <div className="flex items-center gap-3 overflow-x-auto pb-2">
           {[
             { icon: Users, label: 'Novo Lead', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
-            { icon: ArrowRight, label: '', color: 'text-slate-600' },
+            { icon: ArrowRight, label: '', color: 'text-gray-400' },
             { icon: Bot, label: 'IA Classifica', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
-            { icon: ArrowRight, label: '', color: 'text-slate-600' },
+            { icon: ArrowRight, label: '', color: 'text-gray-400' },
             { icon: MessageCircle, label: 'Enviar WhatsApp', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
-            { icon: ArrowRight, label: '', color: 'text-slate-600' },
+            { icon: ArrowRight, label: '', color: 'text-gray-400' },
             { icon: Clock, label: 'Aguardar 1h', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-            { icon: ArrowRight, label: '', color: 'text-slate-600' },
+            { icon: ArrowRight, label: '', color: 'text-gray-400' },
             { icon: Bell, label: 'Notificar Equipe', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
           ].map((step, i) => (
             <div key={i} className={cn(

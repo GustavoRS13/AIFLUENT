@@ -50,8 +50,8 @@ function shouldShowDateSeparator(messages: ChatMessage[], idx: number): boolean 
 
 function StatusIcon({ status }: { status?: string }) {
   if (!status) return null
-  if (status === 'sent') return <Check className="h-3 w-3 text-slate-500" />
-  if (status === 'delivered') return <CheckCheck className="h-3 w-3 text-slate-500" />
+  if (status === 'sent') return <Check className="h-3 w-3 text-gray-400" />
+  if (status === 'delivered') return <CheckCheck className="h-3 w-3 text-gray-400" />
   if (status === 'read') return <CheckCheck className="h-3 w-3 text-blue-400" />
   return null
 }
@@ -68,7 +68,7 @@ function ChatSkeleton() {
             <div
               className={cn(
                 'rounded-xl animate-pulse',
-                isRight ? 'bg-indigo-600/20' : 'bg-slate-700/30',
+                isRight ? 'bg-indigo-600/20' : 'bg-gray-100',
                 i % 2 === 0 ? 'h-10 w-48' : 'h-16 w-64'
               )}
             />
@@ -111,11 +111,11 @@ export function ChatArea({ messages, contactName, loading }: ChatAreaProps) {
     return (
       <div className="flex-1 flex items-center justify-center text-center p-6">
         <div>
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-800/50 border border-slate-700/50 text-slate-500 mx-auto mb-3">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-50 border border-gray-200 text-gray-400 mx-auto mb-3">
             <FileText className="h-6 w-6" />
           </div>
-          <p className="text-sm text-slate-400">Nenhuma mensagem com {contactName}</p>
-          <p className="text-xs text-slate-600 mt-1">Comece a conversa enviando uma mensagem</p>
+          <p className="text-sm text-gray-500">Nenhuma mensagem com {contactName}</p>
+          <p className="text-xs text-gray-400 mt-1">Comece a conversa enviando uma mensagem</p>
         </div>
       </div>
     )
@@ -138,7 +138,7 @@ export function ChatArea({ messages, contactName, loading }: ChatAreaProps) {
             {/* Date separator */}
             {shouldShowDateSeparator(messages, idx) && (
               <div className="flex items-center justify-center py-3">
-                <span className="px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/50 text-[11px] text-slate-400 font-medium">
+                <span className="px-3 py-1 rounded-full bg-gray-100 border border-gray-200 text-[11px] text-gray-500 font-medium">
                   {formatDateSeparator(msg.timestamp)}
                 </span>
               </div>
@@ -159,7 +159,7 @@ export function ChatArea({ messages, contactName, loading }: ChatAreaProps) {
                   'max-w-[75%] rounded-xl px-3 py-2 relative',
                   msg.direction === 'outbound'
                     ? 'bg-indigo-600/80 text-white rounded-br-sm'
-                    : 'bg-slate-700/70 text-slate-100 rounded-bl-sm'
+                    : 'bg-gray-100 text-gray-900 rounded-bl-sm'
                 )}
               >
                 {/* Content */}
@@ -171,8 +171,8 @@ export function ChatArea({ messages, contactName, loading }: ChatAreaProps) {
 
                 {msg.type === 'image' && (
                   <div className="space-y-1.5">
-                    <div className="w-56 h-36 rounded-lg bg-slate-600/50 flex items-center justify-center">
-                      <Image className="h-8 w-8 text-slate-400" />
+                    <div className="w-56 h-36 rounded-lg bg-gray-100 flex items-center justify-center">
+                      <Image className="h-8 w-8 text-gray-500" />
                     </div>
                     {msg.content && (
                       <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
@@ -216,7 +216,7 @@ export function ChatArea({ messages, contactName, loading }: ChatAreaProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             onClick={scrollToBottom}
-            className="absolute bottom-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-slate-800 border border-slate-700/50 text-slate-300 hover:text-slate-100 shadow-lg transition-colors"
+            className="absolute bottom-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 border border-gray-200 text-gray-700 hover:text-gray-900 shadow-lg transition-colors"
           >
             <ArrowDown className="h-4 w-4" />
           </motion.button>

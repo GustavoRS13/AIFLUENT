@@ -38,14 +38,14 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload?.length) return null
 
   return (
-    <div className="rounded-xl border border-white/10 bg-slate-900/95 backdrop-blur-xl px-4 py-3 shadow-2xl">
-      <p className="mb-2 text-xs font-medium text-slate-400">{label} 2026</p>
+    <div className="rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-2xl">
+      <p className="mb-2 text-xs font-medium text-gray-500">{label} 2026</p>
       <div className="space-y-1">
         <p className="text-sm font-semibold text-emerald-400">
           {formatCurrency(payload[0].value)}
         </p>
         {payload[1] && (
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-gray-500">
             {payload[1].value} leads
           </p>
         )}
@@ -65,15 +65,15 @@ export function RevenueChart() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3 }}
-      className="rounded-2xl border border-white/5 bg-slate-800/50 backdrop-blur-sm p-6"
+      className="rounded-2xl border border-gray-200 bg-gray-50 p-6"
     >
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-slate-100">Receita Mensal</h3>
-          <p className="mt-1 text-sm text-slate-400">Últimos 12 meses</p>
+          <h3 className="text-lg font-semibold text-gray-900">Receita Mensal</h3>
+          <p className="mt-1 text-sm text-gray-500">Últimos 12 meses</p>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-bold text-slate-100">
+          <p className="text-2xl font-bold text-gray-900">
             {formatCurrency(totalRevenue)}
           </p>
           <div className="mt-1 flex items-center justify-end gap-1 text-emerald-400">
@@ -152,7 +152,7 @@ export function RevenueChart() {
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-4 flex items-center gap-6 text-xs text-slate-500">
+      <div className="mt-4 flex items-center gap-6 text-xs text-gray-400">
         <div className="flex items-center gap-2">
           <div className="h-2 w-6 rounded-full bg-indigo-500" />
           <span>Receita (BRL)</span>

@@ -56,17 +56,17 @@ export default function DashboardPage() {
       >
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-100">
+            <h1 className="text-2xl font-bold text-gray-900">
               {getGreeting()}, Raphael
             </h1>
             <Sparkles className="h-5 w-5 text-amber-400" />
           </div>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-gray-400">
             Aqui esta o resumo da sua operacao.
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-xl border border-white/5 bg-slate-800/50 px-4 py-2 text-sm text-slate-400">
-          <CalendarDays className="h-4 w-4 text-slate-500" />
+        <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-500">
+          <CalendarDays className="h-4 w-4 text-gray-400" />
           <span className="capitalize">{getFormattedDate()}</span>
         </div>
       </motion.div>
@@ -82,8 +82,8 @@ export default function DashboardPage() {
           <Bot className="w-5 h-5 text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-white font-medium">Insight IA: 12 leads quentes precisam de contato hoje</p>
-          <p className="text-xs text-slate-400 mt-0.5">A campanha "Business English" gerou 23% mais leads esta semana. Sugestao: aumentar budget em 20%.</p>
+          <p className="text-sm text-gray-900 font-medium">Insight IA: 12 leads quentes precisam de contato hoje</p>
+          <p className="text-xs text-gray-500 mt-0.5">A campanha "Business English" gerou 23% mais leads esta semana. Sugestao: aumentar budget em 20%.</p>
         </div>
         <button className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 text-xs font-medium rounded-lg transition-colors shrink-0">
           Ver detalhes <ArrowRight className="w-3 h-3" />
@@ -110,10 +110,10 @@ export default function DashboardPage() {
           >
             <div className="flex items-center gap-2 mb-2">
               <kpi.icon className={cn('w-4 h-4', kpi.iconColor)} />
-              <span className="text-xs text-slate-400">{kpi.label}</span>
+              <span className="text-xs text-gray-500">{kpi.label}</span>
             </div>
-            <p className="text-xl font-bold text-white">{kpi.value}</p>
-            <p className="text-[10px] text-slate-500 mt-1">{kpi.subtext}</p>
+            <p className="text-xl font-bold text-gray-900">{kpi.value}</p>
+            <p className="text-[10px] text-gray-400 mt-1">{kpi.subtext}</p>
           </motion.div>
         ))}
       </div>

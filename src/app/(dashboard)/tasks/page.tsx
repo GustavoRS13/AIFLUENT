@@ -33,17 +33,17 @@ const mockTasks: Task[] = [
 ]
 
 const priorityConfig = {
-  low: { color: 'text-slate-400', bg: 'bg-slate-400/10', icon: Flag, label: 'Baixa' },
+  low: { color: 'text-gray-500', bg: 'bg-gray-100', icon: Flag, label: 'Baixa' },
   medium: { color: 'text-blue-400', bg: 'bg-blue-400/10', icon: Flag, label: 'Média' },
   high: { color: 'text-amber-400', bg: 'bg-amber-400/10', icon: AlertTriangle, label: 'Alta' },
   urgent: { color: 'text-rose-400', bg: 'bg-rose-400/10', icon: AlertTriangle, label: 'Urgente' },
 }
 
 const statusConfig = {
-  pending: { color: 'text-slate-400', icon: Circle, label: 'Pendente' },
+  pending: { color: 'text-gray-500', icon: Circle, label: 'Pendente' },
   in_progress: { color: 'text-blue-400', icon: Clock, label: 'Em Andamento' },
   completed: { color: 'text-emerald-400', icon: CheckCircle2, label: 'Concluída' },
-  cancelled: { color: 'text-slate-500', icon: Circle, label: 'Cancelada' },
+  cancelled: { color: 'text-gray-400', icon: Circle, label: 'Cancelada' },
 }
 
 export default function TasksPage() {
@@ -93,8 +93,8 @@ export default function TasksPage() {
     <div className="p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Tarefas</h1>
-          <p className="text-slate-400 mt-1">{counts.pending} pendentes · {counts.in_progress} em andamento</p>
+          <h1 className="text-3xl font-bold text-gray-900">Tarefas</h1>
+          <p className="text-gray-500 mt-1">{counts.pending} pendentes · {counts.in_progress} em andamento</p>
         </div>
         <button
           onClick={() => setShowNewTask(true)}
@@ -119,7 +119,7 @@ export default function TasksPage() {
               'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
               filter === f.key
                 ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30'
-                : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             )}
           >
             {f.label}
@@ -136,21 +136,21 @@ export default function TasksPage() {
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="flex items-center gap-3 p-4 bg-slate-800/50 backdrop-blur border border-white/5 rounded-2xl">
-              <Circle className="w-5 h-5 text-slate-500" />
+            <div className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+              <Circle className="w-5 h-5 text-gray-400" />
               <input
                 type="text"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addTask()}
                 placeholder="Título da tarefa..."
-                className="flex-1 bg-transparent text-white placeholder-slate-500 outline-none"
+                className="flex-1 bg-transparent text-gray-900 placeholder-gray-400 outline-none"
                 autoFocus
               />
               <button onClick={addTask} className="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-500 transition-colors">
                 Adicionar
               </button>
-              <button onClick={() => setShowNewTask(false)} className="px-3 py-1.5 text-slate-400 text-sm hover:text-white transition-colors">
+              <button onClick={() => setShowNewTask(false)} className="px-3 py-1.5 text-gray-500 text-sm hover:text-gray-900 transition-colors">
                 Cancelar
               </button>
             </div>
@@ -172,7 +172,7 @@ export default function TasksPage() {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ delay: i * 0.03 }}
                 className={cn(
-                  'group flex items-center gap-4 p-4 bg-slate-800/30 backdrop-blur border border-white/5 rounded-xl hover:bg-slate-800/50 hover:border-white/10 transition-all cursor-pointer',
+                  'group flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-200 transition-all cursor-pointer',
                   task.status === 'completed' && 'opacity-60'
                 )}
               >
@@ -181,7 +181,7 @@ export default function TasksPage() {
                 </button>
 
                 <div className="flex-1 min-w-0">
-                  <p className={cn('text-sm font-medium text-white truncate', task.status === 'completed' && 'line-through text-slate-500')}>
+                  <p className={cn('text-sm font-medium text-gray-900 truncate', task.status === 'completed' && 'line-through text-gray-400')}>
                     {task.title}
                   </p>
                   <div className="flex items-center gap-3 mt-1">
@@ -189,7 +189,7 @@ export default function TasksPage() {
                       <PriorityIcon className="w-3 h-3" />
                       {priorityConfig[task.priority].label}
                     </span>
-                    <span className="flex items-center gap-1 text-xs text-slate-500">
+                    <span className="flex items-center gap-1 text-xs text-gray-400">
                       <Calendar className="w-3 h-3" />
                       {new Date(task.dueDate).toLocaleDateString('pt-BR')}
                     </span>
@@ -199,14 +199,14 @@ export default function TasksPage() {
                 <div className="flex items-center gap-3 shrink-0">
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center">
-                      <span className="text-[10px] font-bold text-white">
+                      <span className="text-[10px] font-bold text-gray-900">
                         {task.assignee.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                       </span>
                     </div>
-                    <span className="text-xs text-slate-400 hidden lg:block">{task.assignee.name.split(' ')[0]}</span>
+                    <span className="text-xs text-gray-500 hidden lg:block">{task.assignee.name.split(' ')[0]}</span>
                   </div>
                   <button className="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <MoreHorizontal className="w-4 h-4 text-slate-500 hover:text-white" />
+                    <MoreHorizontal className="w-4 h-4 text-gray-400 hover:text-gray-900" />
                   </button>
                 </div>
               </motion.div>

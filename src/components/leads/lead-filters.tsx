@@ -98,11 +98,11 @@ export function LeadFilters({ open, onToggle, consultants = [] }: LeadFiltersPro
             transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
             className="overflow-hidden"
           >
-            <div className="mt-4 rounded-xl border border-slate-700/50 bg-slate-900/50 backdrop-blur-sm p-4">
+            <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
                 {/* Source */}
                 <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-wider text-slate-400">
+                  <label className="text-xs font-medium uppercase tracking-wider text-gray-500">
                     Origem
                   </label>
                   <div className="flex flex-wrap gap-1.5">
@@ -119,7 +119,7 @@ export function LeadFilters({ open, onToggle, consultants = [] }: LeadFiltersPro
                           'inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-all',
                           filters.source === opt.value
                             ? 'bg-indigo-500/20 text-indigo-300 ring-1 ring-indigo-500/40'
-                            : 'bg-slate-800/60 text-slate-400 hover:bg-slate-700/60 hover:text-slate-300'
+                            : 'bg-gray-50 text-gray-500 hover:bg-gray-200 hover:text-gray-700'
                         )}
                       >
                         {opt.icon}
@@ -131,7 +131,7 @@ export function LeadFilters({ open, onToggle, consultants = [] }: LeadFiltersPro
 
                 {/* Temperature */}
                 <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-wider text-slate-400">
+                  <label className="text-xs font-medium uppercase tracking-wider text-gray-500">
                     Temperatura
                   </label>
                   <div className="flex flex-wrap gap-1.5">
@@ -152,7 +152,7 @@ export function LeadFilters({ open, onToggle, consultants = [] }: LeadFiltersPro
                               : opt.variant === 'warm'
                                 ? 'bg-amber-500/20 text-amber-300 ring-1 ring-amber-500/40'
                                 : 'bg-rose-500/20 text-rose-300 ring-1 ring-rose-500/40'
-                            : 'bg-slate-800/60 text-slate-400 hover:bg-slate-700/60 hover:text-slate-300'
+                            : 'bg-gray-50 text-gray-500 hover:bg-gray-200 hover:text-gray-700'
                         )}
                       >
                         <Badge variant={opt.variant} size="sm" dot>
@@ -165,7 +165,7 @@ export function LeadFilters({ open, onToggle, consultants = [] }: LeadFiltersPro
 
                 {/* Status */}
                 <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-wider text-slate-400">
+                  <label className="text-xs font-medium uppercase tracking-wider text-gray-500">
                     Status
                   </label>
                   <div className="flex flex-wrap gap-1.5">
@@ -182,7 +182,7 @@ export function LeadFilters({ open, onToggle, consultants = [] }: LeadFiltersPro
                           'rounded-md px-2.5 py-1 text-xs transition-all',
                           filters.status === opt.value
                             ? 'bg-indigo-500/20 text-indigo-300 ring-1 ring-indigo-500/40'
-                            : 'bg-slate-800/60 text-slate-400 hover:bg-slate-700/60 hover:text-slate-300'
+                            : 'bg-gray-50 text-gray-500 hover:bg-gray-200 hover:text-gray-700'
                         )}
                       >
                         {opt.label}
@@ -193,7 +193,7 @@ export function LeadFilters({ open, onToggle, consultants = [] }: LeadFiltersPro
 
                 {/* Consultant */}
                 <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-wider text-slate-400">
+                  <label className="text-xs font-medium uppercase tracking-wider text-gray-500">
                     Consultor
                   </label>
                   <select
@@ -201,7 +201,7 @@ export function LeadFilters({ open, onToggle, consultants = [] }: LeadFiltersPro
                     onChange={(e) =>
                       setFilter('consultant', e.target.value || null)
                     }
-                    className="w-full rounded-lg border border-slate-700/50 bg-slate-800/50 px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   >
                     <option value="">Todos</option>
                     {consultants.map((c) => (
@@ -214,7 +214,7 @@ export function LeadFilters({ open, onToggle, consultants = [] }: LeadFiltersPro
 
                 {/* Date Range */}
                 <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-wider text-slate-400">
+                  <label className="text-xs font-medium uppercase tracking-wider text-gray-500">
                     <Calendar className="mr-1 inline h-3 w-3" />
                     Periodo
                   </label>
@@ -228,7 +228,7 @@ export function LeadFilters({ open, onToggle, consultants = [] }: LeadFiltersPro
                           from: e.target.value || null,
                         })
                       }
-                      className="w-full rounded-lg border border-slate-700/50 bg-slate-800/50 px-2 py-1.5 text-xs text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                     />
                     <input
                       type="date"
@@ -239,7 +239,7 @@ export function LeadFilters({ open, onToggle, consultants = [] }: LeadFiltersPro
                           to: e.target.value || null,
                         })
                       }
-                      className="w-full rounded-lg border border-slate-700/50 bg-slate-800/50 px-2 py-1.5 text-xs text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                     />
                   </div>
                 </div>
@@ -251,7 +251,7 @@ export function LeadFilters({ open, onToggle, consultants = [] }: LeadFiltersPro
                       variant="ghost"
                       size="sm"
                       onClick={clearFilters}
-                      className="text-slate-400 hover:text-slate-200"
+                      className="text-gray-500 hover:text-gray-800"
                     >
                       <X className="h-3.5 w-3.5" />
                       Limpar filtros

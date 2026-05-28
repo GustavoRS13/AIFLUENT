@@ -176,9 +176,9 @@ export function KanbanBoard({ onCardClick, onAddLead, onMoveLead }: KanbanBoardP
           // Custom horizontal scrollbar
           '[&::-webkit-scrollbar]:h-1.5',
           '[&::-webkit-scrollbar-track]:bg-transparent',
-          '[&::-webkit-scrollbar-thumb]:bg-slate-700/40',
+          '[&::-webkit-scrollbar-thumb]:bg-gray-100',
           '[&::-webkit-scrollbar-thumb]:rounded-full',
-          '[&::-webkit-scrollbar-thumb:hover]:bg-slate-600/50'
+          '[&::-webkit-scrollbar-thumb:hover]:bg-gray-100'
         )}
       >
         {stages.map((stage) => (

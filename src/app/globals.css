@@ -1,12 +1,8 @@
 @import "tailwindcss";
 
-/* ───────────────────────────────────────────
-   AIFLUENT Dark Theme Variables
-   ─────────────────────────────────────────── */
-
 :root {
-  --background: #020617;
-  --foreground: #e2e8f0;
+  --background: #ffffff;
+  --foreground: #0f172a;
 
   --sidebar-width: 280px;
   --sidebar-collapsed: 72px;
@@ -15,9 +11,9 @@
   --color-brand-light: #818cf8;
   --color-brand-dark: #4f46e5;
 
-  --color-surface: #0f172a;
-  --color-surface-hover: #1e293b;
-  --color-border: rgba(148, 163, 184, 0.08);
+  --color-surface: #ffffff;
+  --color-surface-hover: #f8fafc;
+  --color-border: rgba(0, 0, 0, 0.08);
   --color-border-active: rgba(99, 102, 241, 0.4);
 
   --radius-sm: 6px;
@@ -31,10 +27,6 @@
   --font-sans: var(--font-inter);
 }
 
-/* ───────────────────────────────────────────
-   Base
-   ─────────────────────────────────────────── */
-
 html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
@@ -45,14 +37,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), system-ui, sans-serif;
-  background-image:
-    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(99, 102, 241, 0.08), transparent),
-    radial-gradient(ellipse 60% 40% at 80% 50%, rgba(99, 102, 241, 0.04), transparent);
 }
-
-/* ───────────────────────────────────────────
-   Scrollbar
-   ─────────────────────────────────────────── */
 
 ::-webkit-scrollbar {
   width: 6px;
@@ -64,138 +49,84 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.15);
+  background: rgba(0, 0, 0, 0.12);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.25);
+  background: rgba(0, 0, 0, 0.2);
 }
 
-/* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(148, 163, 184, 0.15) transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
 }
 
-/* ───────────────────────────────────────────
-   Glass-morphism utilities
-   ─────────────────────────────────────────── */
-
 .glass {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .glass-sm {
-  background: rgba(15, 23, 42, 0.4);
+  background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(8px) saturate(150%);
   -webkit-backdrop-filter: blur(8px) saturate(150%);
-  border: 1px solid rgba(148, 163, 184, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .glass-card {
-  background: rgba(15, 23, 42, 0.7);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(24px) saturate(200%);
   -webkit-backdrop-filter: blur(24px) saturate(200%);
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow:
-    0 0 0 1px rgba(148, 163, 184, 0.05),
-    0 4px 24px rgba(0, 0, 0, 0.3);
+    0 0 0 1px rgba(0, 0, 0, 0.03),
+    0 4px 24px rgba(0, 0, 0, 0.08);
 }
 
-/* ───────────────────────────────────────────
-   Custom Animations
-   ─────────────────────────────────────────── */
-
 @keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
-  }
+  0%, 100% { box-shadow: 0 0 8px rgba(99, 102, 241, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
 }
 
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out forwards;
-}
-
-.animate-slide-up {
-  animation: slide-up 0.4s ease-out forwards;
-}
-
-.animate-slide-in-right {
-  animation: slide-in-right 0.3s ease-out forwards;
-}
+.animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+.animate-slide-up { animation: slide-up 0.4s ease-out forwards; }
+.animate-slide-in-right { animation: slide-in-right 0.3s ease-out forwards; }
 
 .animate-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(148, 163, 184, 0.03) 25%,
-    rgba(148, 163, 184, 0.08) 50%,
-    rgba(148, 163, 184, 0.03) 75%
-  );
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.02) 25%, rgba(0, 0, 0, 0.05) 50%, rgba(0, 0, 0, 0.02) 75%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-/* ───────────────────────────────────────────
-   Kanban Drag Styles
-   ─────────────────────────────────────────── */
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
 
 .kanban-card-dragging {
-  opacity: 0.85;
-  box-shadow:
-    0 0 0 2px rgba(99, 102, 241, 0.4),
-    0 12px 40px rgba(0, 0, 0, 0.5);
-  transform: rotate(2deg);
+  opacity: 0.9;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4), 0 12px 40px rgba(0, 0, 0, 0.15);
+  transform: rotate(1deg);
   z-index: 50;
 }
 
@@ -205,17 +136,13 @@ body {
 }
 
 .kanban-placeholder {
-  background: rgba(99, 102, 241, 0.06);
+  background: rgba(99, 102, 241, 0.04);
   border: 2px dashed rgba(99, 102, 241, 0.2);
   border-radius: var(--radius-md);
 }
 
-/* ───────────────────────────────────────────
-   Gradient Text
-   ─────────────────────────────────────────── */
-
 .gradient-text {
-  background: linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #a78bfa 100%);
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #7c3aed 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -228,26 +155,18 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-/* ───────────────────────────────────────────
-   Focus & Selection
-   ─────────────────────────────────────────── */
-
 ::selection {
-  background: rgba(99, 102, 241, 0.3);
-  color: #e2e8f0;
+  background: rgba(99, 102, 241, 0.15);
+  color: #0f172a;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: rgba(148, 163, 184, 0.4);
+  color: rgba(100, 116, 139, 0.6);
 }
 
-/* ───────────────────────────────────────────
-   Overlay backdrop
-   ─────────────────────────────────────────── */
-
 .overlay-backdrop {
-  background: rgba(2, 6, 23, 0.7);
+  background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }

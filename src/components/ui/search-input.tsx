@@ -44,15 +44,15 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
 
     return (
       <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
         <input
           ref={ref}
           type="text"
           value={value}
           onChange={handleChange}
           className={cn(
-            'flex h-10 w-full rounded-lg border border-slate-700/50 bg-slate-800/50 pl-10 pr-9 py-2 text-sm text-slate-100 placeholder:text-slate-500 transition-all duration-200',
-            'focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 focus:bg-slate-800/80 focus:backdrop-blur-sm',
+            'flex h-10 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-9 py-2 text-sm text-gray-900 placeholder:text-gray-400 transition-all duration-200',
+            'focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 focus:bg-white',
             className
           )}
           {...props}
@@ -61,7 +61,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-500 hover:text-slate-300 transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-gray-400 hover:text-gray-700 transition-colors"
             aria-label="Clear search"
           >
             <X className="h-3.5 w-3.5" />

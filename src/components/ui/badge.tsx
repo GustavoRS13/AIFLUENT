@@ -10,7 +10,7 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-slate-700/50 text-slate-300 border border-slate-600/50',
+          'bg-gray-100 text-gray-700 border border-gray-300',
         primary:
           'bg-indigo-500/15 text-indigo-400 border border-indigo-500/25',
         secondary:
@@ -66,7 +66,7 @@ const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
               variant === 'cold' && 'bg-blue-400',
               variant === 'warm' && 'bg-amber-400',
               variant === 'hot' && 'bg-rose-400',
-              (!variant || variant === 'default' || variant === 'secondary') && 'bg-slate-400'
+              (!variant || variant === 'default' || variant === 'secondary') && 'bg-gray-400'
             )}
           />
         )}

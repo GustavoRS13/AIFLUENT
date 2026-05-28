@@ -35,7 +35,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
       onClick={() => onChange(!checked)}
       className={cn(
         'relative w-11 h-6 rounded-full transition-colors',
-        checked ? 'bg-indigo-600' : 'bg-slate-700'
+        checked ? 'bg-indigo-600' : 'bg-gray-200'
       )}
     >
       <motion.div
@@ -96,8 +96,8 @@ export default function SettingsPage() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white">Configurações</h1>
-          <p className="text-slate-400 mt-1">Gerencie sua conta e preferências</p>
+          <h1 className="text-3xl font-bold text-gray-900">Configurações</h1>
+          <p className="text-gray-500 mt-1">Gerencie sua conta e preferências</p>
         </div>
         <button
           onClick={handleSave}
@@ -123,7 +123,7 @@ export default function SettingsPage() {
                 'w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-colors text-left',
                 activeSection === section.id
                   ? 'bg-indigo-600/10 text-indigo-400 border border-indigo-500/20'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
               )}
             >
               <section.icon className="w-4 h-4" />
@@ -135,24 +135,24 @@ export default function SettingsPage() {
         <div className="flex-1 max-w-2xl">
           {activeSection === 'geral' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-              <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6 space-y-6">
-                <h3 className="text-lg font-semibold text-white">Informações da Plataforma</h3>
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900">Informações da Plataforma</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm text-slate-400 mb-2">Nome da Plataforma</label>
-                    <input defaultValue="AIFLUENT" className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-colors" />
+                    <label className="block text-sm text-gray-500 mb-2">Nome da Plataforma</label>
+                    <input defaultValue="AIFLUENT" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors" />
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-400 mb-2">Idioma</label>
-                    <select defaultValue="pt-BR" className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-colors">
+                    <label className="block text-sm text-gray-500 mb-2">Idioma</label>
+                    <select defaultValue="pt-BR" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors">
                       <option value="pt-BR">Português (Brasil)</option>
                       <option value="en">English</option>
                       <option value="es">Español</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-400 mb-2">Fuso Horário</label>
-                    <select defaultValue="America/Sao_Paulo" className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-colors">
+                    <label className="block text-sm text-gray-500 mb-2">Fuso Horário</label>
+                    <select defaultValue="America/Sao_Paulo" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors">
                       <option value="America/Sao_Paulo">São Paulo (GMT-3)</option>
                       <option value="America/New_York">New York (GMT-5)</option>
                     </select>
@@ -164,18 +164,18 @@ export default function SettingsPage() {
 
           {activeSection === 'notificacoes' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-              <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6 space-y-6">
-                <h3 className="text-lg font-semibold text-white">Preferências de Notificação</h3>
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900">Preferências de Notificação</h3>
                 {[
                   { key: 'email' as const, label: 'Notificações por Email', desc: 'Receba atualizações importantes por email' },
                   { key: 'push' as const, label: 'Notificações Push', desc: 'Alertas em tempo real no navegador' },
                   { key: 'whatsapp' as const, label: 'Notificações WhatsApp', desc: 'Receba alertas via WhatsApp' },
                   { key: 'sound' as const, label: 'Som de Notificação', desc: 'Reproduzir som ao receber notificações' },
                 ].map((item) => (
-                  <div key={item.key} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
+                  <div key={item.key} className="flex items-center justify-between py-3 border-b border-gray-200 last:border-0">
                     <div>
-                      <p className="text-sm font-medium text-white">{item.label}</p>
-                      <p className="text-xs text-slate-500">{item.desc}</p>
+                      <p className="text-sm font-medium text-gray-900">{item.label}</p>
+                      <p className="text-xs text-gray-400">{item.desc}</p>
                     </div>
                     <Toggle
                       checked={notifications[item.key]}
@@ -189,19 +189,19 @@ export default function SettingsPage() {
 
           {activeSection === 'integracoes' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-              <h3 className="text-lg font-semibold text-white">Integrações Disponíveis</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Integrações Disponíveis</h3>
               {integrations.map((integration) => (
                 <div
                   key={integration.id}
-                  className="flex items-center justify-between p-5 bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl hover:bg-slate-800/50 transition-colors"
+                  className="flex items-center justify-between p-5 bg-white border border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-slate-700/50 flex items-center justify-center text-2xl">
+                    <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-2xl">
                       {integration.icon}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-white">{integration.name}</p>
-                      <p className="text-xs text-slate-500">{integration.desc}</p>
+                      <p className="text-sm font-medium text-gray-900">{integration.name}</p>
+                      <p className="text-xs text-gray-400">{integration.desc}</p>
                     </div>
                   </div>
                   <button
@@ -221,26 +221,26 @@ export default function SettingsPage() {
 
           {activeSection === 'api' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-              <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6 space-y-4">
-                <h3 className="text-lg font-semibold text-white">Chaves de API</h3>
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900">Chaves de API</h3>
                 <div>
-                  <label className="block text-sm text-slate-400 mb-2">API Key</label>
+                  <label className="block text-sm text-gray-500 mb-2">API Key</label>
                   <div className="flex gap-2">
                     <input
                       readOnly
                       value="aif_sk_••••••••••••••••••••••••"
-                      className="flex-1 px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-slate-500 font-mono text-sm"
+                      className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-400 font-mono text-sm"
                     />
-                    <button className="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded-xl transition-colors">
+                    <button className="px-4 py-2.5 bg-gray-200 hover:bg-gray-200 text-gray-900 text-sm rounded-xl transition-colors">
                       Copiar
                     </button>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-400 mb-2">Webhook URL</label>
+                  <label className="block text-sm text-gray-500 mb-2">Webhook URL</label>
                   <input
                     placeholder="https://seu-servidor.com/webhook"
-                    className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors"
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -249,41 +249,41 @@ export default function SettingsPage() {
 
           {activeSection === 'empresa' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-              <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6 space-y-6">
-                <h3 className="text-lg font-semibold text-white">Dados da Empresa</h3>
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900">Dados da Empresa</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm text-slate-400 mb-2">Logo da Empresa</label>
+                    <label className="block text-sm text-gray-500 mb-2">Logo da Empresa</label>
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
-                        <span className="text-xl font-bold text-white">AI</span>
+                        <span className="text-xl font-bold text-gray-900">AI</span>
                       </div>
-                      <button className="flex items-center gap-2 px-4 py-2.5 bg-slate-700/50 hover:bg-slate-700 text-slate-300 text-sm rounded-xl border border-white/5 transition-colors">
+                      <button className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-xl border border-gray-200 transition-colors">
                         <Upload className="w-4 h-4" />
                         Alterar Logo
                       </button>
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-400 mb-2">Nome da Empresa</label>
-                    <input defaultValue="AIFLUENT Educação Ltda" className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-colors" />
+                    <label className="block text-sm text-gray-500 mb-2">Nome da Empresa</label>
+                    <input defaultValue="AIFLUENT Educação Ltda" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors" />
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-400 mb-2">CNPJ</label>
-                    <input defaultValue="12.345.678/0001-90" className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-colors" />
+                    <label className="block text-sm text-gray-500 mb-2">CNPJ</label>
+                    <input defaultValue="12.345.678/0001-90" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors" />
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-400 mb-2">Endereço</label>
-                    <input defaultValue="Rua da Inovação, 1000 - São Paulo, SP" className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-colors" />
+                    <label className="block text-sm text-gray-500 mb-2">Endereço</label>
+                    <input defaultValue="Rua da Inovação, 1000 - São Paulo, SP" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm text-slate-400 mb-2">Telefone</label>
-                      <input defaultValue="(11) 3456-7890" className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-colors" />
+                      <label className="block text-sm text-gray-500 mb-2">Telefone</label>
+                      <input defaultValue="(11) 3456-7890" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors" />
                     </div>
                     <div>
-                      <label className="block text-sm text-slate-400 mb-2">Email</label>
-                      <input defaultValue="contato@aifluent.com" className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-colors" />
+                      <label className="block text-sm text-gray-500 mb-2">Email</label>
+                      <input defaultValue="contato@aifluent.com" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors" />
                     </div>
                   </div>
                 </div>
@@ -294,7 +294,7 @@ export default function SettingsPage() {
           {activeSection === 'equipe' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">Membros da Equipe</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Membros da Equipe</h3>
                 <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm rounded-xl font-medium transition-colors">
                   <Plus className="w-4 h-4" />
                   Convidar Membro
@@ -304,17 +304,17 @@ export default function SettingsPage() {
                 {mockTeamMembers.map((member) => (
                   <div
                     key={member.id}
-                    className="flex items-center justify-between p-4 bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl hover:bg-slate-800/50 transition-colors"
+                    className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center">
-                        <span className="text-xs font-bold text-white">
+                        <span className="text-xs font-bold text-gray-900">
                           {member.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                         </span>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-white">{member.name}</p>
-                        <p className="text-xs text-slate-500">{member.email}</p>
+                        <p className="text-sm font-medium text-gray-900">{member.name}</p>
+                        <p className="text-xs text-gray-400">{member.email}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -327,18 +327,18 @@ export default function SettingsPage() {
                       </span>
                       <select
                         defaultValue={member.role}
-                        className="px-3 py-1.5 bg-slate-900/50 border border-white/10 rounded-lg text-sm text-white focus:border-indigo-500 focus:outline-none transition-colors"
+                        className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors"
                       >
                         <option value="admin">Administrador</option>
                         <option value="manager">Gerente</option>
                         <option value="member">Membro</option>
                       </select>
                       {member.status === 'inactive' && (
-                        <span className="px-2 py-0.5 bg-slate-700/50 text-slate-500 text-[10px] font-medium rounded-full">
+                        <span className="px-2 py-0.5 bg-gray-100 text-gray-400 text-[10px] font-medium rounded-full">
                           Inativo
                         </span>
                       )}
-                      <button className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors">
+                      <button className="p-1.5 text-gray-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -350,20 +350,20 @@ export default function SettingsPage() {
 
           {activeSection === 'seguranca' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-              <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6 space-y-6">
-                <h3 className="text-lg font-semibold text-white">Alterar Senha</h3>
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900">Alterar Senha</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm text-slate-400 mb-2">Senha Atual</label>
-                    <input type="password" placeholder="••••••••" className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors" />
+                    <label className="block text-sm text-gray-500 mb-2">Senha Atual</label>
+                    <input type="password" placeholder="••••••••" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors" />
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-400 mb-2">Nova Senha</label>
-                    <input type="password" placeholder="••••••••" className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors" />
+                    <label className="block text-sm text-gray-500 mb-2">Nova Senha</label>
+                    <input type="password" placeholder="••••••••" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors" />
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-400 mb-2">Confirmar Nova Senha</label>
-                    <input type="password" placeholder="••••••••" className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors" />
+                    <label className="block text-sm text-gray-500 mb-2">Confirmar Nova Senha</label>
+                    <input type="password" placeholder="••••••••" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors" />
                   </div>
                   <button className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-xl transition-colors">
                     Atualizar Senha
@@ -371,12 +371,12 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6 space-y-6">
-                <h3 className="text-lg font-semibold text-white">Autenticação de Dois Fatores</h3>
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900">Autenticação de Dois Fatores</h3>
                 <div className="flex items-center justify-between py-3">
                   <div>
-                    <p className="text-sm font-medium text-white">Ativar 2FA</p>
-                    <p className="text-xs text-slate-500">Adicione uma camada extra de segurança com autenticação por aplicativo</p>
+                    <p className="text-sm font-medium text-gray-900">Ativar 2FA</p>
+                    <p className="text-xs text-gray-400">Adicione uma camada extra de segurança com autenticação por aplicativo</p>
                   </div>
                   <Toggle checked={twoFactor} onChange={setTwoFactor} />
                 </div>
@@ -389,15 +389,15 @@ export default function SettingsPage() {
                 )}
               </div>
 
-              <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6 space-y-6">
-                <h3 className="text-lg font-semibold text-white">Sessão e Acesso</h3>
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900">Sessão e Acesso</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm text-slate-400 mb-2">Timeout de Sessão (minutos)</label>
+                    <label className="block text-sm text-gray-500 mb-2">Timeout de Sessão (minutos)</label>
                     <select
                       value={sessionTimeout}
                       onChange={(e) => setSessionTimeout(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-colors"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors"
                     >
                       <option value="15">15 minutos</option>
                       <option value="30">30 minutos</option>
@@ -407,14 +407,14 @@ export default function SettingsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-400 mb-2">Whitelist de IP (um por linha)</label>
+                    <label className="block text-sm text-gray-500 mb-2">Whitelist de IP (um por linha)</label>
                     <textarea
                       rows={3}
                       defaultValue=""
                       placeholder="192.168.1.0/24&#10;10.0.0.1"
-                      className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors resize-none font-mono text-sm"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors resize-none font-mono text-sm"
                     />
-                    <p className="text-xs text-slate-500 mt-1">Deixe vazio para permitir acesso de qualquer IP</p>
+                    <p className="text-xs text-gray-400 mt-1">Deixe vazio para permitir acesso de qualquer IP</p>
                   </div>
                 </div>
               </div>
@@ -423,8 +423,8 @@ export default function SettingsPage() {
 
           {activeSection === 'aparencia' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-              <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6 space-y-6">
-                <h3 className="text-lg font-semibold text-white">Tema</h3>
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900">Tema</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     onClick={() => setTheme('dark')}
@@ -432,11 +432,11 @@ export default function SettingsPage() {
                       'flex flex-col items-center gap-3 p-4 rounded-xl border transition-all',
                       theme === 'dark'
                         ? 'border-indigo-500/50 bg-indigo-500/10'
-                        : 'border-white/5 bg-slate-900/50 hover:border-white/10'
+                        : 'border-gray-200 bg-gray-50 hover:border-gray-200'
                     )}
                   >
-                    <Moon className="w-8 h-8 text-slate-300" />
-                    <span className="text-sm font-medium text-white">Escuro</span>
+                    <Moon className="w-8 h-8 text-gray-700" />
+                    <span className="text-sm font-medium text-gray-900">Escuro</span>
                   </button>
                   <button
                     onClick={() => setTheme('light')}
@@ -444,17 +444,17 @@ export default function SettingsPage() {
                       'flex flex-col items-center gap-3 p-4 rounded-xl border transition-all',
                       theme === 'light'
                         ? 'border-indigo-500/50 bg-indigo-500/10'
-                        : 'border-white/5 bg-slate-900/50 hover:border-white/10'
+                        : 'border-gray-200 bg-gray-50 hover:border-gray-200'
                     )}
                   >
                     <Sun className="w-8 h-8 text-amber-400" />
-                    <span className="text-sm font-medium text-white">Claro</span>
+                    <span className="text-sm font-medium text-gray-900">Claro</span>
                   </button>
                 </div>
               </div>
 
-              <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6 space-y-6">
-                <h3 className="text-lg font-semibold text-white">Cor de Destaque</h3>
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900">Cor de Destaque</h3>
                 <div className="flex flex-wrap gap-3">
                   {accentColors.map((color) => (
                     <button
@@ -463,29 +463,29 @@ export default function SettingsPage() {
                       className={cn(
                         'flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all',
                         accentColor === color.value
-                          ? 'border-white/30 bg-white/5'
-                          : 'border-transparent hover:border-white/10'
+                          ? 'border-gray-300 bg-gray-50'
+                          : 'border-transparent hover:border-gray-200'
                       )}
                     >
                       <div
                         className="w-8 h-8 rounded-full"
                         style={{ backgroundColor: color.value }}
                       />
-                      <span className="text-[10px] text-slate-400">{color.name}</span>
+                      <span className="text-[10px] text-gray-500">{color.name}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6 space-y-6">
-                <h3 className="text-lg font-semibold text-white">Layout e Tipografia</h3>
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900">Layout e Tipografia</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm text-slate-400 mb-2">Tamanho da Fonte</label>
+                    <label className="block text-sm text-gray-500 mb-2">Tamanho da Fonte</label>
                     <select
                       value={fontSize}
                       onChange={(e) => setFontSize(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-colors"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors"
                     >
                       <option value="small">Pequeno</option>
                       <option value="medium">Médio</option>
@@ -493,20 +493,20 @@ export default function SettingsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-400 mb-2">Posição da Sidebar</label>
+                    <label className="block text-sm text-gray-500 mb-2">Posição da Sidebar</label>
                     <select
                       value={sidebarPosition}
                       onChange={(e) => setSidebarPosition(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-colors"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors"
                     >
                       <option value="left">Esquerda</option>
                       <option value="right">Direita</option>
                     </select>
                   </div>
-                  <div className="flex items-center justify-between py-3 border-b border-white/5">
+                  <div className="flex items-center justify-between py-3 border-b border-gray-200">
                     <div>
-                      <p className="text-sm font-medium text-white">Modo Compacto</p>
-                      <p className="text-xs text-slate-500">Reduz espaçamento para mostrar mais conteúdo</p>
+                      <p className="text-sm font-medium text-gray-900">Modo Compacto</p>
+                      <p className="text-xs text-gray-400">Reduz espaçamento para mostrar mais conteúdo</p>
                     </div>
                     <Toggle checked={compactMode} onChange={setCompactMode} />
                   </div>

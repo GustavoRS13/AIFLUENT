@@ -28,7 +28,7 @@ const sourceOptions: { value: LeadSource; label: string; icon: React.ElementType
   { value: 'referral', label: 'Indicacao', icon: Users, color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
   { value: 'event', label: 'Evento', icon: Calendar, color: 'text-violet-400 bg-violet-500/10 border-violet-500/20' },
   { value: 'meta_ads', label: 'Meta Ads', icon: Target, color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
-  { value: 'manual', label: 'Manual', icon: UserPlus, color: 'text-slate-400 bg-slate-500/10 border-slate-500/20' },
+  { value: 'manual', label: 'Manual', icon: UserPlus, color: 'text-gray-500 bg-gray-100 border-gray-300' },
 ]
 
 const temperatureConfig = {
@@ -184,12 +184,12 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => handleOpenChange(false)} />
+      <div className="absolute inset-0 bg-black/30" onClick={() => handleOpenChange(false)} />
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl shadow-2xl shadow-black/50"
+        className="relative w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl shadow-black/50"
       >
         {/* Success overlay */}
         <AnimatePresence>
@@ -197,7 +197,7 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/98"
+              className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white"
             >
               <motion.div
                 initial={{ scale: 0 }}
@@ -207,38 +207,38 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
               >
                 <CheckCircle2 className="w-10 h-10 text-emerald-400" />
               </motion.div>
-              <p className="text-xl font-bold text-white">Lead Criado!</p>
-              <p className="text-sm text-slate-400 mt-1">{form.firstName} foi adicionado com sucesso</p>
+              <p className="text-xl font-bold text-gray-900">Lead Criado!</p>
+              <p className="text-sm text-gray-500 mt-1">{form.firstName} foi adicionado com sucesso</p>
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-              <UserPlus className="w-5 h-5 text-white" />
+              <UserPlus className="w-5 h-5 text-gray-900" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">Novo Lead</h2>
-              <p className="text-xs text-slate-500">Preencha os dados para cadastrar</p>
+              <h2 className="text-lg font-bold text-gray-900">Novo Lead</h2>
+              <p className="text-xs text-gray-400">Preencha os dados para cadastrar</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             {/* AI Score */}
             <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-lg">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span className="text-xs font-bold text-white">{aiScore}</span>
-              <span className="text-[10px] text-slate-400">Score IA</span>
+              <span className="text-xs font-bold text-gray-900">{aiScore}</span>
+              <span className="text-[10px] text-gray-500">Score IA</span>
             </div>
-            <button onClick={() => handleOpenChange(false)} className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 transition-colors">
+            <button onClick={() => handleOpenChange(false)} className="p-2 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
         {/* Step Indicator */}
-        <div className="flex items-center gap-1 px-6 py-3 border-b border-white/5 bg-slate-800/30">
+        <div className="flex items-center gap-1 px-6 py-3 border-b border-gray-200 bg-white">
           {steps.map((s, i) => (
             <React.Fragment key={s.id}>
               <button
@@ -249,13 +249,13 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
                     ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30'
                     : step > i
                       ? 'text-emerald-400 bg-emerald-500/10'
-                      : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
+                      : 'text-gray-400 hover:text-gray-700 hover:bg-gray-50'
                 )}
               >
                 <s.icon className="w-3.5 h-3.5" />
                 {s.label}
               </button>
-              {i < steps.length - 1 && <ChevronRight className="w-3 h-3 text-slate-700" />}
+              {i < steps.length - 1 && <ChevronRight className="w-3 h-3 text-gray-600" />}
             </React.Fragment>
           ))}
         </div>
@@ -268,43 +268,43 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
               <motion.div key="personal" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm text-slate-400 mb-1.5">Nome *</label>
+                    <label className="block text-sm text-gray-500 mb-1.5">Nome *</label>
                     <input
                       value={form.firstName} onChange={(e) => update('firstName', e.target.value)}
                       placeholder="Nome do lead"
-                      className={cn('w-full px-4 py-2.5 bg-slate-800/50 border rounded-xl text-sm text-white placeholder-slate-600 focus:border-indigo-500/50 focus:outline-none transition-colors', errors.firstName ? 'border-rose-500/50' : 'border-white/5')}
+                      className={cn('w-full px-4 py-2.5 bg-gray-50 border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500/50 focus:outline-none transition-colors', errors.firstName ? 'border-rose-500/50' : 'border-gray-200')}
                     />
                     {errors.firstName && <p className="text-[10px] text-rose-400 mt-1">{errors.firstName}</p>}
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-400 mb-1.5">Sobrenome</label>
+                    <label className="block text-sm text-gray-500 mb-1.5">Sobrenome</label>
                     <input
                       value={form.lastName} onChange={(e) => update('lastName', e.target.value)}
                       placeholder="Sobrenome"
-                      className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/5 rounded-xl text-sm text-white placeholder-slate-600 focus:border-indigo-500/50 focus:outline-none transition-colors"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500/50 focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm text-slate-400 mb-1.5">Empresa</label>
+                    <label className="block text-sm text-gray-500 mb-1.5">Empresa</label>
                     <div className="relative">
-                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
-                      <input value={form.company} onChange={(e) => update('company', e.target.value)} placeholder="Nome da empresa" className="w-full pl-10 pr-4 py-2.5 bg-slate-800/50 border border-white/5 rounded-xl text-sm text-white placeholder-slate-600 focus:border-indigo-500/50 focus:outline-none transition-colors" />
+                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input value={form.company} onChange={(e) => update('company', e.target.value)} placeholder="Nome da empresa" className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500/50 focus:outline-none transition-colors" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-400 mb-1.5">Cargo</label>
+                    <label className="block text-sm text-gray-500 mb-1.5">Cargo</label>
                     <div className="relative">
-                      <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
-                      <input value={form.jobTitle} onChange={(e) => update('jobTitle', e.target.value)} placeholder="Cargo / Funcao" className="w-full pl-10 pr-4 py-2.5 bg-slate-800/50 border border-white/5 rounded-xl text-sm text-white placeholder-slate-600 focus:border-indigo-500/50 focus:outline-none transition-colors" />
+                      <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input value={form.jobTitle} onChange={(e) => update('jobTitle', e.target.value)} placeholder="Cargo / Funcao" className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500/50 focus:outline-none transition-colors" />
                     </div>
                   </div>
                 </div>
 
                 {/* Source Selector */}
                 <div>
-                  <label className="block text-sm text-slate-400 mb-2">Origem do Lead</label>
+                  <label className="block text-sm text-gray-500 mb-2">Origem do Lead</label>
                   <div className="grid grid-cols-3 gap-2">
                     {sourceOptions.map((opt) => (
                       <button
@@ -313,7 +313,7 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
                         onClick={() => update('source', opt.value)}
                         className={cn(
                           'flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-medium transition-all',
-                          form.source === opt.value ? opt.color : 'text-slate-500 bg-slate-800/30 border-white/5 hover:bg-slate-800/50'
+                          form.source === opt.value ? opt.color : 'text-gray-400 bg-white border-gray-200 hover:bg-gray-50'
                         )}
                       >
                         <opt.icon className="w-3.5 h-3.5" />
@@ -329,40 +329,40 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
             {step === 1 && (
               <motion.div key="contact" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
                 <div>
-                  <label className="block text-sm text-slate-400 mb-1.5">Email</label>
+                  <label className="block text-sm text-gray-500 mb-1.5">Email</label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
-                    <input value={form.email} onChange={(e) => update('email', e.target.value)} type="email" placeholder="email@exemplo.com" className={cn('w-full pl-10 pr-4 py-2.5 bg-slate-800/50 border rounded-xl text-sm text-white placeholder-slate-600 focus:border-indigo-500/50 focus:outline-none transition-colors', errors.email ? 'border-rose-500/50' : 'border-white/5')} />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input value={form.email} onChange={(e) => update('email', e.target.value)} type="email" placeholder="email@exemplo.com" className={cn('w-full pl-10 pr-4 py-2.5 bg-gray-50 border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500/50 focus:outline-none transition-colors', errors.email ? 'border-rose-500/50' : 'border-gray-200')} />
                   </div>
                   {errors.email && <p className="text-[10px] text-rose-400 mt-1">{errors.email}</p>}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm text-slate-400 mb-1.5">Telefone</label>
+                    <label className="block text-sm text-gray-500 mb-1.5">Telefone</label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
-                      <input value={form.phone} onChange={(e) => update('phone', e.target.value)} placeholder="(11) 99999-9999" className="w-full pl-10 pr-4 py-2.5 bg-slate-800/50 border border-white/5 rounded-xl text-sm text-white placeholder-slate-600 focus:border-indigo-500/50 focus:outline-none transition-colors" />
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input value={form.phone} onChange={(e) => update('phone', e.target.value)} placeholder="(11) 99999-9999" className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500/50 focus:outline-none transition-colors" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-400 mb-1.5">WhatsApp</label>
+                    <label className="block text-sm text-gray-500 mb-1.5">WhatsApp</label>
                     <div className="relative">
-                      <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
-                      <input value={form.whatsapp} onChange={(e) => update('whatsapp', e.target.value)} placeholder="(11) 99999-9999" className="w-full pl-10 pr-4 py-2.5 bg-slate-800/50 border border-white/5 rounded-xl text-sm text-white placeholder-slate-600 focus:border-indigo-500/50 focus:outline-none transition-colors" />
+                      <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input value={form.whatsapp} onChange={(e) => update('whatsapp', e.target.value)} placeholder="(11) 99999-9999" className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500/50 focus:outline-none transition-colors" />
                     </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm text-slate-400 mb-1.5">Cidade</label>
+                    <label className="block text-sm text-gray-500 mb-1.5">Cidade</label>
                     <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
-                      <input value={form.city} onChange={(e) => update('city', e.target.value)} placeholder="Sao Paulo" className="w-full pl-10 pr-4 py-2.5 bg-slate-800/50 border border-white/5 rounded-xl text-sm text-white placeholder-slate-600 focus:border-indigo-500/50 focus:outline-none transition-colors" />
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input value={form.city} onChange={(e) => update('city', e.target.value)} placeholder="Sao Paulo" className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500/50 focus:outline-none transition-colors" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-400 mb-1.5">Estado</label>
-                    <input value={form.state} onChange={(e) => update('state', e.target.value)} placeholder="SP" className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/5 rounded-xl text-sm text-white placeholder-slate-600 focus:border-indigo-500/50 focus:outline-none transition-colors" />
+                    <label className="block text-sm text-gray-500 mb-1.5">Estado</label>
+                    <input value={form.state} onChange={(e) => update('state', e.target.value)} placeholder="SP" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500/50 focus:outline-none transition-colors" />
                   </div>
                 </div>
               </motion.div>
@@ -373,7 +373,7 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
               <motion.div key="qualification" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
                 {/* Temperature */}
                 <div>
-                  <label className="block text-sm text-slate-400 mb-2">Temperatura do Lead</label>
+                  <label className="block text-sm text-gray-500 mb-2">Temperatura do Lead</label>
                   <div className="grid grid-cols-3 gap-3">
                     {(Object.entries(temperatureConfig) as [LeadTemperature, typeof temperatureConfig.cold][]).map(([key, cfg]) => (
                       <button
@@ -382,7 +382,7 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
                         onClick={() => update('temperature', key)}
                         className={cn(
                           'flex flex-col items-center gap-2 p-4 rounded-xl border transition-all',
-                          form.temperature === key ? cfg.color : 'text-slate-500 bg-slate-800/30 border-white/5 hover:bg-slate-800/50'
+                          form.temperature === key ? cfg.color : 'text-gray-400 bg-white border-gray-200 hover:bg-gray-50'
                         )}
                       >
                         <cfg.icon className="w-6 h-6" />
@@ -395,7 +395,7 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
 
                 {/* Course */}
                 <div>
-                  <label className="block text-sm text-slate-400 mb-2">Curso de Interesse</label>
+                  <label className="block text-sm text-gray-500 mb-2">Curso de Interesse</label>
                   <div className="flex flex-wrap gap-2">
                     {courseOptions.map((course) => (
                       <button
@@ -406,7 +406,7 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
                           'px-3 py-1.5 rounded-lg text-xs font-medium border transition-all',
                           form.courseInterest === course
                             ? 'bg-indigo-600/20 text-indigo-400 border-indigo-500/30'
-                            : 'text-slate-400 bg-slate-800/30 border-white/5 hover:bg-slate-800/50'
+                            : 'text-gray-500 bg-white border-gray-200 hover:bg-gray-50'
                         )}
                       >
                         {course}
@@ -417,7 +417,7 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
 
                 {/* Language Level */}
                 <div>
-                  <label className="block text-sm text-slate-400 mb-2">Nivel do Idioma</label>
+                  <label className="block text-sm text-gray-500 mb-2">Nivel do Idioma</label>
                   <div className="flex gap-2">
                     {levelOptions.map((level) => (
                       <button
@@ -428,7 +428,7 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
                           'flex-1 py-2 rounded-xl text-xs font-medium border transition-all text-center',
                           form.languageLevel === level
                             ? 'bg-purple-600/20 text-purple-400 border-purple-500/30'
-                            : 'text-slate-500 bg-slate-800/30 border-white/5 hover:bg-slate-800/50'
+                            : 'text-gray-400 bg-white border-gray-200 hover:bg-gray-50'
                         )}
                       >
                         {level}
@@ -441,19 +441,19 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
                 <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-xl p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Sparkles className="w-4 h-4 text-amber-400" />
-                    <span className="text-sm font-semibold text-white">Previsao IA</span>
+                    <span className="text-sm font-semibold text-gray-900">Previsao IA</span>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="flex-1">
-                      <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                        <motion.div animate={{ width: `${aiScore}%` }} className={cn('h-full rounded-full', aiScore >= 70 ? 'bg-emerald-500' : aiScore >= 40 ? 'bg-amber-500' : 'bg-slate-500')} />
+                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <motion.div animate={{ width: `${aiScore}%` }} className={cn('h-full rounded-full', aiScore >= 70 ? 'bg-emerald-500' : aiScore >= 40 ? 'bg-amber-500' : 'bg-gray-400')} />
                       </div>
                     </div>
-                    <span className={cn('text-sm font-bold', aiScore >= 70 ? 'text-emerald-400' : aiScore >= 40 ? 'text-amber-400' : 'text-slate-400')}>
+                    <span className={cn('text-sm font-bold', aiScore >= 70 ? 'text-emerald-400' : aiScore >= 40 ? 'text-amber-400' : 'text-gray-500')}>
                       {aiScore}%
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-400 mt-1">
+                  <p className="text-[10px] text-gray-500 mt-1">
                     {aiScore >= 70 ? 'Alta probabilidade de conversao' : aiScore >= 40 ? 'Probabilidade moderada - investir em follow-up' : 'Preencha mais dados para melhorar a previsao'}
                   </p>
                 </div>
@@ -465,12 +465,12 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
               <motion.div key="tags" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
                 {/* Tags */}
                 <div>
-                  <label className="block text-sm text-slate-400 mb-2">Tags</label>
+                  <label className="block text-sm text-gray-500 mb-2">Tags</label>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {form.tags.map((tag) => (
                       <span key={tag} className="flex items-center gap-1 px-2.5 py-1 bg-indigo-500/20 text-indigo-400 text-xs font-medium rounded-lg border border-indigo-500/30">
                         {tag}
-                        <button onClick={() => removeTag(tag)} className="hover:text-white transition-colors"><X className="w-3 h-3" /></button>
+                        <button onClick={() => removeTag(tag)} className="hover:text-gray-900 transition-colors"><X className="w-3 h-3" /></button>
                       </span>
                     ))}
                   </div>
@@ -480,21 +480,21 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
                       onChange={(e) => setTagInput(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag(tagInput) } }}
                       placeholder="Digite uma tag e pressione Enter"
-                      className="flex-1 px-4 py-2 bg-slate-800/50 border border-white/5 rounded-xl text-sm text-white placeholder-slate-600 focus:border-indigo-500/50 focus:outline-none transition-colors"
+                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500/50 focus:outline-none transition-colors"
                     />
                     <button onClick={() => addTag(tagInput)} className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm transition-colors">
                       <Plus className="w-4 h-4" />
                     </button>
                   </div>
                   <div>
-                    <p className="text-[10px] text-slate-600 mb-2">Sugestoes:</p>
+                    <p className="text-[10px] text-gray-400 mb-2">Sugestoes:</p>
                     <div className="flex flex-wrap gap-1.5">
                       {suggestedTags.filter((t) => !form.tags.includes(t)).map((tag) => (
                         <button
                           key={tag}
                           type="button"
                           onClick={() => addTag(tag)}
-                          className="px-2 py-1 text-[10px] text-slate-500 bg-slate-800/30 border border-white/5 rounded-lg hover:bg-slate-800/50 hover:text-slate-300 transition-colors"
+                          className="px-2 py-1 text-[10px] text-gray-400 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors"
                         >
                           + {tag}
                         </button>
@@ -505,19 +505,19 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
 
                 {/* Notes */}
                 <div>
-                  <label className="block text-sm text-slate-400 mb-1.5">Notas</label>
+                  <label className="block text-sm text-gray-500 mb-1.5">Notas</label>
                   <textarea
                     value={form.notes}
                     onChange={(e) => update('notes', e.target.value)}
                     placeholder="Observacoes, contexto, informacoes relevantes..."
                     rows={4}
-                    className="w-full px-4 py-2.5 bg-slate-800/50 border border-white/5 rounded-xl text-sm text-white placeholder-slate-600 focus:border-indigo-500/50 focus:outline-none resize-none transition-colors"
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500/50 focus:outline-none resize-none transition-colors"
                   />
                 </div>
 
                 {/* Summary */}
-                <div className="bg-slate-800/30 border border-white/5 rounded-xl p-4 space-y-2">
-                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Resumo</h4>
+                <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Resumo</h4>
                   <div className="grid grid-cols-2 gap-2">
                     {[
                       { label: 'Nome', value: `${form.firstName} ${form.lastName}`.trim() || '-' },
@@ -530,8 +530,8 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
                       { label: 'Score IA', value: `${aiScore}%` },
                     ].map((item) => (
                       <div key={item.label} className="flex justify-between">
-                        <span className="text-[10px] text-slate-500">{item.label}</span>
-                        <span className="text-[10px] text-slate-300 font-medium text-right truncate ml-2">{item.value}</span>
+                        <span className="text-[10px] text-gray-400">{item.label}</span>
+                        <span className="text-[10px] text-gray-700 font-medium text-right truncate ml-2">{item.value}</span>
                       </div>
                     ))}
                   </div>
@@ -550,15 +550,15 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-white/5 bg-slate-800/20">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
           <div className="flex items-center gap-1">
             {steps.map((_, i) => (
-              <div key={i} className={cn('h-1.5 rounded-full transition-all', step === i ? 'w-6 bg-indigo-500' : step > i ? 'w-3 bg-emerald-500' : 'w-3 bg-slate-700')} />
+              <div key={i} className={cn('h-1.5 rounded-full transition-all', step === i ? 'w-6 bg-indigo-500' : step > i ? 'w-3 bg-emerald-500' : 'w-3 bg-gray-200')} />
             ))}
           </div>
           <div className="flex items-center gap-2">
             {step > 0 && (
-              <button onClick={() => setStep(step - 1)} className="flex items-center gap-1.5 px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors">
+              <button onClick={() => setStep(step - 1)} className="flex items-center gap-1.5 px-4 py-2 text-sm text-gray-500 hover:text-gray-900 transition-colors">
                 <ChevronLeft className="w-4 h-4" /> Voltar
               </button>
             )}

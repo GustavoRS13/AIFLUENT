@@ -77,7 +77,7 @@ const mockGoals: Goal[] = [
 ]
 
 const rankIcons = [Crown, Medal, Award]
-const rankColors = ['text-amber-400', 'text-slate-300', 'text-amber-600']
+const rankColors = ['text-amber-400', 'text-gray-700', 'text-amber-600']
 
 export default function ProductivityPage() {
   const [tab, setTab] = useState<TabType>('ranking')
@@ -87,8 +87,8 @@ export default function ProductivityPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Produtividade</h1>
-          <p className="text-slate-400 mt-1">Ranking, metas, conquistas e gamificacao</p>
+          <h1 className="text-3xl font-bold text-gray-900">Produtividade</h1>
+          <p className="text-gray-500 mt-1">Ranking, metas, conquistas e gamificacao</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-xl">
@@ -107,18 +107,18 @@ export default function ProductivityPage() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <span className="text-lg font-extrabold text-white">12</span>
+              <span className="text-lg font-extrabold text-gray-900">12</span>
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">Level 12 - Expert</p>
-              <p className="text-xs text-slate-400">850 XP para o proximo nivel</p>
+              <p className="text-sm font-semibold text-gray-900">Level 12 - Expert</p>
+              <p className="text-xs text-gray-500">850 XP para o proximo nivel</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-sm text-slate-300">4.850 / 5.700 XP</p>
+            <p className="text-sm text-gray-700">4.850 / 5.700 XP</p>
           </div>
         </div>
-        <div className="h-3 bg-slate-800/50 rounded-full overflow-hidden">
+        <div className="h-3 bg-gray-50 rounded-full overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: '85%' }}
@@ -143,7 +143,7 @@ export default function ProductivityPage() {
               'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors',
               tab === t.key
                 ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30'
-                : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             )}
           >
             <t.icon className="w-4 h-4" />
@@ -168,7 +168,7 @@ export default function ProductivityPage() {
                   'flex items-center gap-4 p-4 rounded-2xl border transition-colors',
                   i === 0
                     ? 'bg-gradient-to-r from-amber-500/10 to-yellow-500/5 border-amber-500/20'
-                    : 'bg-slate-800/30 border-white/5 hover:bg-slate-800/50'
+                    : 'bg-white border-gray-200 hover:bg-gray-50'
                 )}
               >
                 {/* Rank */}
@@ -176,13 +176,13 @@ export default function ProductivityPage() {
                   {RankIcon ? (
                     <RankIcon className={cn('w-6 h-6 mx-auto', rankColors[i])} />
                   ) : (
-                    <span className="text-lg font-bold text-slate-500">#{member.rank}</span>
+                    <span className="text-lg font-bold text-gray-400">#{member.rank}</span>
                   )}
                 </div>
 
                 {/* Avatar */}
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shrink-0">
-                  <span className="text-xs font-bold text-white">
+                  <span className="text-xs font-bold text-gray-900">
                     {member.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                   </span>
                 </div>
@@ -190,29 +190,29 @@ export default function ProductivityPage() {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-white">{member.name}</p>
-                    <span className="text-[10px] text-slate-500 bg-slate-800/50 px-2 py-0.5 rounded">Lvl {member.level}</span>
+                    <p className="text-sm font-semibold text-gray-900">{member.name}</p>
+                    <span className="text-[10px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded">Lvl {member.level}</span>
                   </div>
-                  <p className="text-xs text-slate-500">{member.role}</p>
+                  <p className="text-xs text-gray-400">{member.role}</p>
                 </div>
 
                 {/* Stats */}
                 <div className="flex items-center gap-6 shrink-0">
                   <div className="text-center">
                     <p className="text-sm font-bold text-emerald-400">{member.leadsConverted}</p>
-                    <p className="text-[10px] text-slate-500">Conversoes</p>
+                    <p className="text-[10px] text-gray-400">Conversoes</p>
                   </div>
                   <div className="text-center">
                     <p className="text-sm font-bold text-indigo-400">R${(member.revenue / 1000).toFixed(1)}K</p>
-                    <p className="text-[10px] text-slate-500">Receita</p>
+                    <p className="text-[10px] text-gray-400">Receita</p>
                   </div>
                   <div className="text-center">
                     <p className="text-sm font-bold text-amber-400">{member.tasksCompleted}</p>
-                    <p className="text-[10px] text-slate-500">Tarefas</p>
+                    <p className="text-[10px] text-gray-400">Tarefas</p>
                   </div>
                   <div className="text-center">
                     <p className="text-sm font-bold text-cyan-400">{member.avgResponseTime}m</p>
-                    <p className="text-[10px] text-slate-500">Resp.</p>
+                    <p className="text-[10px] text-gray-400">Resp.</p>
                   </div>
                   <div className="flex items-center gap-1">
                     <Flame className="w-4 h-4 text-orange-400" />
@@ -224,7 +224,7 @@ export default function ProductivityPage() {
                 <div className="w-8 text-center shrink-0">
                   {member.change > 0 && <ArrowUpRight className="w-4 h-4 text-emerald-400 mx-auto" />}
                   {member.change < 0 && <ArrowUpRight className="w-4 h-4 text-rose-400 mx-auto rotate-90" />}
-                  {member.change === 0 && <span className="text-xs text-slate-600">-</span>}
+                  {member.change === 0 && <span className="text-xs text-gray-400">-</span>}
                 </div>
               </motion.div>
             )
@@ -246,26 +246,26 @@ export default function ProductivityPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-5 space-y-4"
+                className="bg-white border border-gray-200 rounded-2xl p-5 space-y-4"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <goal.icon className={cn('w-5 h-5', goal.color)} />
-                    <h3 className="text-sm font-semibold text-white">{goal.label}</h3>
+                    <h3 className="text-sm font-semibold text-gray-900">{goal.label}</h3>
                   </div>
-                  <span className="text-xs text-slate-500">{goal.period}</span>
+                  <span className="text-xs text-gray-400">{goal.period}</span>
                 </div>
 
                 <div>
                   <div className="flex items-end justify-between mb-2">
-                    <p className="text-2xl font-bold text-white">
+                    <p className="text-2xl font-bold text-gray-900">
                       {goal.type === 'revenue' ? `R$${(goal.current / 1000).toFixed(1)}K` : goal.current}
                     </p>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-gray-400">
                       / {goal.type === 'revenue' ? `R$${(goal.target / 1000).toFixed(0)}K` : `${goal.target} ${goal.unit}`}
                     </p>
                   </div>
-                  <div className="h-2.5 bg-slate-800/50 rounded-full overflow-hidden">
+                  <div className="h-2.5 bg-gray-50 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${pct}%` }}
@@ -276,7 +276,7 @@ export default function ProductivityPage() {
                       )}
                     />
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">{Math.round(pct)}% concluido</p>
+                  <p className="text-xs text-gray-400 mt-1">{Math.round(pct)}% concluido</p>
                 </div>
               </motion.div>
             )
@@ -297,27 +297,27 @@ export default function ProductivityPage() {
                 'relative overflow-hidden rounded-2xl p-5 border transition-colors',
                 achievement.unlocked
                   ? 'bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border-indigo-500/20'
-                  : 'bg-slate-800/30 border-white/5 opacity-70'
+                  : 'bg-white border-gray-200 opacity-70'
               )}
             >
               <div className="flex items-start gap-3">
                 <div className="text-3xl">{achievement.icon}</div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-white">{achievement.name}</h3>
+                    <h3 className="text-sm font-semibold text-gray-900">{achievement.name}</h3>
                     {achievement.unlocked && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
                   </div>
-                  <p className="text-xs text-slate-400 mt-0.5">{achievement.description}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{achievement.description}</p>
                   <div className="flex items-center gap-2 mt-2">
                     <span className="text-[10px] text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded font-medium">
                       +{achievement.xpReward} XP
                     </span>
                     {!achievement.unlocked && (
-                      <span className="text-[10px] text-slate-500">{achievement.progress}%</span>
+                      <span className="text-[10px] text-gray-400">{achievement.progress}%</span>
                     )}
                   </div>
                   {!achievement.unlocked && (
-                    <div className="h-1.5 bg-slate-700/50 rounded-full overflow-hidden mt-2">
+                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mt-2">
                       <div
                         className="h-full bg-indigo-500/50 rounded-full"
                         style={{ width: `${achievement.progress}%` }}
@@ -335,10 +335,10 @@ export default function ProductivityPage() {
       {tab === 'gamification' && (
         <div className="grid grid-cols-3 gap-6">
           {/* Daily Challenges */}
-          <div className="col-span-2 bg-slate-800/30 backdrop-blur border border-white/5 rounded-2xl p-6 space-y-4">
+          <div className="col-span-2 bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
             <div className="flex items-center gap-2">
               <Zap className="w-5 h-5 text-amber-400" />
-              <h3 className="text-lg font-semibold text-white">Desafios Diarios</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Desafios Diarios</h3>
             </div>
             {[
               { title: 'Responder 10 leads em menos de 5 min', reward: 50, progress: 7, target: 10, icon: '⚡' },
@@ -347,18 +347,18 @@ export default function ProductivityPage() {
               { title: 'Enviar 1 campanha', reward: 40, progress: 0, target: 1, icon: '📢' },
               { title: 'Fazer 5 ligacoes', reward: 35, progress: 2, target: 5, icon: '📞' },
             ].map((challenge, i) => (
-              <div key={i} className="flex items-center gap-4 p-3 rounded-xl bg-slate-800/20">
+              <div key={i} className="flex items-center gap-4 p-3 rounded-xl bg-gray-50">
                 <span className="text-xl">{challenge.icon}</span>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-white">{challenge.title}</p>
+                  <p className="text-sm font-medium text-gray-900">{challenge.title}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <div className="flex-1 h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
+                    <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-indigo-500 rounded-full transition-all"
                         style={{ width: `${(challenge.progress / challenge.target) * 100}%` }}
                       />
                     </div>
-                    <span className="text-[10px] text-slate-400">{challenge.progress}/{challenge.target}</span>
+                    <span className="text-[10px] text-gray-500">{challenge.progress}/{challenge.target}</span>
                   </div>
                 </div>
                 <span className="text-xs text-amber-400 font-bold">+{challenge.reward} XP</span>
@@ -371,7 +371,7 @@ export default function ProductivityPage() {
             <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl p-5 space-y-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-amber-400" />
-                <h3 className="text-sm font-semibold text-white">Resumo Semanal</h3>
+                <h3 className="text-sm font-semibold text-gray-900">Resumo Semanal</h3>
               </div>
               {[
                 { label: 'XP Ganho', value: '+1.250' },
@@ -381,18 +381,18 @@ export default function ProductivityPage() {
                 { label: 'Desafios', value: '18/25' },
               ].map((item) => (
                 <div key={item.label} className="flex justify-between items-center">
-                  <span className="text-xs text-slate-400">{item.label}</span>
-                  <span className="text-xs font-bold text-white">{item.value}</span>
+                  <span className="text-xs text-gray-500">{item.label}</span>
+                  <span className="text-xs font-bold text-gray-900">{item.value}</span>
                 </div>
               ))}
             </div>
 
-            <div className="bg-slate-800/30 border border-white/5 rounded-2xl p-5 space-y-3">
-              <h3 className="text-sm font-semibold text-white">Proxima Recompensa</h3>
+            <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-3">
+              <h3 className="text-sm font-semibold text-gray-900">Proxima Recompensa</h3>
               <div className="text-center py-3">
                 <div className="text-4xl mb-2">🏆</div>
-                <p className="text-sm font-semibold text-white">Top Closer</p>
-                <p className="text-xs text-slate-400 mt-1">Converta 50 leads</p>
+                <p className="text-sm font-semibold text-gray-900">Top Closer</p>
+                <p className="text-xs text-gray-500 mt-1">Converta 50 leads</p>
                 <p className="text-xs text-indigo-400 mt-2">68% concluido</p>
               </div>
             </div>
