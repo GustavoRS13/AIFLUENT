@@ -91,6 +91,12 @@ export interface KanbanCard {
   courseInterest: string | null
   status: LeadStatus
   entryDate: string
+  dealValue?: number
+  lastMessage?: string
+  lastMessageAt?: string
+  messageCount?: number
+  totalMessages?: number
+  daysSinceEntry?: string
 }
 
 // ── Campaign Metrics ────────────────────────────────────────────────────────
