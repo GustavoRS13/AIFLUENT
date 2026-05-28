@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useState, useCallback, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   GitBranch, Search, SlidersHorizontal, RefreshCw, Loader2, Plus,
-  ChevronLeft, MoreHorizontal, Download, Upload,
+  ChevronDown, MoreHorizontal, Download, Upload, X, Check, Calendar,
+  Tag, User, Activity, Columns3,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { usePipelineStore, type PipelineStage } from '@/stores/pipeline-store'
@@ -103,6 +104,20 @@ export default function PipelinePage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedOrigin, setSelectedOrigin] = useState(0)
+  const [openFilter, setOpenFilter] = useState<string | null>(null)
+  const [filterDate, setFilterDate] = useState<string>('')
+  const [filterTag, setFilterTag] = useState<string>('')
+  const [filterOwner, setFilterOwner] = useState<string>('')
+  const [filterStatus, setFilterStatus] = useState<string>('')
+  const filterRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) setOpenFilter(null)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const fetchPipeline = useCallback(async () => {
     setLoading(true)
@@ -143,13 +158,21 @@ export default function PipelinePage() {
     try { await fetch('/api/pipeline', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ leadId, stageId, newOrder }) }) } catch {}
   }, [])
 
-  const filteredStages = searchQuery.trim()
-    ? stages.map((stage) => ({ ...stage, leads: stage.leads.filter((lead) => lead.name.toLowerCase().includes(searchQuery.toLowerCase()) || lead.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()))) }))
-    : stages
+  const filteredStages = stages.map((stage) => ({
+    ...stage,
+    leads: stage.leads.filter((lead) => {
+      if (searchQuery.trim() && !lead.name.toLowerCase().includes(searchQuery.toLowerCase()) && !lead.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()))) return false
+      if (filterTag && !lead.tags.includes(filterTag)) return false
+      if (filterOwner && lead.consultant !== filterOwner) return false
+      if (filterStatus && lead.status !== filterStatus) return false
+      return true
+    }),
+  }))
 
   const origins = computeOrigins(stages)
-  const totalLeads = stages.reduce((s, st) => s + st.leads.length, 0)
-  const totalValue = stages.flatMap((s) => s.leads).reduce((s, l) => s + (l.dealValue || 0), 0)
+  const totalLeads = filteredStages.reduce((s, st) => s + st.leads.length, 0)
+  const totalValue = filteredStages.flatMap((s) => s.leads).reduce((s, l) => s + (l.dealValue || 0), 0)
+  const activeFilters = [filterDate, filterTag, filterOwner, filterStatus].filter(Boolean).length
 
   return (
     <div className="flex h-[calc(100dvh-4rem)] -m-6">
@@ -196,19 +219,97 @@ export default function PipelinePage() {
           </div>
 
           {/* Filters bar */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 flex-wrap" ref={filterRef}>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar..." className="pl-9 pr-4 py-2 w-64 border border-gray-200 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 bg-gray-50"
+                placeholder="Buscar..." className="pl-9 pr-4 py-2 w-56 border border-gray-200 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 bg-gray-50"
               />
             </div>
-            {['Data', 'Campos', 'Tags', 'Dono do negocio', 'Status', 'Mais filtros'].map((f) => (
-              <button key={f} className="flex items-center gap-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                {f} <ChevronLeft className="w-3 h-3 rotate-[270deg]" />
+
+            {/* Data filter */}
+            <div className="relative">
+              <button onClick={() => setOpenFilter(openFilter === 'data' ? null : 'data')} className={cn('flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors', filterDate ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'text-gray-600 border-gray-200 hover:bg-gray-50')}>
+                <Calendar className="w-3.5 h-3.5" /> Data {filterDate && <span className="text-xs bg-indigo-100 text-indigo-600 px-1.5 rounded-full">1</span>} <ChevronDown className="w-3 h-3" />
               </button>
-            ))}
+              <AnimatePresence>
+                {openFilter === 'data' && (
+                  <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }} className="absolute top-full left-0 mt-1 w-52 bg-white border border-gray-200 rounded-xl shadow-lg p-3 z-50 space-y-1">
+                    {['Hoje', 'Ultimos 7 dias', 'Ultimos 30 dias', 'Este mes', 'Mes passado'].map((d) => (
+                      <button key={d} onClick={() => { setFilterDate(filterDate === d ? '' : d); setOpenFilter(null) }} className={cn('w-full text-left px-3 py-1.5 rounded-lg text-sm transition-colors flex items-center justify-between', filterDate === d ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50')}>
+                        {d} {filterDate === d && <Check className="w-3.5 h-3.5 text-indigo-600" />}
+                      </button>
+                    ))}
+                    {filterDate && <button onClick={() => { setFilterDate(''); setOpenFilter(null) }} className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-rose-500 hover:bg-rose-50 mt-1">Limpar filtro</button>}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Tags filter */}
+            <div className="relative">
+              <button onClick={() => setOpenFilter(openFilter === 'tags' ? null : 'tags')} className={cn('flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors', filterTag ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'text-gray-600 border-gray-200 hover:bg-gray-50')}>
+                <Tag className="w-3.5 h-3.5" /> Tags {filterTag && <span className="text-xs bg-indigo-100 text-indigo-600 px-1.5 rounded-full">1</span>} <ChevronDown className="w-3 h-3" />
+              </button>
+              <AnimatePresence>
+                {openFilter === 'tags' && (
+                  <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }} className="absolute top-full left-0 mt-1 w-56 bg-white border border-gray-200 rounded-xl shadow-lg p-3 z-50 space-y-1 max-h-64 overflow-y-auto">
+                    {['Botao whatsapp site', 'Home_NEW', 'RMKT 1 MES', 'LP - Ingles MSI', 'ex_alunos_MSI_300_50%', 'ex_alunos_MSI_50%off', 'Black_MSI_EX', 'MSI', 'RENOVACAO MSI', 'ultima semana cliente'].map((t) => (
+                      <button key={t} onClick={() => { setFilterTag(filterTag === t ? '' : t); setOpenFilter(null) }} className={cn('w-full text-left px-3 py-1.5 rounded-lg text-sm transition-colors flex items-center justify-between', filterTag === t ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50')}>
+                        <span className="truncate">{t}</span> {filterTag === t && <Check className="w-3.5 h-3.5 text-indigo-600 shrink-0" />}
+                      </button>
+                    ))}
+                    {filterTag && <button onClick={() => { setFilterTag(''); setOpenFilter(null) }} className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-rose-500 hover:bg-rose-50 mt-1">Limpar filtro</button>}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Dono do negocio filter */}
+            <div className="relative">
+              <button onClick={() => setOpenFilter(openFilter === 'owner' ? null : 'owner')} className={cn('flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors', filterOwner ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'text-gray-600 border-gray-200 hover:bg-gray-50')}>
+                <User className="w-3.5 h-3.5" /> Dono {filterOwner && <span className="text-xs bg-indigo-100 text-indigo-600 px-1.5 rounded-full">1</span>} <ChevronDown className="w-3 h-3" />
+              </button>
+              <AnimatePresence>
+                {openFilter === 'owner' && (
+                  <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }} className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg p-3 z-50 space-y-1">
+                    {['Gustavo', 'Ana', 'Carlos', 'Pedro', 'Maria'].map((o) => (
+                      <button key={o} onClick={() => { setFilterOwner(filterOwner === o ? '' : o); setOpenFilter(null) }} className={cn('w-full text-left px-3 py-1.5 rounded-lg text-sm transition-colors flex items-center justify-between', filterOwner === o ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50')}>
+                        {o} {filterOwner === o && <Check className="w-3.5 h-3.5 text-indigo-600" />}
+                      </button>
+                    ))}
+                    {filterOwner && <button onClick={() => { setFilterOwner(''); setOpenFilter(null) }} className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-rose-500 hover:bg-rose-50 mt-1">Limpar filtro</button>}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Status filter */}
+            <div className="relative">
+              <button onClick={() => setOpenFilter(openFilter === 'status' ? null : 'status')} className={cn('flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors', filterStatus ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'text-gray-600 border-gray-200 hover:bg-gray-50')}>
+                <Activity className="w-3.5 h-3.5" /> Status {filterStatus && <span className="text-xs bg-indigo-100 text-indigo-600 px-1.5 rounded-full">1</span>} <ChevronDown className="w-3 h-3" />
+              </button>
+              <AnimatePresence>
+                {openFilter === 'status' && (
+                  <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }} className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg p-3 z-50 space-y-1">
+                    {[{ v: 'new', l: 'Novo' }, { v: 'contacted', l: 'Contatado' }, { v: 'qualified', l: 'Qualificado' }, { v: 'negotiating', l: 'Negociando' }, { v: 'converted', l: 'Convertido' }, { v: 'lost', l: 'Perdido' }].map((s) => (
+                      <button key={s.v} onClick={() => { setFilterStatus(filterStatus === s.v ? '' : s.v); setOpenFilter(null) }} className={cn('w-full text-left px-3 py-1.5 rounded-lg text-sm transition-colors flex items-center justify-between', filterStatus === s.v ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50')}>
+                        {s.l} {filterStatus === s.v && <Check className="w-3.5 h-3.5 text-indigo-600" />}
+                      </button>
+                    ))}
+                    {filterStatus && <button onClick={() => { setFilterStatus(''); setOpenFilter(null) }} className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-rose-500 hover:bg-rose-50 mt-1">Limpar filtro</button>}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Active filters indicator */}
+            {(filterDate || filterTag || filterOwner || filterStatus) && (
+              <button onClick={() => { setFilterDate(''); setFilterTag(''); setFilterOwner(''); setFilterStatus('') }} className="flex items-center gap-1 px-2 py-1 text-xs text-rose-500 hover:bg-rose-50 rounded-lg transition-colors">
+                <X className="w-3 h-3" /> Limpar tudo
+              </button>
+            )}
           </div>
 
           {/* Summary */}
