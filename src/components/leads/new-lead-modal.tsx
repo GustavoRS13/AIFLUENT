@@ -86,6 +86,7 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
   const [success, setSuccess] = React.useState(false)
   const [tagInput, setTagInput] = React.useState('')
   const [errors, setErrors] = React.useState<Record<string, string>>({})
+  const [apiError, setApiError] = React.useState('')
 
   const resetForm = () => {
     setForm({ ...defaultForm })
@@ -94,6 +95,7 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
     setSuccess(false)
     setTagInput('')
     setErrors({})
+    setApiError('')
   }
 
   const handleOpenChange = (v: boolean) => {
@@ -126,34 +128,39 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
   const handleSubmit = async () => {
     if (!validate()) return
     setLoading(true)
+    setApiError('')
+    const payload = {
+      firstName: form.firstName.trim(),
+      lastName: form.lastName.trim(),
+      email: form.email.trim() || undefined,
+      phone: form.phone.replace(/\D/g, '') || undefined,
+      whatsapp: form.whatsapp.replace(/\D/g, '') || undefined,
+      company: form.company.trim() || undefined,
+      jobTitle: form.jobTitle.trim() || undefined,
+      source: form.source,
+      temperature: form.temperature,
+      courseInterest: form.courseInterest || undefined,
+      languageLevel: form.languageLevel || undefined,
+      city: form.city.trim() || undefined,
+      state: form.state.trim() || undefined,
+      notes: form.notes.trim() || undefined,
+      tags: form.tags,
+    }
     try {
       const res = await fetch('/api/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName: form.firstName.trim(),
-          lastName: form.lastName.trim(),
-          email: form.email.trim() || undefined,
-          phone: form.phone.replace(/\D/g, '') || undefined,
-          whatsapp: form.whatsapp.replace(/\D/g, '') || undefined,
-          company: form.company.trim() || undefined,
-          jobTitle: form.jobTitle.trim() || undefined,
-          source: form.source,
-          temperature: form.temperature,
-          courseInterest: form.courseInterest || undefined,
-          languageLevel: form.languageLevel || undefined,
-          city: form.city.trim() || undefined,
-          state: form.state.trim() || undefined,
-          notes: form.notes.trim() || undefined,
-          tags: form.tags,
-        }),
+        body: JSON.stringify(payload),
       })
       if (res.ok) {
         setSuccess(true)
         setTimeout(() => { onCreated?.(); handleOpenChange(false) }, 1200)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setApiError(data.error || `Erro ${res.status}: falha ao criar lead`)
       }
-    } catch {
-      // ignore
+    } catch (err) {
+      setApiError('Erro de conexao. Verifique sua rede.')
     } finally {
       setLoading(false)
     }
@@ -533,6 +540,14 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
             )}
           </AnimatePresence>
         </div>
+
+        {/* Error Message */}
+        {apiError && (
+          <div className="mx-6 mb-2 px-4 py-2.5 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-2">
+            <X className="w-4 h-4 text-rose-400 shrink-0" />
+            <p className="text-xs text-rose-400">{apiError}</p>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-white/5 bg-slate-800/20">
