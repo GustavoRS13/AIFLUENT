@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   Users,
@@ -25,6 +26,7 @@ interface StatCardProps {
   index: number
   iconColor: string
   iconBg: string
+  href?: string
 }
 
 function useCountUp(end: number, duration: number = 1200) {
@@ -53,7 +55,8 @@ function useCountUp(end: number, duration: number = 1200) {
   return count
 }
 
-function StatCard({ icon: Icon, title, value, change, index, iconColor, iconBg }: StatCardProps) {
+function StatCard({ icon: Icon, title, value, change, index, iconColor, iconBg, href }: StatCardProps) {
+  const router = useRouter()
   // Parse the numeric part for count-up
   const numericMatch = value.match(/[\d.,]+/)
   const numericValue = numericMatch ? parseFloat(numericMatch[0].replace(/\./g, '').replace(',', '.')) : 0
@@ -80,7 +83,11 @@ function StatCard({ icon: Icon, title, value, change, index, iconColor, iconBg }
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all duration-300 hover:border-gray-200 hover:bg-gray-100"
+      onClick={() => href && router.push(href)}
+      className={cn(
+        "group relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all duration-300 hover:border-gray-200 hover:bg-gray-100",
+        href && "cursor-pointer"
+      )}
     >
       {/* Subtle gradient overlay on hover */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
@@ -138,6 +145,7 @@ const statConfig = [
     iconBg: 'bg-indigo-500/10',
     format: (v: number) => v.toLocaleString('pt-BR'),
     change: 12.5,
+    href: '/leads',
   },
   {
     key: 'newLeadsToday' as const,
@@ -147,6 +155,7 @@ const statConfig = [
     iconBg: 'bg-emerald-500/10',
     format: (v: number) => v.toLocaleString('pt-BR'),
     change: 8.2,
+    href: '/leads',
   },
   {
     key: 'conversionRate' as const,
@@ -156,6 +165,7 @@ const statConfig = [
     iconBg: 'bg-violet-500/10',
     format: (v: number) => `${v}%`,
     change: 3.1,
+    href: '/reports',
   },
   {
     key: 'activeDeals' as const,
@@ -165,6 +175,7 @@ const statConfig = [
     iconBg: 'bg-amber-500/10',
     format: (v: number) => v.toLocaleString('pt-BR'),
     change: 5.7,
+    href: '/deals',
   },
   {
     key: 'totalRevenue' as const,
@@ -175,6 +186,7 @@ const statConfig = [
     format: (v: number) =>
       `R$ ${v.toLocaleString('pt-BR')}`,
     change: 18.3,
+    href: '/reports',
   },
   {
     key: 'campaignsSent' as const,
@@ -184,6 +196,7 @@ const statConfig = [
     iconBg: 'bg-blue-500/10',
     format: (v: number) => v.toLocaleString('pt-BR'),
     change: -2.4,
+    href: '/campaigns',
   },
   {
     key: 'responseRate' as const,
@@ -193,6 +206,7 @@ const statConfig = [
     iconBg: 'bg-cyan-500/10',
     format: (v: number) => `${v}%`,
     change: 6.8,
+    href: '/campaigns',
   },
   {
     key: 'avgResponseTime' as const,
@@ -202,6 +216,7 @@ const statConfig = [
     iconBg: 'bg-orange-500/10',
     format: (v: number) => `${v}min`,
     change: -15.2,
+    href: '/reports',
   },
 ]
 
@@ -218,6 +233,7 @@ export function StatsGrid({ stats }: StatsGridProps) {
           index={index}
           iconColor={config.iconColor}
           iconBg={config.iconBg}
+          href={config.href}
         />
       ))}
     </div>

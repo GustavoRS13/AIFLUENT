@@ -11,6 +11,7 @@ import {
   CalendarDays,
   ExternalLink,
 } from 'lucide-react'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { formatDate } from '@/lib/utils'
@@ -107,9 +108,9 @@ export function RecentLeads() {
           <h3 className="text-lg font-semibold text-gray-900">Leads Recentes</h3>
           <p className="mt-1 text-sm text-gray-500">Últimos 10 leads capturados</p>
         </div>
-        <button className="rounded-lg border border-gray-200 bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900">
+        <Link href="/leads" className="rounded-lg border border-gray-200 bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200 hover:text-gray-900">
           Ver todos
-        </button>
+        </Link>
       </div>
 
       <div className="overflow-x-auto">

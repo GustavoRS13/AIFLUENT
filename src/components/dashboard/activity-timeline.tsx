@@ -12,6 +12,7 @@ import {
   Star,
   FileText,
 } from 'lucide-react'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { getInitials } from '@/lib/utils'
 
@@ -191,9 +192,9 @@ export function ActivityTimeline() {
           <h3 className="text-lg font-semibold text-gray-900">Atividades Recentes</h3>
           <p className="mt-1 text-sm text-gray-500">Timeline de ações da equipe</p>
         </div>
-        <button className="rounded-lg border border-gray-200 bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900">
+        <Link href="/tasks" className="rounded-lg border border-gray-200 bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200 hover:text-gray-900">
           Ver todas
-        </button>
+        </Link>
       </div>
 
       <div className="relative space-y-0">

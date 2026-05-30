@@ -74,29 +74,38 @@ const mockDeals: Deal[] = [
 // ── Component ───────────────────────────────────────────────────────────────
 
 export default function DealsPage() {
+  const [deals, setDeals] = useState<Deal[]>(mockDeals)
   const [viewMode, setViewMode] = useState<'table' | 'pipeline'>('table')
   const [stageFilter, setStageFilter] = useState<'all' | 'open' | 'ganho' | 'perdido'>('all')
   const [showNewDeal, setShowNewDeal] = useState(false)
+  const [successMsg, setSuccessMsg] = useState(false)
 
   const filtered = useMemo(() => {
-    if (stageFilter === 'all') return mockDeals
-    if (stageFilter === 'open') return mockDeals.filter((d) => d.stage !== 'ganho' && d.stage !== 'perdido')
-    return mockDeals.filter((d) => d.stage === stageFilter)
-  }, [stageFilter])
+    if (stageFilter === 'all') return deals
+    if (stageFilter === 'open') return deals.filter((d) => d.stage !== 'ganho' && d.stage !== 'perdido')
+    return deals.filter((d) => d.stage === stageFilter)
+  }, [stageFilter, deals])
 
   const stats = useMemo(() => {
-    const openDeals = mockDeals.filter((d) => d.stage !== 'ganho' && d.stage !== 'perdido')
-    const wonDeals = mockDeals.filter((d) => d.stage === 'ganho')
+    const openDeals = deals.filter((d) => d.stage !== 'ganho' && d.stage !== 'perdido')
+    const wonDeals = deals.filter((d) => d.stage === 'ganho')
     const totalValue = openDeals.reduce((s, d) => s + d.value, 0)
     const avgSize = openDeals.length > 0 ? totalValue / openDeals.length : 0
-    const winRate = mockDeals.length > 0 ? (wonDeals.length / mockDeals.length) * 100 : 0
+    const winRate = deals.length > 0 ? (wonDeals.length / deals.length) * 100 : 0
     return {
       totalDeals: openDeals.length,
       totalValue,
       avgSize,
       winRate,
     }
-  }, [])
+  }, [deals])
+
+  const handleCreateDeal = (newDeal: Deal) => {
+    setDeals((prev) => [newDeal, ...prev])
+    setShowNewDeal(false)
+    setSuccessMsg(true)
+    setTimeout(() => setSuccessMsg(false), 3000)
+  }
 
   return (
     <div className="space-y-6">
@@ -222,9 +231,24 @@ export default function DealsPage() {
         )}
       </AnimatePresence>
 
+      {/* Success Toast */}
+      <AnimatePresence>
+        {successMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3 shadow-lg"
+          >
+            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-sm font-medium text-emerald-700">Negocio criado com sucesso!</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* New Deal Modal */}
       <AnimatePresence>
-        {showNewDeal && <NewDealModal onClose={() => setShowNewDeal(false)} />}
+        {showNewDeal && <NewDealModal onClose={() => setShowNewDeal(false)} onSave={handleCreateDeal} />}
       </AnimatePresence>
     </div>
   )
@@ -435,7 +459,40 @@ function DealsPipeline({ deals }: { deals: Deal[] }) {
 
 // ── New Deal Modal ──────────────────────────────────────────────────────────
 
-function NewDealModal({ onClose }: { onClose: () => void }) {
+function NewDealModal({ onClose, onSave }: { onClose: () => void; onSave: (deal: Deal) => void }) {
+  const [form, setForm] = useState({
+    title: '',
+    value: '',
+    company: '',
+    leadName: '',
+    stage: 'prospeccao' as DealStage,
+    probability: '50',
+    expectedClose: '',
+  })
+
+  const handleChange = (field: string, val: string) => {
+    setForm((prev) => ({ ...prev, [field]: val }))
+  }
+
+  const handleSubmit = () => {
+    if (!form.title.trim()) return
+    const deal: Deal = {
+      id: `d-${Date.now()}`,
+      title: form.title,
+      value: parseFloat(form.value) || 0,
+      company: form.company || 'Sem empresa',
+      leadName: form.leadName || 'Sem contato',
+      stage: form.stage,
+      probability: parseInt(form.probability) || 50,
+      expectedClose: form.expectedClose || new Date().toISOString().slice(0, 10),
+      assignedTo: 'Raphael Ruiz',
+      createdAt: new Date().toISOString().slice(0, 10),
+    }
+    onSave(deal)
+  }
+
+  const inputClass = "w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors"
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -451,7 +508,7 @@ function NewDealModal({ onClose }: { onClose: () => void }) {
         className="w-full max-w-lg bg-white border border-gray-200 rounded-2xl shadow-2xl"
       >
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Novo Negócio</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Novo Negocio</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-900 transition-colors">
             <X className="w-5 h-5" />
           </button>
@@ -459,10 +516,12 @@ function NewDealModal({ onClose }: { onClose: () => void }) {
 
         <div className="p-6 space-y-4">
           <div>
-            <label className="block text-sm text-gray-500 mb-2">Título do Negócio</label>
+            <label className="block text-sm text-gray-500 mb-2">Titulo do Negocio *</label>
             <input
+              value={form.title}
+              onChange={(e) => handleChange('title', e.target.value)}
               placeholder="Ex: MBA Executivo - Empresa X"
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors"
+              className={inputClass}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -470,47 +529,63 @@ function NewDealModal({ onClose }: { onClose: () => void }) {
               <label className="block text-sm text-gray-500 mb-2">Valor (R$)</label>
               <input
                 type="number"
+                value={form.value}
+                onChange={(e) => handleChange('value', e.target.value)}
                 placeholder="0,00"
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors"
+                className={inputClass}
               />
             </div>
             <div>
               <label className="block text-sm text-gray-500 mb-2">Probabilidade (%)</label>
               <input
                 type="number"
+                value={form.probability}
+                onChange={(e) => handleChange('probability', e.target.value)}
                 placeholder="50"
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors"
+                min={0}
+                max={100}
+                className={inputClass}
               />
             </div>
           </div>
           <div>
             <label className="block text-sm text-gray-500 mb-2">Empresa</label>
             <input
+              value={form.company}
+              onChange={(e) => handleChange('company', e.target.value)}
               placeholder="Nome da empresa"
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors"
+              className={inputClass}
             />
           </div>
           <div>
             <label className="block text-sm text-gray-500 mb-2">Lead</label>
             <input
+              value={form.leadName}
+              onChange={(e) => handleChange('leadName', e.target.value)}
               placeholder="Nome do contato"
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors"
+              className={inputClass}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-500 mb-2">Estágio</label>
-              <select className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors">
+              <label className="block text-sm text-gray-500 mb-2">Estagio</label>
+              <select
+                value={form.stage}
+                onChange={(e) => handleChange('stage', e.target.value)}
+                className={inputClass}
+              >
                 {Object.entries(stageConfig).map(([key, cfg]) => (
                   <option key={key} value={key}>{cfg.label}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm text-gray-500 mb-2">Previsão de Fechamento</label>
+              <label className="block text-sm text-gray-500 mb-2">Previsao de Fechamento</label>
               <input
                 type="date"
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:outline-none transition-colors"
+                value={form.expectedClose}
+                onChange={(e) => handleChange('expectedClose', e.target.value)}
+                className={inputClass}
               />
             </div>
           </div>
@@ -524,10 +599,14 @@ function NewDealModal({ onClose }: { onClose: () => void }) {
             Cancelar
           </button>
           <button
-            onClick={onClose}
-            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-xl transition-colors"
+            onClick={handleSubmit}
+            disabled={!form.title.trim()}
+            className={cn(
+              "px-5 py-2.5 text-white text-sm font-medium rounded-xl transition-colors",
+              form.title.trim() ? "bg-indigo-600 hover:bg-indigo-500" : "bg-gray-300 cursor-not-allowed"
+            )}
           >
-            Criar Negócio
+            Criar Negocio
           </button>
         </div>
       </motion.div>
