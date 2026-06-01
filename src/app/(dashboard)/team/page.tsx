@@ -47,10 +47,10 @@ export default function TeamPage() {
   }
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Equipe</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Equipe</h1>
           <p className="text-gray-500 mt-1">{members.length} membros · {members.filter((m) => m.isActive).length} ativos</p>
         </div>
         <button

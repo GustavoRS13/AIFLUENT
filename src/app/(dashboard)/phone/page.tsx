@@ -87,11 +87,11 @@ export default function PhonePage() {
   const selectedCallData = mockCalls.find((c) => c.id === selectedCall)
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Telefonia</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Telefonia</h1>
           <p className="text-gray-500 mt-1">Central de chamadas com IA integrada</p>
         </div>
         <div className="flex items-center gap-3">
@@ -103,7 +103,7 @@ export default function PhonePage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {[
           { label: 'Total Chamadas', value: stats.total, icon: Phone, color: 'text-indigo-400' },
           { label: 'Atendidas', value: stats.completed, icon: PhoneCall, color: 'text-emerald-400' },
@@ -146,7 +146,7 @@ export default function PhonePage() {
 
       {/* Dialer Tab */}
       {tab === 'dialer' && (
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Dialer Pad */}
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
             <div className="text-center mb-6">
@@ -222,7 +222,7 @@ export default function PhonePage() {
           </div>
 
           {/* Quick Dial / Recent */}
-          <div className="col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-4">
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Discagem Rapida</h3>
             <div className="grid grid-cols-2 gap-3">
               {mockCalls.filter((c) => c.status === 'completed').slice(0, 6).map((call) => (
@@ -363,7 +363,7 @@ export default function PhonePage() {
 
       {/* Analytics Tab */}
       {tab === 'analytics' && (
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
             <h3 className="text-lg font-semibold text-gray-900">Performance por Agente</h3>
             {[

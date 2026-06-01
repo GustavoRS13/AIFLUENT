@@ -30,6 +30,7 @@ import {
   MapPin,
   Tag,
   Star,
+  ArrowLeft,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -238,13 +239,13 @@ export default function WhatsAppPage() {
       <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
 
       {/* Top bar with stats */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-500/10">
             <MessageSquare className="h-5 w-5 text-sky-400" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">WhatsApp</h1>
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-900">WhatsApp</h1>
             <div className="flex items-center gap-2">
               <div className={cn(
                 'flex items-center gap-1 text-xs',
@@ -283,7 +284,7 @@ export default function WhatsAppPage() {
       {/* Main content: 3-column layout */}
       <div className="flex-1 flex rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 min-h-0">
         {/* Left: Conversation list */}
-        <div className="w-80 border-r border-gray-200 flex flex-col shrink-0">
+        <div className={cn('w-full sm:w-80 border-r border-gray-200 flex flex-col shrink-0', selectedConv ? 'hidden sm:flex' : 'flex')}>
           <div className="p-3 border-b border-gray-200">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -339,6 +340,13 @@ export default function WhatsAppPage() {
           {currentConv && (
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
               <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setSelectedConv('')}
+                  className="sm:hidden flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+                  aria-label="Voltar"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
                 <div className="relative">
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center">
                     <span className="text-xs font-bold text-gray-900">{currentConv.avatar}</span>

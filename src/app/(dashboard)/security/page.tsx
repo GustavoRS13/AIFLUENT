@@ -55,11 +55,11 @@ export default function SecurityPage() {
   const [dataEncryption, setDataEncryption] = useState(true)
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Seguranca</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Seguranca</h1>
           <p className="text-gray-500 mt-1">Protecao enterprise, LGPD e controle de acesso</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
@@ -69,7 +69,7 @@ export default function SecurityPage() {
       </div>
 
       {/* Security Score Cards */}
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {[
           { label: '2FA Ativo', value: '5/7', icon: Fingerprint, color: 'text-emerald-400', status: 'good' },
           { label: 'Sessoes Ativas', value: '3', icon: Monitor, color: 'text-blue-400', status: 'good' },
@@ -88,7 +88,7 @@ export default function SecurityPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
         {[
           { key: 'overview' as const, label: 'Visao Geral', icon: Shield },
           { key: '2fa' as const, label: 'Autenticacao', icon: Fingerprint },
@@ -310,7 +310,7 @@ export default function SecurityPage() {
 
           <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
             <h3 className="text-lg font-semibold text-gray-900">Acoes LGPD</h3>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
                 { label: 'Exportar Dados do Lead', desc: 'Gera relatorio com todos os dados pessoais', icon: Download },
                 { label: 'Solicitar Exclusao', desc: 'Apaga todos os dados de um lead', icon: XCircle },

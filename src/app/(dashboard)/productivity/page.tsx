@@ -83,11 +83,11 @@ export default function ProductivityPage() {
   const [tab, setTab] = useState<TabType>('ranking')
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Produtividade</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Produtividade</h1>
           <p className="text-gray-500 mt-1">Ranking, metas, conquistas e gamificacao</p>
         </div>
         <div className="flex items-center gap-3">
@@ -234,7 +234,7 @@ export default function ProductivityPage() {
 
       {/* Goals Tab */}
       {tab === 'goals' && (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {mockGoals.map((goal, i) => {
             const pct = goal.type === 'response'
               ? Math.max(0, Math.min(100, (goal.target / goal.current) * 100))
@@ -286,7 +286,7 @@ export default function ProductivityPage() {
 
       {/* Achievements Tab */}
       {tab === 'achievements' && (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {mockAchievements.map((achievement, i) => (
             <motion.div
               key={achievement.id}
@@ -333,9 +333,9 @@ export default function ProductivityPage() {
 
       {/* Gamification Tab */}
       {tab === 'gamification' && (
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Daily Challenges */}
-          <div className="col-span-2 bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
+          <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
             <div className="flex items-center gap-2">
               <Zap className="w-5 h-5 text-amber-400" />
               <h3 className="text-lg font-semibold text-gray-900">Desafios Diarios</h3>

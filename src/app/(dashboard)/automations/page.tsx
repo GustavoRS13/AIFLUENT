@@ -68,11 +68,11 @@ export default function AutomationsPage() {
   const activeCount = mockAutomations.filter((a) => a.isActive).length
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Automacoes</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Automacoes</h1>
           <p className="text-gray-500 mt-1">Fluxos automaticos e workflows inteligentes</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-medium transition-colors">
@@ -82,7 +82,7 @@ export default function AutomationsPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Automacoes Ativas', value: activeCount, total: mockAutomations.length, icon: Workflow, color: 'text-emerald-400' },
           { label: 'Execucoes Totais', value: formatNumber(totalRuns), icon: Zap, color: 'text-indigo-400' },

@@ -179,7 +179,7 @@ export default function MetaAdsPage() {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       {/* Success Toast */}
       <AnimatePresence>
         {toast.visible && (
@@ -447,9 +447,9 @@ export default function MetaAdsPage() {
       </AnimatePresence>
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Meta Ads</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Meta Ads</h1>
           <p className="text-gray-500 mt-1">Gerencie campanhas Facebook e Instagram Ads</p>
         </div>
         <div className="flex items-center gap-3">
@@ -468,7 +468,7 @@ export default function MetaAdsPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {[
           { label: 'Investimento', value: formatCurrency(totals.spend), icon: DollarSign, change: '+12%', positive: false, color: 'text-indigo-400' },
           { label: 'Impressoes', value: formatNumber(totals.impressions), icon: Eye, change: '+28%', positive: true, color: 'text-blue-400' },
@@ -647,7 +647,7 @@ export default function MetaAdsPage() {
 
       {/* Audiences Tab */}
       {tab === 'audiences' && (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[
             { name: 'Lookalike - Alunos Ativos', type: 'Lookalike', size: '2.3M', platform: 'facebook' },
             { name: 'Visitantes Site - 30 dias', type: 'Retargeting', size: '45K', platform: 'both' },

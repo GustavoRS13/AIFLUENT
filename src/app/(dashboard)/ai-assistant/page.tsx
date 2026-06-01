@@ -271,7 +271,7 @@ export default function AIAssistantPage() {
       </div>
 
       {/* Right Panel - Insights */}
-      <div className="w-[340px] border-l border-gray-200 overflow-y-auto p-5 space-y-5">
+      <div className="hidden lg:block w-[340px] border-l border-gray-200 overflow-y-auto p-5 space-y-5">
         <div className="flex items-center gap-2">
           <Brain className="w-5 h-5 text-indigo-400" />
           <h3 className="text-sm font-bold text-gray-900">Insights em Tempo Real</h3>

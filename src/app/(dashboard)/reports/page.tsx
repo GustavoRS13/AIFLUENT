@@ -71,10 +71,10 @@ export default function ReportsPage() {
   const [period, setPeriod] = useState('6m')
 
   return (
-    <div className="p-8 space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Relatórios</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Relatórios</h1>
           <p className="text-gray-500 mt-1">Análise completa de performance comercial</p>
         </div>
         <div className="flex items-center gap-3">

@@ -176,7 +176,7 @@ function CampaignDetailPanel({ campaign, onClose }: { campaign: CampaignCardData
           {/* Metrics grid */}
           <div>
             <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Metricas</p>
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {[
                 { label: 'Enviados', value: sent, icon: Send, color: 'text-gray-600' },
                 { label: 'Entregues', value: delivered, icon: Eye, color: 'text-blue-500' },
@@ -199,7 +199,7 @@ function CampaignDetailPanel({ campaign, onClose }: { campaign: CampaignCardData
           {/* Rates */}
           <div>
             <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Taxas</p>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
                 { label: 'Abertura', value: `${openRate}%`, color: 'text-indigo-500' },
                 { label: 'Resposta', value: `${responseRate}%`, color: 'text-emerald-500' },

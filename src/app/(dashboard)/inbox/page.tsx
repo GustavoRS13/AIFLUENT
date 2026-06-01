@@ -6,7 +6,7 @@ import {
   Search, Send, Paperclip, Smile, MoreHorizontal, Phone, Video, Bot,
   Sparkles, Filter, Archive, CheckCheck, Check,
   MessageCircle, Camera, MessagesSquare, Mail, Star, ArrowRight,
-  Mic, Image, X, UserPlus, Inbox,
+  Mic, Image, X, UserPlus, Inbox, ArrowLeft,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -214,7 +214,8 @@ export default function InboxPage() {
       <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
 
       {/* Conversation List */}
-      <div className="w-[380px] flex flex-col border-r border-gray-200 bg-white">
+      <div className={cn('w-full sm:w-[380px] flex flex-col border-r border-gray-200 bg-white', selectedId ? 'hidden sm:flex' : 'flex')}>
+
         {/* List Header */}
         <div className="p-4 border-b border-gray-200 space-y-3">
           <div className="flex items-center justify-between">
@@ -339,10 +340,17 @@ export default function InboxPage() {
 
       {/* Chat Area */}
       {selected ? (
-        <div className="flex-1 flex flex-col">
+        <div className={cn('flex-1 flex flex-col', !selectedId ? 'hidden sm:flex' : 'flex')}>
           {/* Chat Header */}
-          <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-gray-200">
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSelectedId('')}
+                className="sm:hidden flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+                aria-label="Voltar"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
               <div className="relative">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center">
                   <span className="text-xs font-bold text-white">
@@ -567,7 +575,7 @@ export default function InboxPage() {
 
       {/* Right Panel - Lead Info */}
       {selected && (
-        <div className="w-[300px] border-l border-gray-200 overflow-y-auto">
+        <div className="hidden lg:block w-[300px] border-l border-gray-200 overflow-y-auto">
           <div className="p-5 space-y-5">
             {/* Lead Card */}
             <div className="text-center">

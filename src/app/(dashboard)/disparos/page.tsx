@@ -622,7 +622,7 @@ export default function DisparosPage() {
                     <ChannelIcon channel={ch.channel} />
                     <span className="text-sm font-medium text-gray-700">{channelLabel[ch.channel]}</span>
                   </div>
-                  <div className="flex-1 grid grid-cols-4 gap-4 text-center">
+                  <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
                     <div><p className="text-xs text-gray-400">Enviadas</p><p className="text-sm font-semibold text-gray-900">{ch.sent.toLocaleString('pt-BR')}</p></div>
                     <div><p className="text-xs text-gray-400">Entregues</p><p className="text-sm font-semibold text-gray-900">{ch.delivered.toLocaleString('pt-BR')}</p></div>
                     <div><p className="text-xs text-gray-400">Lidas</p><p className="text-sm font-semibold text-gray-900">{ch.read.toLocaleString('pt-BR')}</p></div>

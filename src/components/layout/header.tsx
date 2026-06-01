@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Search, Bell, UserPlus, Sparkles, Command, ChevronDown, LogOut, Settings, User,
+  Search, Bell, UserPlus, Sparkles, Command, ChevronDown, LogOut, Settings, User, Menu,
 } from 'lucide-react'
 import { CommandPalette } from './command-palette'
 
@@ -17,7 +17,7 @@ const routeTitles: Record<string, string> = {
   '/ai-assistant': 'Assistente IA', '/integrations': 'Integracoes', '/security': 'Seguranca', '/settings': 'Configuracoes',
 }
 
-export function Header() {
+export function Header({ onMobileMenuToggle }: { onMobileMenuToggle?: () => void }) {
   const pathname = usePathname()
   const [commandOpen, setCommandOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
@@ -27,8 +27,17 @@ export function Header() {
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-6">
-        <div className="flex items-center gap-4">
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 sm:px-6">
+        <div className="flex items-center gap-3">
+          {onMobileMenuToggle && (
+            <button
+              onClick={onMobileMenuToggle}
+              className="lg:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+              aria-label="Abrir menu"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          )}
           <h1 className="text-lg font-semibold text-gray-900">{pageTitle}</h1>
         </div>
         <div className="flex items-center gap-2">

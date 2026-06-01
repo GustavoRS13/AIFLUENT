@@ -93,10 +93,10 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Configurações</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Configurações</h1>
           <p className="text-gray-500 mt-1">Gerencie sua conta e preferências</p>
         </div>
         <button
@@ -113,14 +113,14 @@ export default function SettingsPage() {
         </button>
       </div>
 
-      <div className="flex gap-8">
-        <nav className="w-56 shrink-0 space-y-1">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+        <nav className="w-full lg:w-56 shrink-0 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0">
           {sections.map((section) => (
             <button
               key={section.id}
               onClick={() => setActiveSection(section.id)}
               className={cn(
-                'w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-colors text-left',
+                'flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-colors text-left whitespace-nowrap shrink-0 lg:shrink lg:w-full',
                 activeSection === section.id
                   ? 'bg-indigo-600/10 text-indigo-400 border border-indigo-500/20'
                   : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
