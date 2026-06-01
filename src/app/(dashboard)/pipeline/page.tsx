@@ -3,9 +3,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  GitBranch, Search, SlidersHorizontal, RefreshCw, Loader2, Plus,
-  ChevronDown, MoreHorizontal, Download, Upload, X, Check, Calendar,
-  Tag, User, Activity, Columns3,
+  Search, SlidersHorizontal, RefreshCw, Loader2, Plus,
+  ChevronDown, Download, X, Check, Calendar,
+  Tag, User, Activity,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { usePipelineStore, type PipelineStage } from '@/stores/pipeline-store'

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-let memoryLeads: Record<string, unknown>[] = []
+const memoryLeads: Record<string, unknown>[] = []
 
 async function getPrisma() {
   try {

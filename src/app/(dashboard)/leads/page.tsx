@@ -347,7 +347,7 @@ export default function LeadsPage() {
         lead={selectedLead}
         open={detailOpen}
         onClose={() => setDetailOpen(false)}
-        onEdit={(lead) => {
+        onEdit={() => {
           setDetailOpen(false)
           // Could open an edit modal
         }}

@@ -1,12 +1,11 @@
 'use client'
 
 import * as React from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Papa from 'papaparse'
 import {
   Upload,
   FileSpreadsheet,
-  X,
   CheckCircle2,
   AlertCircle,
   ArrowRight,

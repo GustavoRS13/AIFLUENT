@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  CheckCircle2, Circle, Clock, AlertTriangle, Plus, Filter,
-  Calendar, User, MoreHorizontal, Flag, ArrowUpDown,
+  CheckCircle2, Circle, Clock, AlertTriangle, Plus,
+  Calendar, MoreHorizontal, Flag,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

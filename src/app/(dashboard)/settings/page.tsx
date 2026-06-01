@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
-  Settings, Building2, Users, Bell, Shield, Palette, Globe, Zap,
-  Key, Database, Webhook, Save, Check, Plus, Trash2, Upload,
-  Lock, Smartphone, Monitor, Sun, Moon, Type,
+  Settings, Building2, Users, Bell, Shield, Palette, Zap,
+  Webhook, Save, Check, Plus, Trash2, Upload,
+  Sun, Moon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

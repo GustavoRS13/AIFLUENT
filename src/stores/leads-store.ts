@@ -2,9 +2,6 @@ import { create } from 'zustand'
 import type {
   KanbanCard,
   LeadFilters,
-  LeadSource,
-  LeadStatus,
-  LeadTemperature,
   SortOrder,
   ViewMode,
 } from '@/types'
@@ -37,7 +34,7 @@ const defaultFilters: LeadFilters = {
   dateRange: { from: null, to: null },
 }
 
-export const useLeadsStore = create<LeadsState>((set, get) => ({
+export const useLeadsStore = create<LeadsState>((set) => ({
   leads: [],
   selectedLeads: new Set<string>(),
   filters: { ...defaultFilters },

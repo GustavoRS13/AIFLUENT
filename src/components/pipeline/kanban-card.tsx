@@ -3,9 +3,9 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import {
-  MessageCircle, Phone, Mail, Clock, DollarSign,
+  MessageCircle, Phone, Mail, Clock,
 } from 'lucide-react'
-import { cn, getInitials, generateColor } from '@/lib/utils'
+import { cn, generateColor } from '@/lib/utils'
 import type { KanbanCard as KanbanCardType } from '@/types'
 
 interface KanbanCardProps {
@@ -30,7 +30,7 @@ function getTagColor(tag: string) {
   return tagColors[tag] || 'bg-indigo-50 text-indigo-600 border-indigo-200'
 }
 
-export function KanbanCard({ card, onClick, isDragOverlay = false }: KanbanCardProps) {
+export function KanbanCard({ card, onClick: _onClick, isDragOverlay = false }: KanbanCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card.id,
     data: { type: 'card', card },

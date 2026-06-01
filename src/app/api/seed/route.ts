@@ -40,6 +40,11 @@ function randomDate(daysBack: number): Date {
 }
 
 export async function POST() {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Seed nao permitido em producao' }, { status: 403 })
+  }
+
+  try {
   const existingOrg = await prisma.organization.findUnique({ where: { slug: 'aifluent-demo' } })
   if (existingOrg) {
     return NextResponse.json({ message: 'Seed data already exists' }, { status: 200 })
@@ -260,4 +265,8 @@ export async function POST() {
     message: 'Seed completed',
     stats: { leads: 200, campaigns: campaignNames.length, templates: templateData.length, tasks: 15 },
   })
+  } catch (error) {
+    console.error('POST /api/seed error:', error)
+    return NextResponse.json({ error: 'Erro ao executar seed' }, { status: 500 })
+  }
 }

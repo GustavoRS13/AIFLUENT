@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   CalendarDays, Sparkles, TrendingUp, Bot, Flame, Target,
-  ArrowUpRight, ArrowRight, DollarSign, Users, Zap, Phone, X,
+  ArrowRight, Phone, X,
 } from 'lucide-react'
 import { StatsGrid } from '@/components/dashboard/stats-grid'
 import { RevenueChart } from '@/components/dashboard/revenue-chart'
@@ -123,7 +123,7 @@ export default function DashboardPage() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm text-gray-900 font-medium">Insight IA: 12 leads quentes precisam de contato hoje</p>
-          <p className="text-xs text-gray-500 mt-0.5">A campanha "Business English" gerou 23% mais leads esta semana. Sugestao: aumentar budget em 20%.</p>
+          <p className="text-xs text-gray-500 mt-0.5">A campanha &ldquo;Business English&rdquo; gerou 23% mais leads esta semana. Sugestao: aumentar budget em 20%.</p>
         </div>
         <button className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 text-xs font-medium rounded-lg transition-colors shrink-0">
           Ver detalhes <ArrowRight className="w-3 h-3" />

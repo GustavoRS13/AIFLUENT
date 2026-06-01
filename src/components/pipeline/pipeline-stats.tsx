@@ -9,7 +9,6 @@ import {
   BarChart3,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { formatCurrency } from '@/lib/utils'
 import type { PipelineStage } from '@/stores/pipeline-store'
 
 interface PipelineStatsProps {

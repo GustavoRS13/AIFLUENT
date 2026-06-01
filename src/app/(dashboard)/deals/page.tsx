@@ -9,15 +9,12 @@ import {
   Trophy,
   LayoutList,
   Columns3,
-  Filter,
   Plus,
   MoreHorizontal,
   Calendar,
   Building2,
   User,
-  ChevronRight,
   ArrowUpRight,
-  ArrowDownRight,
   X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'

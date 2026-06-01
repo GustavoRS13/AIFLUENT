@@ -4,10 +4,10 @@ import * as React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   UserPlus, Loader2, User, Phone, Mail, MessageCircle, MapPin,
-  Briefcase, GraduationCap, Tag, FileText, Sparkles, X, Plus,
+  Briefcase, GraduationCap, Tag, Sparkles, X, Plus,
   Flame, Thermometer, Snowflake, ChevronRight, ChevronLeft,
   Camera, Globe, Search, Users, Calendar, MessagesSquare, Target,
-  CheckCircle2, Building2, Languages,
+  CheckCircle2, Building2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { LeadSource, LeadTemperature } from '@/types'
@@ -159,7 +159,7 @@ export function NewLeadModal({ open, onOpenChange, onCreated }: NewLeadModalProp
         const data = await res.json().catch(() => ({}))
         setApiError(data.error || `Erro ${res.status}: falha ao criar lead`)
       }
-    } catch (err) {
+    } catch {
       setApiError('Erro de conexao. Verifique sua rede.')
     } finally {
       setLoading(false)

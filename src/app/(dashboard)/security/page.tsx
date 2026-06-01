@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
-  Shield, Lock, Key, Fingerprint, Eye, EyeOff, Users, Clock,
-  AlertTriangle, CheckCircle2, XCircle, Settings, FileText,
-  Download, RefreshCw, Globe, Smartphone, Monitor,
+  Shield, Key, Fingerprint, Users, Clock,
+  AlertTriangle, CheckCircle2, XCircle, FileText,
+  Download, RefreshCw, Smartphone, Monitor,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

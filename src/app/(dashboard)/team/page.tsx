@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Users, Plus, Mail, Phone, MoreHorizontal, Shield, ShieldCheck,
-  UserCog, TrendingUp, Target, MessageSquare, Star, X,
+  UserCog, TrendingUp, Target, MessageSquare, X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

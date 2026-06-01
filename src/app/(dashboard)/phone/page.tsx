@@ -4,9 +4,9 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Phone, PhoneCall, PhoneOff, PhoneMissed, PhoneOutgoing, PhoneIncoming,
-  Mic, MicOff, Volume2, VolumeX, Pause, Play, Users, Clock, Search,
+  Mic, MicOff, Pause, Play, Clock, Search,
   MoreHorizontal, Download, FileText, Bot, Sparkles, BarChart3,
-  ArrowUpRight, ArrowDownLeft, Hash, Star,
+  ArrowDownLeft, Hash, Star,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

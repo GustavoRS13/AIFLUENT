@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, Bell, UserPlus, Sparkles, Command, ChevronDown, LogOut, Settings, User,
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { CommandPalette } from './command-palette'
 
 const routeTitles: Record<string, string> = {

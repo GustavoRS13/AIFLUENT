@@ -4,9 +4,9 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, Send, Paperclip, Smile, MoreHorizontal, Phone, Video, Bot,
-  Sparkles, Filter, Archive, Clock, CheckCheck, Check, Circle,
+  Sparkles, Filter, Archive, CheckCheck, Check,
   MessageCircle, Camera, MessagesSquare, Mail, Star, ArrowRight,
-  ChevronDown, Mic, Image, X, UserPlus, Inbox,
+  Mic, Image, X, UserPlus, Inbox,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

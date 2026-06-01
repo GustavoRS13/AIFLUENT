@@ -17,8 +17,14 @@ const campaignTemplates: Record<string, string[]> = {
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json()
-  const { action, channel, context } = body
+  let body: Record<string, unknown>
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'JSON invalido' }, { status: 400 })
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { action, channel, context } = body as { action?: string; channel?: string; context?: Record<string, any> }
 
   if (action === 'generate-campaign-message') {
     const templates = campaignTemplates[channel || 'whatsapp'] || campaignTemplates.whatsapp

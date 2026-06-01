@@ -8,7 +8,6 @@ import {
   MessageCircle,
   Mail,
   Pencil,
-  MapPin,
   Calendar,
   Clock,
   User,

@@ -3,8 +3,8 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Target, TrendingUp, TrendingDown, DollarSign, Eye, MousePointer, Users,
-  BarChart3, Plus, Filter, RefreshCw, ExternalLink, Pause, Play,
+  Target, TrendingUp, DollarSign, Eye, MousePointer, Users,
+  Plus, RefreshCw, ExternalLink, Pause, Play,
   MessagesSquare, Camera, Sparkles, ArrowUpRight, ArrowDownRight,
   Layers, Megaphone, Zap, Calendar, Globe, X, CheckCircle2, Loader2,
 } from 'lucide-react'
@@ -109,7 +109,7 @@ export default function MetaAdsPage() {
   }), [campaigns])
 
   const avgCPL = totals.leads > 0 ? totals.spend / totals.leads : 0
-  const avgCTR = totals.impressions > 0 ? (totals.clicks / totals.impressions * 100) : 0
+  const _avgCTR = totals.impressions > 0 ? (totals.clicks / totals.impressions * 100) : 0
   const avgROAS = useMemo(() => {
     const campaignsWithROAS = campaigns.filter((c) => c.roas > 0)
     if (campaignsWithROAS.length === 0) return 0

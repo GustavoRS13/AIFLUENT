@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Zap,
   MessageSquare,
-  Camera,
   Search as SearchIcon,
   CreditCard,
   Bot,

@@ -5,11 +5,11 @@ import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Plus, MessageSquare, Mail, Smartphone, Send, FileText, Clock, Eye,
-  BarChart3, Target, ArrowLeft, ArrowRight, Pause, Play, X, Copy,
-  AlertTriangle, Shield, CheckCircle2, XCircle, Users, Tag, Filter,
-  Zap, Trash2, Edit3, ChevronDown, ChevronUp, RefreshCw, Activity,
-  Globe, Lock, Download, Search, MoreHorizontal, Image, Paperclip, Upload,
-  MousePointerClick, TrendingUp, TrendingDown, Radio, Layers, Hash,
+  BarChart3, ArrowLeft, ArrowRight, Pause, Play, X, Copy,
+  AlertTriangle, Shield, CheckCircle2, XCircle, Users, Filter,
+  Zap, Trash2, Edit3, RefreshCw, Activity,
+  Lock, Download, Image, Paperclip, Upload,
+  MousePointerClick, TrendingDown, Radio, Layers,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -266,7 +266,7 @@ export default function DisparosPage() {
     if (!orig) return
     const dup: Campanha = {
       ...orig,
-      id: `c${Date.now()}`,
+      id: `c${crypto.randomUUID()}`,
       name: `${orig.name} (Copia)`,
       status: 'rascunho',
       createdAt: new Date().toISOString().split('T')[0],
@@ -516,7 +516,7 @@ export default function DisparosPage() {
                   const file = e.target.files?.[0]
                   if (file) {
                     const count = Math.floor(Math.random() * 3000) + 1000
-                    setAudiencias(prev => [...prev, { id: `imp-${Date.now()}`, name: `Importado: ${file.name}`, type: 'lista', count, rules: [`Arquivo: ${file.name}`, `${count} contatos importados`], createdAt: new Date().toISOString() }])
+                    setAudiencias(prev => [...prev, { id: `imp-${crypto.randomUUID()}`, name: `Importado: ${file.name}`, type: 'lista', count, rules: [`Arquivo: ${file.name}`, `${count} contatos importados`], createdAt: new Date().toISOString() }])
                   }
                 }} />
               </label>
