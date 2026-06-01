@@ -44,9 +44,9 @@ type QuickReply = {
   text: string
 }
 
-// ── Mock Data ───────────────────────────────────────────────────────────────
+// Initial demo data — replace with API when backend ready
 
-const mockConversations: Conversation[] = [
+const initialConversations: Conversation[] = [
   { id: 'c1', name: 'Maria Silva', phone: '(11) 99876-5432', avatar: 'MS', lastMessage: 'Ola, gostaria de saber mais sobre o MBA...', lastMessageTime: '10:32', unreadCount: 3, status: 'online', tags: ['quente', 'MBA'] },
   { id: 'c2', name: 'Carlos Eduardo', phone: '(21) 98765-4321', avatar: 'CE', lastMessage: 'Voces tem bolsa de estudo?', lastMessageTime: '09:45', unreadCount: 1, status: 'online', tags: ['bolsa'] },
   { id: 'c3', name: 'Ana Paula Ferreira', phone: '(31) 97654-3210', avatar: 'AF', lastMessage: 'Perfeito, vou pensar e te retorno!', lastMessageTime: '09:12', unreadCount: 0, status: 'offline', tags: ['pos-graduacao'] },
@@ -57,7 +57,8 @@ const mockConversations: Conversation[] = [
   { id: 'c8', name: 'Diego Santos', phone: '(81) 92109-8765', avatar: 'DS', lastMessage: 'Bom dia! Vi o anuncio no Instagram', lastMessageTime: '24/05', unreadCount: 0, status: 'offline', tags: ['instagram'] },
 ]
 
-const initialMockMessages: Record<string, ChatMessage[]> = {
+// Initial demo data — replace with API when backend ready
+const initialMessages: Record<string, ChatMessage[]> = {
   c1: [
     { id: 'm1', direction: 'outbound', content: 'Ola Maria! Bem-vinda ao AIFLUENT. Como posso te ajudar?', type: 'text', status: 'read', aiGenerated: false, createdAt: '10:00' },
     { id: 'm2', direction: 'inbound', content: 'Oi! Vi o anuncio de voces no Instagram sobre o MBA em Gestao.', type: 'text', status: 'read', aiGenerated: false, createdAt: '10:15' },
@@ -92,10 +93,10 @@ export default function WhatsAppPage() {
   const [showContactInfo, setShowContactInfo] = useState(false)
   const [showBulkSend, setShowBulkSend] = useState(false)
   const [apiStatus] = useState<'connected' | 'disconnected'>('connected')
-  const [allMessages, setAllMessages] = useState<Record<string, ChatMessage[]>>(initialMockMessages)
+  const [allMessages, setAllMessages] = useState<Record<string, ChatMessage[]>>(initialMessages)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const currentConv = mockConversations.find((c) => c.id === selectedConv)
+  const currentConv = initialConversations.find((c) => c.id === selectedConv)
   const currentMessages = allMessages[selectedConv] ?? []
 
   const {
@@ -108,12 +109,12 @@ export default function WhatsAppPage() {
   } = useChat([])
 
   const filteredConversations = searchTerm
-    ? mockConversations.filter(
+    ? initialConversations.filter(
         (c) =>
           c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           c.phone.includes(searchTerm)
       )
-    : mockConversations
+    : initialConversations
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -180,7 +181,7 @@ export default function WhatsAppPage() {
   }, [recording, addMessage, handleAudioToggle])
 
   // Stats
-  const totalUnread = mockConversations.reduce((s, c) => s + c.unreadCount, 0)
+  const totalUnread = initialConversations.reduce((s, c) => s + c.unreadCount, 0)
 
   return (
     <div className="flex flex-col h-[calc(100vh-7rem)]">

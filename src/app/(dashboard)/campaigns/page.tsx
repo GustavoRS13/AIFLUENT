@@ -28,10 +28,10 @@ import { StatCard } from '@/components/ui/stat-card'
 import { Tabs, TabsList, AnimatedTabTrigger, TabsContent } from '@/components/ui/tabs'
 import { CampaignCard, type CampaignCardData } from '@/components/campaigns/campaign-card'
 import { CampaignBuilder } from '@/components/campaigns/campaign-builder'
-import { CampaignMetrics, getMockMetrics } from '@/components/campaigns/campaign-metrics'
+import { CampaignMetrics, getDemoMetrics } from '@/components/campaigns/campaign-metrics'
 import type { CampaignChannel, CampaignStatus } from '@/types'
 
-// ── Mock data ────────────────────────────────────────────────────────────────
+// Initial demo data — replace with API when backend ready
 
 const initialCampaigns: CampaignCardData[] = [
   {
@@ -344,7 +344,7 @@ export default function CampaignsPage() {
           </Button>
           <h2 className="text-lg font-semibold text-gray-900">{camp?.name}</h2>
         </div>
-        <CampaignMetrics data={getMockMetrics()} onExport={() => {}} />
+        <CampaignMetrics data={getDemoMetrics()} onExport={() => {}} />
       </div>
     )
   }

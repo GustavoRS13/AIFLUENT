@@ -19,7 +19,8 @@ type Task = {
   creator: string
 }
 
-const mockTasks: Task[] = [
+// Initial demo data — replace with API when backend ready
+const initialTasks: Task[] = [
   { id: '1', title: 'Ligar para lead quente — Ana Silva', type: 'call', priority: 'urgent', status: 'pending', dueDate: '2026-05-28', assignee: { name: 'Maria Consultora' }, creator: 'AIFLUENT' },
   { id: '2', title: 'Enviar proposta comercial — Empresa XYZ', type: 'email', priority: 'high', status: 'in_progress', dueDate: '2026-05-29', assignee: { name: 'Carlos Vendedor' }, creator: 'AIFLUENT' },
   { id: '3', title: 'Follow-up campanha Black Friday', type: 'task', priority: 'medium', status: 'pending', dueDate: '2026-05-30', assignee: { name: 'Ana Especialista' }, creator: 'AIFLUENT' },
@@ -47,7 +48,7 @@ const statusConfig = {
 }
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState(mockTasks)
+  const [tasks, setTasks] = useState(initialTasks)
   const [filter, setFilter] = useState<string>('all')
   const [showNewTask, setShowNewTask] = useState(false)
   const [newTitle, setNewTitle] = useState('')

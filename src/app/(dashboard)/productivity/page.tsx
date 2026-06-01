@@ -26,7 +26,8 @@ interface TeamMember {
   change: number
 }
 
-const mockRanking: TeamMember[] = [
+// Initial demo data — replace with API when backend ready
+const initialRanking: TeamMember[] = [
   { id: '1', name: 'Pedro Closer', role: 'Closer', xp: 4850, level: 12, leadsConverted: 34, revenue: 45200, tasksCompleted: 67, avgResponseTime: 2.1, streak: 15, rank: 1, change: 0 },
   { id: '2', name: 'Maria Consultora', role: 'Consultora', xp: 4200, level: 11, leadsConverted: 28, revenue: 38900, tasksCompleted: 58, avgResponseTime: 3.4, streak: 8, rank: 2, change: 1 },
   { id: '3', name: 'Carlos Vendedor', role: 'Vendedor', xp: 3780, level: 10, leadsConverted: 22, revenue: 31500, tasksCompleted: 52, avgResponseTime: 4.2, streak: 5, rank: 3, change: -1 },
@@ -46,7 +47,8 @@ interface Achievement {
   progress: number
 }
 
-const mockAchievements: Achievement[] = [
+// Initial demo data — replace with API when backend ready
+const initialAchievements: Achievement[] = [
   { id: '1', name: 'Primeiro Fechamento', description: 'Feche seu primeiro negocio', icon: '🎯', category: 'sales', threshold: 1, xpReward: 100, unlocked: true, progress: 100 },
   { id: '2', name: 'Maquina de Vendas', description: 'Converta 10 leads em um mes', icon: '⚡', category: 'sales', threshold: 10, xpReward: 500, unlocked: true, progress: 100 },
   { id: '3', name: 'Top Closer', description: 'Converta 50 leads no total', icon: '👑', category: 'sales', threshold: 50, xpReward: 1000, unlocked: false, progress: 68 },
@@ -69,7 +71,8 @@ interface Goal {
   color: string
 }
 
-const mockGoals: Goal[] = [
+// Initial demo data — replace with API when backend ready
+const initialGoals: Goal[] = [
   { id: '1', type: 'leads', label: 'Leads Convertidos', target: 30, current: 18, unit: 'leads', period: 'Maio 2026', icon: Users, color: 'text-emerald-400' },
   { id: '2', type: 'revenue', label: 'Receita', target: 50000, current: 31500, unit: 'BRL', period: 'Maio 2026', icon: TrendingUp, color: 'text-indigo-400' },
   { id: '3', type: 'tasks', label: 'Tarefas Concluidas', target: 60, current: 42, unit: 'tarefas', period: 'Maio 2026', icon: CheckCircle2, color: 'text-amber-400' },
@@ -155,7 +158,7 @@ export default function ProductivityPage() {
       {/* Ranking Tab */}
       {tab === 'ranking' && (
         <div className="space-y-3">
-          {mockRanking.map((member, i) => {
+          {initialRanking.map((member, i) => {
             const RankIcon = i < 3 ? rankIcons[i] : undefined
 
             return (
@@ -235,7 +238,7 @@ export default function ProductivityPage() {
       {/* Goals Tab */}
       {tab === 'goals' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {mockGoals.map((goal, i) => {
+          {initialGoals.map((goal, i) => {
             const pct = goal.type === 'response'
               ? Math.max(0, Math.min(100, (goal.target / goal.current) * 100))
               : Math.min(100, (goal.current / goal.target) * 100)
@@ -287,7 +290,7 @@ export default function ProductivityPage() {
       {/* Achievements Tab */}
       {tab === 'achievements' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {mockAchievements.map((achievement, i) => (
+          {initialAchievements.map((achievement, i) => (
             <motion.div
               key={achievement.id}
               initial={{ opacity: 0, scale: 0.95 }}

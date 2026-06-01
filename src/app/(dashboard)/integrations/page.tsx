@@ -43,9 +43,9 @@ type Integration = {
   category: 'messaging' | 'ads' | 'payment' | 'automation' | 'ai' | 'productivity'
 }
 
-// ── Mock Data ───────────────────────────────────────────────────────────────
+// Initial demo data — replace with API when backend ready
 
-const mockIntegrations: Integration[] = [
+const initialIntegrations: Integration[] = [
   {
     id: 'whatsapp',
     name: 'WhatsApp Business API',
@@ -186,7 +186,7 @@ export default function IntegrationsPage() {
   const [configModal, setConfigModal] = useState<string | null>(null)
   const [showApiKeys, setShowApiKeys] = useState(false)
   const [showWebhooks, setShowWebhooks] = useState(false)
-  const [integrations, setIntegrations] = useState(mockIntegrations)
+  const [integrations, setIntegrations] = useState(initialIntegrations)
 
   const connected = integrations.filter((i) => i.status === 'connected').length
   const disconnected = integrations.filter((i) => i.status === 'disconnected').length

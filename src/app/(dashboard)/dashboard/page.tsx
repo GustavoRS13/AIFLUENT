@@ -15,7 +15,8 @@ import { ActivityTimeline } from '@/components/dashboard/activity-timeline'
 import { cn } from '@/lib/utils'
 import type { DashboardStats } from '@/types'
 
-const mockStats: DashboardStats = {
+// Initial demo data — replace with API when backend ready
+const initialStats: DashboardStats = {
   totalLeads: 4892,
   newLeadsToday: 47,
   conversionRate: 18.4,
@@ -82,7 +83,7 @@ function getFormattedDate(): string {
 }
 
 export default function DashboardPage() {
-  const [stats] = useState<DashboardStats>(mockStats)
+  const [stats] = useState<DashboardStats>(initialStats)
   const [kpiModal, setKpiModal] = useState<string | null>(null)
 
   return (

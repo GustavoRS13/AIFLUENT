@@ -28,7 +28,8 @@ interface Conversation {
   aiSuggestion?: string
 }
 
-const mockConversations: Conversation[] = [
+// Initial demo data — replace with API when backend ready
+const initialConversations: Conversation[] = [
   { id: '1', channel: 'whatsapp', lead: { name: 'Ana Carolina Silva', phone: '+55 11 99999-1234' }, lastMessage: 'Oi, gostaria de saber mais sobre o curso de ingles!', lastMessageAt: '2 min', unreadCount: 3, status: 'open', priority: 'urgent', assignee: 'Maria', aiSuggestion: 'Responder com informacoes do curso Business English' },
   { id: '2', channel: 'instagram', lead: { name: 'Pedro Henrique', phone: '+55 21 98888-5678' }, lastMessage: 'Vi o anuncio de voces, qual o valor da mensalidade?', lastMessageAt: '15 min', unreadCount: 1, status: 'open', priority: 'high' },
   { id: '3', channel: 'messenger', lead: { name: 'Juliana Santos', phone: '+55 31 97777-9012' }, lastMessage: 'Obrigada! Vou pensar e retorno amanha.', lastMessageAt: '1h', unreadCount: 0, status: 'pending', assignee: 'Carlos', priority: 'normal' },
@@ -87,19 +88,19 @@ export default function InboxPage() {
     handleAudioToggle,
   } = useChat(initialMessages)
 
-  const filtered = mockConversations.filter((c) => {
+  const filtered = initialConversations.filter((c) => {
     if (channel !== 'all' && c.channel !== channel) return false
     if (search && !c.lead.name.toLowerCase().includes(search.toLowerCase())) return false
     return true
   })
 
-  const selected = mockConversations.find((c) => c.id === selectedId)
+  const selected = initialConversations.find((c) => c.id === selectedId)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [selectedId, messages])
 
-  const totalUnread = mockConversations.reduce((sum, c) => sum + c.unreadCount, 0)
+  const totalUnread = initialConversations.reduce((sum, c) => sum + c.unreadCount, 0)
 
   const handleAiResponse = () => {
     setTimeout(() => {
@@ -147,10 +148,10 @@ export default function InboxPage() {
           {/* Channel Tabs */}
           <div className="flex gap-1">
             {[
-              { key: 'all' as const, label: 'Todos', count: mockConversations.length },
-              { key: 'whatsapp' as const, label: 'WhatsApp', count: mockConversations.filter((c) => c.channel === 'whatsapp').length },
-              { key: 'instagram' as const, label: 'Instagram', count: mockConversations.filter((c) => c.channel === 'instagram').length },
-              { key: 'messenger' as const, label: 'Messenger', count: mockConversations.filter((c) => c.channel === 'messenger').length },
+              { key: 'all' as const, label: 'Todos', count: initialConversations.length },
+              { key: 'whatsapp' as const, label: 'WhatsApp', count: initialConversations.filter((c) => c.channel === 'whatsapp').length },
+              { key: 'instagram' as const, label: 'Instagram', count: initialConversations.filter((c) => c.channel === 'instagram').length },
+              { key: 'messenger' as const, label: 'Messenger', count: initialConversations.filter((c) => c.channel === 'messenger').length },
             ].map((tab) => (
               <button
                 key={tab.key}

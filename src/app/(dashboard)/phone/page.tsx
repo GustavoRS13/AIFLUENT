@@ -26,7 +26,8 @@ interface CallRecord {
   agent: string
 }
 
-const mockCalls: CallRecord[] = [
+// Initial demo data — replace with API when backend ready
+const initialCalls: CallRecord[] = [
   { id: '1', direction: 'outbound', status: 'completed', leadName: 'Ana Silva', phone: '+55 11 99999-1234', duration: 342, recordingUrl: '#', transcription: 'Conversa sobre curso Business English...', aiSummary: 'Lead demonstrou interesse no curso noturno. Pediu para enviar proposta por email. Agendou retorno para quinta-feira.', aiSentiment: 'positive', startedAt: '11:30', agent: 'Maria Consultora' },
   { id: '2', direction: 'inbound', status: 'completed', leadName: 'Carlos Mendes', phone: '+55 21 98888-5678', duration: 186, recordingUrl: '#', aiSummary: 'Duvidas sobre formas de pagamento. Interessado no plano anual com desconto.', aiSentiment: 'positive', startedAt: '10:45', agent: 'Carlos Vendedor' },
   { id: '3', direction: 'outbound', status: 'missed', leadName: 'Fernanda Costa', phone: '+55 31 97777-9012', duration: 0, aiSentiment: 'neutral', startedAt: '10:15', agent: 'Ana Especialista' },
@@ -63,27 +64,27 @@ export default function PhonePage() {
   const [selectedCall, setSelectedCall] = useState<string | null>(null)
   const [search, setSearch] = useState('')
 
-  const filteredCalls = mockCalls.filter((c) =>
+  const filteredCalls = initialCalls.filter((c) =>
     c.leadName.toLowerCase().includes(search.toLowerCase()) ||
     c.phone.includes(search)
   )
 
   const stats = {
-    total: mockCalls.length,
-    completed: mockCalls.filter((c) => c.status === 'completed').length,
-    missed: mockCalls.filter((c) => c.status === 'missed').length,
+    total: initialCalls.length,
+    completed: initialCalls.filter((c) => c.status === 'completed').length,
+    missed: initialCalls.filter((c) => c.status === 'missed').length,
     avgDuration: Math.round(
-      mockCalls.filter((c) => c.duration > 0).reduce((sum, c) => sum + c.duration, 0) /
-      mockCalls.filter((c) => c.duration > 0).length
+      initialCalls.filter((c) => c.duration > 0).reduce((sum, c) => sum + c.duration, 0) /
+      initialCalls.filter((c) => c.duration > 0).length
     ),
-    positive: mockCalls.filter((c) => c.aiSentiment === 'positive').length,
+    positive: initialCalls.filter((c) => c.aiSentiment === 'positive').length,
   }
 
   function handleDial(digit: string) {
     setDialNumber((prev) => prev + digit)
   }
 
-  const selectedCallData = mockCalls.find((c) => c.id === selectedCall)
+  const selectedCallData = initialCalls.find((c) => c.id === selectedCall)
 
   return (
     <div className="space-y-6">
@@ -224,7 +225,7 @@ export default function PhonePage() {
           <div className="lg:col-span-2 space-y-4">
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Discagem Rapida</h3>
             <div className="grid grid-cols-2 gap-3">
-              {mockCalls.filter((c) => c.status === 'completed').slice(0, 6).map((call) => (
+              {initialCalls.filter((c) => c.status === 'completed').slice(0, 6).map((call) => (
                 <button
                   key={call.id}
                   onClick={() => setDialNumber(call.phone)}

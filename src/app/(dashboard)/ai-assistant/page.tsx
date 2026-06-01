@@ -18,7 +18,8 @@ interface ChatMessage {
   actions?: { label: string; icon: React.ElementType }[]
 }
 
-const mockChat: ChatMessage[] = [
+// Initial demo data — replace with API when backend ready
+const initialChat: ChatMessage[] = [
   {
     id: '1',
     role: 'assistant',
@@ -86,7 +87,7 @@ const insightCards = [
 ]
 
 export default function AIAssistantPage() {
-  const [messages, setMessages] = useState(mockChat)
+  const [messages, setMessages] = useState(initialChat)
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)

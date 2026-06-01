@@ -33,9 +33,9 @@ interface CampaignMetricsProps {
   onExport?: () => void
 }
 
-// ── Mock data generator ──────────────────────────────────────────────────────
+// Initial demo data generator — replace with API when backend ready
 
-export function getMockMetrics(): CampaignMetricsData {
+export function getDemoMetrics(): CampaignMetricsData {
   const hours = Array.from({ length: 24 }, (_, i) => ({
     hour: `${i.toString().padStart(2, '0')}:00`,
     count: Math.floor(Math.random() * 120) + 10,

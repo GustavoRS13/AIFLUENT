@@ -51,9 +51,9 @@ const stageConfig: Record<DealStage, { label: string; color: string; bg: string 
 
 const pipelineStages: DealStage[] = ['prospeccao', 'qualificacao', 'proposta', 'negociacao', 'fechamento']
 
-// ── Mock data ───────────────────────────────────────────────────────────────
+// Initial demo data — replace with API when backend ready
 
-const mockDeals: Deal[] = [
+const initialDeals: Deal[] = [
   { id: 'd1', title: 'MBA Executivo - Turma 2026', value: 89000, company: 'Tech Solutions Ltda', leadName: 'Carlos Eduardo', stage: 'negociacao', probability: 75, expectedClose: '2026-06-15', assignedTo: 'Maria Consultora', createdAt: '2026-04-10' },
   { id: 'd2', title: 'Pós-graduação em Data Science', value: 45000, company: 'Inovare Digital', leadName: 'Ana Paula', stage: 'proposta', probability: 50, expectedClose: '2026-06-20', assignedTo: 'Carlos Vendedor', createdAt: '2026-04-22' },
   { id: 'd3', title: 'Curso Intensivo de Inglês', value: 12000, company: 'Startup Brasil', leadName: 'Pedro Henrique', stage: 'qualificacao', probability: 30, expectedClose: '2026-07-01', assignedTo: 'Ana Especialista', createdAt: '2026-05-01' },
@@ -71,7 +71,7 @@ const mockDeals: Deal[] = [
 // ── Component ───────────────────────────────────────────────────────────────
 
 export default function DealsPage() {
-  const [deals, setDeals] = useState<Deal[]>(mockDeals)
+  const [deals, setDeals] = useState<Deal[]>(initialDeals)
   const [viewMode, setViewMode] = useState<'table' | 'pipeline'>('table')
   const [stageFilter, setStageFilter] = useState<'all' | 'open' | 'ganho' | 'perdido'>('all')
   const [showNewDeal, setShowNewDeal] = useState(false)

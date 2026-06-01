@@ -47,7 +47,8 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
   )
 }
 
-const mockTeamMembers = [
+// Initial demo data — replace with API when backend ready
+const initialTeamMembers = [
   { id: '1', name: 'AIFLUENT', email: 'admin@aifluent.com', role: 'admin', status: 'active' },
   { id: '2', name: 'Maria Consultora', email: 'maria@aifluent.com', role: 'manager', status: 'active' },
   { id: '3', name: 'Carlos Vendedor', email: 'carlos@aifluent.com', role: 'member', status: 'active' },
@@ -301,7 +302,7 @@ export default function SettingsPage() {
                 </button>
               </div>
               <div className="space-y-3">
-                {mockTeamMembers.map((member) => (
+                {initialTeamMembers.map((member) => (
                   <div
                     key={member.id}
                     className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors"

@@ -23,7 +23,8 @@ interface Automation {
   successRate: number
 }
 
-const mockAutomations: Automation[] = [
+// Initial demo data — replace with API when backend ready
+const initialAutomations: Automation[] = [
   { id: '1', name: 'Boas-vindas WhatsApp', description: 'Envia mensagem de boas-vindas para novos leads via WhatsApp', trigger: 'new_lead', triggerLabel: 'Novo Lead', isActive: true, lastRunAt: '5 min atras', runCount: 1247, stepsCount: 3, successRate: 98 },
   { id: '2', name: 'Follow-up Automatico', description: 'Segue up com leads que nao responderam em 24h', trigger: 'no_response', triggerLabel: 'Sem Resposta', isActive: true, lastRunAt: '1h atras', runCount: 892, stepsCount: 5, successRate: 85 },
   { id: '3', name: 'Lead Scoring IA', description: 'Analisa e classifica leads automaticamente com IA', trigger: 'new_lead', triggerLabel: 'Novo Lead', isActive: true, lastRunAt: '10 min atras', runCount: 3450, stepsCount: 4, successRate: 96 },
@@ -58,14 +59,14 @@ export default function AutomationsPage() {
   const [search, setSearch] = useState('')
   const [showActiveOnly, setShowActiveOnly] = useState(false)
 
-  const filtered = mockAutomations.filter((a) => {
+  const filtered = initialAutomations.filter((a) => {
     if (showActiveOnly && !a.isActive) return false
     if (search && !a.name.toLowerCase().includes(search.toLowerCase())) return false
     return true
   })
 
-  const totalRuns = mockAutomations.reduce((s, a) => s + a.runCount, 0)
-  const activeCount = mockAutomations.filter((a) => a.isActive).length
+  const totalRuns = initialAutomations.reduce((s, a) => s + a.runCount, 0)
+  const activeCount = initialAutomations.filter((a) => a.isActive).length
 
   return (
     <div className="space-y-6">
@@ -84,7 +85,7 @@ export default function AutomationsPage() {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Automacoes Ativas', value: activeCount, total: mockAutomations.length, icon: Workflow, color: 'text-emerald-400' },
+          { label: 'Automacoes Ativas', value: activeCount, total: initialAutomations.length, icon: Workflow, color: 'text-emerald-400' },
           { label: 'Execucoes Totais', value: formatNumber(totalRuns), icon: Zap, color: 'text-indigo-400' },
           { label: 'Taxa de Sucesso', value: '94%', icon: CheckCircle2, color: 'text-emerald-400' },
           { label: 'Tempo Economizado', value: '187h', icon: Clock, color: 'text-amber-400' },

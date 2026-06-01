@@ -98,7 +98,7 @@ function ChannelIcon({ channel, className }: { channel: DisparoChannel; classNam
   return <Icon className={cn('h-4 w-4', colors[channel], className)} />
 }
 
-// ── Mock Data ────────────────────────────────────────────────────────────────
+// Initial demo data — replace with API when backend ready
 
 const initialCampaigns: Campanha[] = [
   { id: 'c1', name: 'Vestibular 2026 - Primeiro Contato', channel: 'whatsapp', status: 'em_execucao', type: 'broadcast', createdAt: '2026-05-25', scheduledAt: '2026-05-26', sent: 4820, total: 6000, audienceCount: 6000, delivered: 4650, read: 3720, replied: 1240, failed: 170 },
@@ -134,7 +134,8 @@ const initialAutomacoes: AutomacaoRule[] = [
   { id: 'au5', name: 'Respondeu negativo → Criar tarefa', trigger: 'respondeu', action: 'criar_tarefa', triggerLabel: 'Respondeu com sentimento negativo', actionLabel: 'Criar tarefa para vendedor', active: true },
 ]
 
-const mockLogs: LogEntry[] = [
+// Initial demo data — replace with API when backend ready
+const initialLogs: LogEntry[] = [
   { id: 'l1', timestamp: '2026-05-30 14:32:05', campaign: 'Vestibular 2026', message: '+5511999887766', status: 'enviado' },
   { id: 'l2', timestamp: '2026-05-30 14:32:03', campaign: 'Vestibular 2026', message: '+5511998776655', status: 'entregue' },
   { id: 'l3', timestamp: '2026-05-30 14:31:58', campaign: 'Vestibular 2026', message: '+5511997665544', status: 'falha', error: 'Numero invalido' },
@@ -145,7 +146,8 @@ const mockLogs: LogEntry[] = [
   { id: 'l8', timestamp: '2026-05-30 14:31:35', campaign: 'Vestibular 2026', message: '+5551954321098', status: 'falha', error: 'WhatsApp nao registrado' },
 ]
 
-const mockConsent: ConsentEntry[] = [
+// Initial demo data — replace with API when backend ready
+const initialConsent: ConsentEntry[] = [
   { id: 'co1', contact: 'Maria Silva', phone: '+5511999001122', type: 'opt_in', date: '2026-05-20' },
   { id: 'co2', contact: 'Joao Santos', phone: '+5511998002233', type: 'opt_out', date: '2026-05-22', reason: 'Solicitou remocao via WhatsApp' },
   { id: 'co3', contact: 'Ana Oliveira', phone: '+5511997003344', type: 'bloqueado', date: '2026-05-18', reason: 'Reportou spam' },
@@ -588,7 +590,7 @@ export default function DisparosPage() {
             ))}
           </div>
 
-          {/* Mock Chart */}
+          {/* Demo Chart — replace with API when backend ready */}
           <div className="rounded-xl border border-gray-200 bg-white p-6">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Envios por Dia (Ultimos 7 dias)</h3>
             <div className="flex items-end gap-3 h-40">
@@ -716,9 +718,9 @@ export default function DisparosPage() {
           {/* Consent Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {[
-              { label: 'Opt-in Ativos', value: mockConsent.filter(c => c.type === 'opt_in').length * 1540, icon: <CheckCircle2 className="h-4 w-4" />, color: 'text-emerald-600' },
-              { label: 'Opt-out', value: mockConsent.filter(c => c.type === 'opt_out').length * 380, icon: <XCircle className="h-4 w-4" />, color: 'text-amber-600' },
-              { label: 'Bloqueados', value: mockConsent.filter(c => c.type === 'bloqueado').length * 95, icon: <Lock className="h-4 w-4" />, color: 'text-rose-600' },
+              { label: 'Opt-in Ativos', value: initialConsent.filter(c => c.type === 'opt_in').length * 1540, icon: <CheckCircle2 className="h-4 w-4" />, color: 'text-emerald-600' },
+              { label: 'Opt-out', value: initialConsent.filter(c => c.type === 'opt_out').length * 380, icon: <XCircle className="h-4 w-4" />, color: 'text-amber-600' },
+              { label: 'Bloqueados', value: initialConsent.filter(c => c.type === 'bloqueado').length * 95, icon: <Lock className="h-4 w-4" />, color: 'text-rose-600' },
               { label: 'Taxa de Opt-out', value: 2.3, icon: <TrendingDown className="h-4 w-4" />, color: 'text-gray-600', suffix: '%' },
             ].map((s, i) => (
               <motion.div key={s.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
@@ -773,7 +775,7 @@ export default function DisparosPage() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Motivo</th>
                 </tr></thead>
                 <tbody>
-                  {mockConsent.map(c => (
+                  {initialConsent.map(c => (
                     <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                       <td className="px-6 py-3 font-medium text-gray-900">{c.contact}</td>
                       <td className="px-4 py-3 text-gray-500 font-mono text-xs">{c.phone}</td>
@@ -853,7 +855,7 @@ export default function DisparosPage() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Erro</th>
                 </tr></thead>
                 <tbody>
-                  {mockLogs.map((log, i) => (
+                  {initialLogs.map((log, i) => (
                     <motion.tr key={log.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }}
                       className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
                     >
