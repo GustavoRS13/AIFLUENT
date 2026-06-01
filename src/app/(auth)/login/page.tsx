@@ -198,6 +198,18 @@ export default function LoginPage() {
               Fale com vendas
             </a>
           </p>
+
+          {/* Test credentials hint */}
+          <details className="mt-4 rounded-lg border border-gray-100 bg-gray-50 p-3">
+            <summary className="cursor-pointer text-[10px] font-medium uppercase tracking-wide text-gray-400">
+              Credenciais de teste
+            </summary>
+            <div className="mt-2 space-y-1.5 text-xs text-gray-500">
+              <p><span className="font-medium text-gray-600">Admin:</span> admin@aifluent.com / Admin@2026</p>
+              <p><span className="font-medium text-gray-600">Gestor:</span> gestor@aifluent.com / Gestor@2026</p>
+              <p><span className="font-medium text-gray-600">Operador:</span> operador@aifluent.com / Operador@2026</p>
+            </div>
+          </details>
         </div>
       </motion.div>
     </div>

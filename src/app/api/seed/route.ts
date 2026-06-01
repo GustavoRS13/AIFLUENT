@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/api-auth'
 
 
 const firstNames = [
@@ -40,6 +41,9 @@ function randomDate(daysBack: number): Date {
 }
 
 export async function POST() {
+  const { error: authError } = await requireAuth('admin')
+  if (authError) return authError
+
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.json({ error: 'Seed nao permitido em producao' }, { status: 403 })
   }

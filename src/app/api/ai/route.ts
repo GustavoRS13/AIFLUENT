@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { requireAuth } from '@/lib/api-auth'
 
 const aiRequestSchema = z.object({
   action: z.enum(['generate-campaign-message', 'score-lead', 'suggest-follow-up'], {
@@ -26,6 +27,9 @@ const campaignTemplates: Record<string, string[]> = {
 }
 
 export async function POST(request: NextRequest) {
+  const { error: authError } = await requireAuth()
+  if (authError) return authError
+
   let body: unknown
   try {
     body = await request.json()

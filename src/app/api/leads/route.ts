@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { requireAuth } from '@/lib/api-auth'
 
 const memoryLeads: Record<string, unknown>[] = []
 
@@ -50,6 +51,9 @@ const createLeadSchema = z.object({
 })
 
 export async function GET(request: NextRequest) {
+  const { error } = await requireAuth()
+  if (error) return error
+
   const prisma = await getPrisma()
 
   if (prisma) {
@@ -112,6 +116,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const { error: authError } = await requireAuth('gestor')
+  if (authError) return authError
+
   let body: unknown
   try {
     body = await request.json()

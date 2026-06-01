@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { requireAuth } from '@/lib/api-auth'
 
 const moveLeadSchema = z.object({
   leadId: z.string().min(1, 'leadId e obrigatorio'),
@@ -9,6 +10,9 @@ const moveLeadSchema = z.object({
 })
 
 export async function GET() {
+  const { error } = await requireAuth()
+  if (error) return error
+
   try {
     const pipeline = await prisma.pipeline.findFirst({
       where: { isDefault: true },
@@ -38,6 +42,9 @@ export async function GET() {
 }
 
 export async function PATCH(request: NextRequest) {
+  const { error: authError } = await requireAuth('gestor')
+  if (authError) return authError
+
   try {
     let body: unknown
     try {

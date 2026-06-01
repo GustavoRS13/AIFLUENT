@@ -1,24 +1,20 @@
-'use client'
+import { auth } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { DashboardShell } from '@/components/layout/dashboard-shell'
 
-import { useState } from 'react'
-import { Sidebar, MobileSidebar } from '@/components/layout/sidebar'
-import { Header } from '@/components/layout/header'
-
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const session = await auth()
+  if (!session?.user) redirect('/login')
 
-  return (
-    <div className="flex h-dvh overflow-hidden">
-      <Sidebar />
-      <MobileSidebar open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Header onMobileMenuToggle={() => setMobileMenuOpen(true)} />
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6">{children}</main>
-      </div>
-    </div>
-  )
+  const user = {
+    name: session.user.name,
+    email: session.user.email,
+    role: (session.user as Record<string, unknown>).role as string | undefined,
+  }
+
+  return <DashboardShell user={user}>{children}</DashboardShell>
 }

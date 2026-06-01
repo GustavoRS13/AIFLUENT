@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { requireAuth } from '@/lib/api-auth'
 
 const createCampaignSchema = z.object({
   name: z.string().min(1, 'Nome da campanha e obrigatorio').transform((v) => v.trim()),
@@ -14,6 +15,9 @@ const createCampaignSchema = z.object({
 })
 
 export async function GET() {
+  const { error } = await requireAuth()
+  if (error) return error
+
   try {
     const campaigns = await prisma.campaign.findMany({
       include: {
@@ -31,6 +35,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const { error: authError } = await requireAuth('gestor')
+  if (authError) return authError
+
   try {
     let body: unknown
     try {
