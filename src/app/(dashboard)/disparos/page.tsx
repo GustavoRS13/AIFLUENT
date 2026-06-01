@@ -8,7 +8,7 @@ import {
   BarChart3, Target, ArrowLeft, ArrowRight, Pause, Play, X, Copy,
   AlertTriangle, Shield, CheckCircle2, XCircle, Users, Tag, Filter,
   Zap, Trash2, Edit3, ChevronDown, ChevronUp, RefreshCw, Activity,
-  Globe, Lock, Download, Search, MoreHorizontal, Image, Paperclip,
+  Globe, Lock, Download, Search, MoreHorizontal, Image, Paperclip, Upload,
   MousePointerClick, TrendingUp, TrendingDown, Radio, Layers, Hash,
   type LucideIcon,
 } from 'lucide-react'
@@ -164,7 +164,7 @@ export default function DisparosPage() {
   const [activeTab, setActiveTab] = useState('campanhas')
   const [campaigns, setCampaigns] = useState<Campanha[]>(initialCampaigns)
   const [templates] = useState<Template[]>(initialTemplates)
-  const [audiencias] = useState<Audiencia[]>(initialAudiencias)
+  const [audiencias, setAudiencias] = useState<Audiencia[]>(initialAudiencias)
   const [automacoes, setAutomacoes] = useState<AutomacaoRule[]>(initialAutomacoes)
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -186,6 +186,9 @@ export default function DisparosPage() {
 
   // Template editor
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null)
+
+  // Import leads
+  const [importedLeads, setImportedLeads] = useState<{ fileName: string; count: number; status: 'idle' | 'pasting' | 'success' }>({ fileName: '', count: 0, status: 'idle' })
 
   // ── Derived ────────────────────────────────────────────────────────────────
 
@@ -506,7 +509,19 @@ export default function DisparosPage() {
         <TabsContent value="audiencias" className="mt-6 space-y-4">
           <div className="flex items-center justify-between">
             <SearchInput placeholder="Buscar audiencias..." className="max-w-sm" />
-            <Button variant="outline"><Plus className="h-4 w-4" /> Novo Segmento</Button>
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-2 px-3 py-2 bg-sky-50 border border-sky-200 text-sky-700 text-sm font-medium rounded-lg cursor-pointer hover:bg-sky-100 transition-colors">
+                <Upload className="h-4 w-4" /> Importar CSV/XLSX
+                <input type="file" accept=".csv,.xlsx,.xls,.txt" className="hidden" onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    const count = Math.floor(Math.random() * 3000) + 1000
+                    setAudiencias(prev => [...prev, { id: `imp-${Date.now()}`, name: `Importado: ${file.name}`, type: 'lista', count, rules: [`Arquivo: ${file.name}`, `${count} contatos importados`], createdAt: new Date().toISOString() }])
+                  }
+                }} />
+              </label>
+              <Button variant="outline"><Plus className="h-4 w-4" /> Novo Segmento</Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -948,6 +963,65 @@ export default function DisparosPage() {
                   {/* Step 2: Audiencia */}
                   {wizardStep === 1 && (
                     <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
+                      {/* Import Section */}
+                      <div className="rounded-xl border-2 border-dashed border-sky-300 bg-sky-50 p-5">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 rounded-lg bg-sky-100 flex items-center justify-center">
+                            <Upload className="w-5 h-5 text-sky-600" />
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-semibold text-gray-900">Importar Leads</h4>
+                            <p className="text-xs text-gray-500">CSV, XLSX ou TXT com numeros/emails</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <label className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 cursor-pointer hover:bg-gray-50 transition-colors">
+                            <Upload className="w-4 h-4" />
+                            Importar CSV/XLSX
+                            <input type="file" accept=".csv,.xlsx,.xls,.txt" className="hidden" onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) {
+                                const count = Math.floor(Math.random() * 2000) + 500
+                                setWizardData(d => ({ ...d, audienceIds: [...d.audienceIds, 'imported'] }))
+                                setImportedLeads({ fileName: file.name, count, status: 'success' })
+                              }
+                            }} />
+                          </label>
+                          <button onClick={() => {
+                            setImportedLeads({ fileName: 'lista_colada.txt', count: 0, status: 'pasting' })
+                          }} className="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            Colar Lista
+                          </button>
+                        </div>
+                        {importedLeads.status === 'pasting' && (
+                          <div className="mt-3 space-y-2">
+                            <textarea
+                              placeholder="Cole numeros ou emails aqui (um por linha)..."
+                              rows={4}
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500/30 resize-none"
+                              onChange={(e) => {
+                                const lines = e.target.value.split('\n').filter(l => l.trim())
+                                setImportedLeads(prev => ({ ...prev, count: lines.length }))
+                              }}
+                            />
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs text-gray-500">{importedLeads.count} contatos detectados</span>
+                              <button onClick={() => setImportedLeads(prev => ({ ...prev, status: 'success' }))} className="px-3 py-1.5 bg-sky-500 hover:bg-sky-400 text-white text-xs rounded-lg transition-colors">
+                                Confirmar
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        {importedLeads.status === 'success' && importedLeads.count > 0 && (
+                          <div className="mt-3 flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span className="text-sm text-emerald-700 font-medium">{importedLeads.count.toLocaleString('pt-BR')} contatos importados de {importedLeads.fileName}</span>
+                            <button onClick={() => setImportedLeads({ fileName: '', count: 0, status: 'idle' })} className="ml-auto text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Existing audiences */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Incluir Audiencias</label>
                         <div className="space-y-2">
@@ -995,7 +1069,12 @@ export default function DisparosPage() {
                       <div className="rounded-lg bg-indigo-50 border border-indigo-100 p-4">
                         <div className="flex items-center gap-2">
                           <Users className="h-5 w-5 text-indigo-500" />
-                          <span className="text-sm font-semibold text-indigo-700">{eligibleCount.toLocaleString('pt-BR')} contatos elegiveis</span>
+                          <span className="text-sm font-semibold text-indigo-700">
+                            {(eligibleCount + (importedLeads.status === 'success' ? importedLeads.count : 0)).toLocaleString('pt-BR')} contatos elegiveis
+                          </span>
+                          {importedLeads.status === 'success' && importedLeads.count > 0 && (
+                            <span className="text-xs text-indigo-500">(inclui {importedLeads.count.toLocaleString('pt-BR')} importados)</span>
+                          )}
                         </div>
                       </div>
                     </motion.div>
