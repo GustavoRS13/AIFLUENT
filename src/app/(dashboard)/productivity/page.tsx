@@ -31,7 +31,7 @@ const mockRanking: TeamMember[] = [
   { id: '2', name: 'Maria Consultora', role: 'Consultora', xp: 4200, level: 11, leadsConverted: 28, revenue: 38900, tasksCompleted: 58, avgResponseTime: 3.4, streak: 8, rank: 2, change: 1 },
   { id: '3', name: 'Carlos Vendedor', role: 'Vendedor', xp: 3780, level: 10, leadsConverted: 22, revenue: 31500, tasksCompleted: 52, avgResponseTime: 4.2, streak: 5, rank: 3, change: -1 },
   { id: '4', name: 'Ana Especialista', role: 'Especialista', xp: 3450, level: 9, leadsConverted: 19, revenue: 27800, tasksCompleted: 48, avgResponseTime: 3.8, streak: 12, rank: 4, change: 2 },
-  { id: '5', name: 'Raphael Ruiz', role: 'Admin', xp: 3200, level: 9, leadsConverted: 18, revenue: 24500, tasksCompleted: 42, avgResponseTime: 5.1, streak: 3, rank: 5, change: 0 },
+  { id: '5', name: 'AIFLUENT', role: 'Admin', xp: 3200, level: 9, leadsConverted: 18, revenue: 24500, tasksCompleted: 42, avgResponseTime: 5.1, streak: 3, rank: 5, change: 0 },
 ]
 
 interface Achievement {

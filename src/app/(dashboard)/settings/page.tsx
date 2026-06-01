@@ -48,7 +48,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
 }
 
 const mockTeamMembers = [
-  { id: '1', name: 'Raphael Ruiz', email: 'raphael@aifluent.com', role: 'admin', status: 'active' },
+  { id: '1', name: 'AIFLUENT', email: 'admin@aifluent.com', role: 'admin', status: 'active' },
   { id: '2', name: 'Maria Consultora', email: 'maria@aifluent.com', role: 'manager', status: 'active' },
   { id: '3', name: 'Carlos Vendedor', email: 'carlos@aifluent.com', role: 'member', status: 'active' },
   { id: '4', name: 'Ana Especialista', email: 'ana@aifluent.com', role: 'member', status: 'active' },

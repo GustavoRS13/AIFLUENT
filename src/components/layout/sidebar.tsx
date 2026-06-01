@@ -141,12 +141,12 @@ export function Sidebar() {
       <div className="border-t border-gray-200 p-3">
         <div className={cn('flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-gray-50', collapsed && 'justify-center')}>
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-blue-500">
-            <span className="text-xs font-bold text-white">RR</span>
+            <span className="text-xs font-bold text-white">AI</span>
           </div>
           <AnimatePresence>
             {!collapsed && (
               <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }} className="flex-1 min-w-0">
-                <p className="truncate text-sm font-medium text-gray-900">Raphael Ruiz</p>
+                <p className="truncate text-sm font-medium text-gray-900">AIFLUENT</p>
                 <p className="truncate text-xs text-gray-500">Administrador</p>
               </motion.div>
             )}

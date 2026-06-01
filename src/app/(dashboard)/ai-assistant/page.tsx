@@ -22,7 +22,7 @@ const mockChat: ChatMessage[] = [
   {
     id: '1',
     role: 'assistant',
-    content: 'Ola Raphael! Sou seu copiloto comercial com IA. Posso ajudar com analise de leads, sugestoes de campanhas, resumo de conversas, previsao de fechamento e muito mais. Como posso ajudar?',
+    content: 'Ola! Sou seu copiloto comercial com IA. Posso ajudar com analise de leads, sugestoes de campanhas, resumo de conversas, previsao de fechamento e muito mais. Como posso ajudar?',
     timestamp: '10:00',
   },
   {

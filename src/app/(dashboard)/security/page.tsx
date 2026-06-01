@@ -30,12 +30,12 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
 }
 
 const auditLogs = [
-  { id: '1', action: 'Login', user: 'Raphael Ruiz', entity: 'Session', time: '10 min atras', ip: '189.34.12.45', status: 'success' },
+  { id: '1', action: 'Login', user: 'AIFLUENT', entity: 'Session', time: '10 min atras', ip: '189.34.12.45', status: 'success' },
   { id: '2', action: 'Lead Exportado', user: 'Maria Consultora', entity: 'Lead (234)', time: '30 min atras', ip: '189.34.12.46', status: 'success' },
-  { id: '3', action: 'Permissao Alterada', user: 'Raphael Ruiz', entity: 'User: Carlos', time: '1h atras', ip: '189.34.12.45', status: 'success' },
+  { id: '3', action: 'Permissao Alterada', user: 'AIFLUENT', entity: 'User: Carlos', time: '1h atras', ip: '189.34.12.45', status: 'success' },
   { id: '4', action: 'Login Falhou', user: 'desconhecido@email.com', entity: 'Session', time: '2h atras', ip: '45.67.89.12', status: 'failed' },
-  { id: '5', action: 'Dados Deletados', user: 'Raphael Ruiz', entity: 'Lead (567)', time: '3h atras', ip: '189.34.12.45', status: 'success' },
-  { id: '6', action: 'API Key Gerada', user: 'Raphael Ruiz', entity: 'Integration', time: '1d atras', ip: '189.34.12.45', status: 'success' },
+  { id: '5', action: 'Dados Deletados', user: 'AIFLUENT', entity: 'Lead (567)', time: '3h atras', ip: '189.34.12.45', status: 'success' },
+  { id: '6', action: 'API Key Gerada', user: 'AIFLUENT', entity: 'Integration', time: '1d atras', ip: '189.34.12.45', status: 'success' },
   { id: '7', action: 'Backup Automatico', user: 'Sistema', entity: 'Database', time: '1d atras', ip: '-', status: 'success' },
   { id: '8', action: 'Login', user: 'Ana Especialista', entity: 'Session', time: '1d atras', ip: '189.34.12.47', status: 'success' },
 ]
@@ -169,7 +169,7 @@ export default function SecurityPage() {
 
             <div className="space-y-3">
               {[
-                { name: 'Raphael Ruiz', email: 'raphael@aifluent.com', role: 'Admin', enabled: true },
+                { name: 'AIFLUENT', email: 'admin@aifluent.com', role: 'Admin', enabled: true },
                 { name: 'Maria Consultora', email: 'maria@aifluent.com', role: 'Gerente', enabled: true },
                 { name: 'Carlos Vendedor', email: 'carlos@aifluent.com', role: 'Agente', enabled: true },
                 { name: 'Pedro Closer', email: 'pedro@aifluent.com', role: 'Agente', enabled: true },

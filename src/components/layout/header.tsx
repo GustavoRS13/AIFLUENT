@@ -77,7 +77,7 @@ export function Header() {
           <div className="relative">
             <button onClick={() => setUserMenuOpen((o) => !o)} className="flex items-center gap-2 rounded-lg p-1.5 transition-colors hover:bg-gray-50">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-blue-500">
-                <span className="text-xs font-bold text-white">RR</span>
+                <span className="text-xs font-bold text-white">AI</span>
               </div>
               <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
             </button>
@@ -87,8 +87,8 @@ export function Header() {
                   <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
                   <motion.div initial={{ opacity: 0, y: 8, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.95 }} transition={{ duration: 0.15 }} className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl bg-white border border-gray-200 shadow-lg p-2">
                     <div className="border-b border-gray-100 px-3 py-2 mb-1">
-                      <p className="text-sm font-medium text-gray-900">Raphael Ruiz</p>
-                      <p className="text-xs text-gray-500">raphael@aifluent.com</p>
+                      <p className="text-sm font-medium text-gray-900">AIFLUENT</p>
+                      <p className="text-xs text-gray-500">admin@aifluent.com</p>
                     </div>
                     {[{ label: 'Meu perfil', icon: User, href: '#' }, { label: 'Configuracoes', icon: Settings, href: '/settings' }].map((item) => (
                       <a key={item.label} href={item.href} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900">

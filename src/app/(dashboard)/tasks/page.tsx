@@ -20,16 +20,16 @@ type Task = {
 }
 
 const mockTasks: Task[] = [
-  { id: '1', title: 'Ligar para lead quente — Ana Silva', type: 'call', priority: 'urgent', status: 'pending', dueDate: '2026-05-28', assignee: { name: 'Maria Consultora' }, creator: 'Raphael' },
-  { id: '2', title: 'Enviar proposta comercial — Empresa XYZ', type: 'email', priority: 'high', status: 'in_progress', dueDate: '2026-05-29', assignee: { name: 'Carlos Vendedor' }, creator: 'Raphael' },
-  { id: '3', title: 'Follow-up campanha Black Friday', type: 'task', priority: 'medium', status: 'pending', dueDate: '2026-05-30', assignee: { name: 'Ana Especialista' }, creator: 'Raphael' },
-  { id: '4', title: 'Preparar apresentação para reunião', type: 'meeting', priority: 'high', status: 'pending', dueDate: '2026-05-28', assignee: { name: 'Pedro Closer' }, creator: 'Raphael' },
-  { id: '5', title: 'Revisar métricas da campanha de Espanhol', type: 'task', priority: 'medium', status: 'completed', dueDate: '2026-05-27', assignee: { name: 'Maria Consultora' }, creator: 'Raphael' },
-  { id: '6', title: 'Atualizar base de leads do Instagram', type: 'task', priority: 'low', status: 'pending', dueDate: '2026-06-01', assignee: { name: 'Carlos Vendedor' }, creator: 'Raphael' },
-  { id: '7', title: 'Responder WhatsApp pendentes', type: 'task', priority: 'urgent', status: 'in_progress', dueDate: '2026-05-27', assignee: { name: 'Ana Especialista' }, creator: 'Raphael' },
-  { id: '8', title: 'Criar campanha de reativação', type: 'task', priority: 'high', status: 'pending', dueDate: '2026-05-31', assignee: { name: 'Raphael Ruiz' }, creator: 'Raphael' },
-  { id: '9', title: 'Agendar reunião com lead corporativo', type: 'meeting', priority: 'high', status: 'pending', dueDate: '2026-05-29', assignee: { name: 'Pedro Closer' }, creator: 'Raphael' },
-  { id: '10', title: 'Enviar material didático para leads quentes', type: 'email', priority: 'medium', status: 'completed', dueDate: '2026-05-26', assignee: { name: 'Maria Consultora' }, creator: 'Raphael' },
+  { id: '1', title: 'Ligar para lead quente — Ana Silva', type: 'call', priority: 'urgent', status: 'pending', dueDate: '2026-05-28', assignee: { name: 'Maria Consultora' }, creator: 'AIFLUENT' },
+  { id: '2', title: 'Enviar proposta comercial — Empresa XYZ', type: 'email', priority: 'high', status: 'in_progress', dueDate: '2026-05-29', assignee: { name: 'Carlos Vendedor' }, creator: 'AIFLUENT' },
+  { id: '3', title: 'Follow-up campanha Black Friday', type: 'task', priority: 'medium', status: 'pending', dueDate: '2026-05-30', assignee: { name: 'Ana Especialista' }, creator: 'AIFLUENT' },
+  { id: '4', title: 'Preparar apresentação para reunião', type: 'meeting', priority: 'high', status: 'pending', dueDate: '2026-05-28', assignee: { name: 'Pedro Closer' }, creator: 'AIFLUENT' },
+  { id: '5', title: 'Revisar métricas da campanha de Espanhol', type: 'task', priority: 'medium', status: 'completed', dueDate: '2026-05-27', assignee: { name: 'Maria Consultora' }, creator: 'AIFLUENT' },
+  { id: '6', title: 'Atualizar base de leads do Instagram', type: 'task', priority: 'low', status: 'pending', dueDate: '2026-06-01', assignee: { name: 'Carlos Vendedor' }, creator: 'AIFLUENT' },
+  { id: '7', title: 'Responder WhatsApp pendentes', type: 'task', priority: 'urgent', status: 'in_progress', dueDate: '2026-05-27', assignee: { name: 'Ana Especialista' }, creator: 'AIFLUENT' },
+  { id: '8', title: 'Criar campanha de reativação', type: 'task', priority: 'high', status: 'pending', dueDate: '2026-05-31', assignee: { name: 'AIFLUENT' }, creator: 'AIFLUENT' },
+  { id: '9', title: 'Agendar reunião com lead corporativo', type: 'meeting', priority: 'high', status: 'pending', dueDate: '2026-05-29', assignee: { name: 'Pedro Closer' }, creator: 'AIFLUENT' },
+  { id: '10', title: 'Enviar material didático para leads quentes', type: 'email', priority: 'medium', status: 'completed', dueDate: '2026-05-26', assignee: { name: 'Maria Consultora' }, creator: 'AIFLUENT' },
 ]
 
 const priorityConfig = {
@@ -80,8 +80,8 @@ export default function TasksPage() {
         priority: 'medium',
         status: 'pending',
         dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-        assignee: { name: 'Raphael Ruiz' },
-        creator: 'Raphael',
+        assignee: { name: 'AIFLUENT' },
+        creator: 'AIFLUENT',
       },
       ...prev,
     ])

@@ -97,7 +97,7 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-gray-900">
-              {getGreeting()}, Raphael
+              {getGreeting()}
             </h1>
             <Sparkles className="h-5 w-5 text-amber-400" />
           </div>

@@ -20,7 +20,7 @@ type TeamMember = {
 }
 
 const initialMembers: TeamMember[] = [
-  { id: '1', name: 'Raphael Ruiz', email: 'raphael@aifluent.com', phone: '+55 11 99999-9999', role: 'admin', isActive: true, stats: { leads: 0, conversions: 0, rate: 0, messages: 0 } },
+  { id: '1', name: 'AIFLUENT', email: 'admin@aifluent.com', phone: '+55 11 99999-9999', role: 'admin', isActive: true, stats: { leads: 0, conversions: 0, rate: 0, messages: 0 } },
   { id: '2', name: 'Maria Consultora', email: 'maria.consultora@aifluent.com', phone: '+55 11 98888-8888', role: 'agent', isActive: true, stats: { leads: 85, conversions: 12, rate: 14.1, messages: 342 } },
   { id: '3', name: 'Carlos Vendedor', email: 'carlos.vendedor@aifluent.com', phone: '+55 11 97777-7777', role: 'agent', isActive: true, stats: { leads: 72, conversions: 9, rate: 12.5, messages: 289 } },
   { id: '4', name: 'Ana Especialista', email: 'ana.especialista@aifluent.com', phone: '+55 11 96666-6666', role: 'manager', isActive: true, stats: { leads: 68, conversions: 11, rate: 16.2, messages: 456 } },

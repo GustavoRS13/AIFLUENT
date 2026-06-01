@@ -485,7 +485,7 @@ function NewDealModal({ onClose, onSave }: { onClose: () => void; onSave: (deal:
       stage: form.stage,
       probability: parseInt(form.probability) || 50,
       expectedClose: form.expectedClose || new Date().toISOString().slice(0, 10),
-      assignedTo: 'Raphael Ruiz',
+      assignedTo: 'AIFLUENT',
       createdAt: new Date().toISOString().slice(0, 10),
     }
     onSave(deal)
