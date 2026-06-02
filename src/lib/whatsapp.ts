@@ -27,14 +27,42 @@ export class WhatsAppService {
     return !!(this.config.phoneNumberId && this.config.accessToken)
   }
 
+  private log(level: 'info' | 'warn' | 'error', message: string, data?: Record<string, unknown>) {
+    const timestamp = new Date().toISOString()
+    const prefix = `[WhatsApp][${timestamp}][${level.toUpperCase()}]`
+    if (level === 'error') console.error(prefix, message, data || '')
+    else if (level === 'warn') console.warn(prefix, message, data || '')
+    else console.log(prefix, message, data || '')
+  }
+
+  private async fetchWithRetry(url: string, options: RequestInit, maxRetries = 3): Promise<Response> {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const res = await fetch(url, options)
+        if (res.status === 429) {
+          // Rate limited by Meta - wait and retry
+          const retryAfter = parseInt(res.headers.get('retry-after') || '5')
+          await new Promise(r => setTimeout(r, retryAfter * 1000))
+          continue
+        }
+        return res
+      } catch (err) {
+        if (attempt === maxRetries) throw err
+        await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000))
+      }
+    }
+    throw new Error('Max retries exceeded')
+  }
+
   async sendTextMessage(
     to: string,
     text: string,
   ): Promise<{ messageId: string } | { error: string }> {
     if (!this.isConfigured)
       return { error: 'WhatsApp nao configurado. Configure as variaveis WHATSAPP_*' }
+    this.log('info', 'Sending text message', { to, textLength: text.length })
     try {
-      const res = await fetch(
+      const res = await this.fetchWithRetry(
         `${WHATSAPP_API_URL}/${this.config.phoneNumberId}/messages`,
         {
           method: 'POST',
@@ -52,9 +80,14 @@ export class WhatsAppService {
         },
       )
       const data = await res.json()
-      if (data.messages?.[0]?.id) return { messageId: data.messages[0].id }
+      if (data.messages?.[0]?.id) {
+        this.log('info', 'Text message sent successfully', { to, messageId: data.messages[0].id })
+        return { messageId: data.messages[0].id }
+      }
+      this.log('warn', 'Text message failed', { to, error: data.error?.message })
       return { error: data.error?.message || 'Falha ao enviar' }
     } catch (err) {
+      this.log('error', 'Text message error', { to, error: err instanceof Error ? err.message : 'unknown' })
       return { error: err instanceof Error ? err.message : 'Erro de conexao' }
     }
   }
@@ -66,8 +99,9 @@ export class WhatsAppService {
     components?: unknown[],
   ): Promise<{ messageId: string } | { error: string }> {
     if (!this.isConfigured) return { error: 'WhatsApp nao configurado' }
+    this.log('info', 'Sending template message', { to, templateName, languageCode })
     try {
-      const res = await fetch(
+      const res = await this.fetchWithRetry(
         `${WHATSAPP_API_URL}/${this.config.phoneNumberId}/messages`,
         {
           method: 'POST',
@@ -88,9 +122,14 @@ export class WhatsAppService {
         },
       )
       const data = await res.json()
-      if (data.messages?.[0]?.id) return { messageId: data.messages[0].id }
+      if (data.messages?.[0]?.id) {
+        this.log('info', 'Template message sent successfully', { to, messageId: data.messages[0].id })
+        return { messageId: data.messages[0].id }
+      }
+      this.log('warn', 'Template message failed', { to, error: data.error?.message })
       return { error: data.error?.message || 'Falha ao enviar template' }
     } catch (err) {
+      this.log('error', 'Template message error', { to, error: err instanceof Error ? err.message : 'unknown' })
       return { error: err instanceof Error ? err.message : 'Erro de conexao' }
     }
   }
@@ -102,6 +141,7 @@ export class WhatsAppService {
     caption?: string,
   ): Promise<{ messageId: string } | { error: string }> {
     if (!this.isConfigured) return { error: 'WhatsApp nao configurado' }
+    this.log('info', 'Sending media message', { to, type, mediaUrl })
     try {
       const body: Record<string, unknown> = {
         messaging_product: 'whatsapp',
@@ -112,7 +152,7 @@ export class WhatsAppService {
       if (caption && (type === 'image' || type === 'document')) {
         ;(body[type] as Record<string, unknown>).caption = caption
       }
-      const res = await fetch(
+      const res = await this.fetchWithRetry(
         `${WHATSAPP_API_URL}/${this.config.phoneNumberId}/messages`,
         {
           method: 'POST',
@@ -124,18 +164,55 @@ export class WhatsAppService {
         },
       )
       const data = await res.json()
-      if (data.messages?.[0]?.id) return { messageId: data.messages[0].id }
+      if (data.messages?.[0]?.id) {
+        this.log('info', 'Media message sent successfully', { to, messageId: data.messages[0].id })
+        return { messageId: data.messages[0].id }
+      }
+      this.log('warn', 'Media message failed', { to, error: data.error?.message })
       return { error: data.error?.message || 'Falha ao enviar midia' }
     } catch (err) {
+      this.log('error', 'Media message error', { to, error: err instanceof Error ? err.message : 'unknown' })
       return { error: err instanceof Error ? err.message : 'Erro de conexao' }
     }
   }
 
   verifyWebhook(mode: string, token: string, challenge: string): string | null {
+    this.log('info', 'Webhook verification attempt', { mode })
     if (mode === 'subscribe' && token === this.config.webhookVerifyToken) {
+      this.log('info', 'Webhook verified successfully')
       return challenge
     }
+    this.log('warn', 'Webhook verification failed', { mode })
     return null
+  }
+
+  async refreshAccessToken(): Promise<boolean> {
+    // WhatsApp Cloud API uses long-lived tokens (60 days)
+    // To refresh: POST to https://graph.facebook.com/v21.0/oauth/access_token
+    // with grant_type=fb_exchange_token&client_id=APP_ID&client_secret=APP_SECRET&fb_exchange_token=CURRENT_TOKEN
+    this.log('info', 'Token refresh not implemented - use Meta Business Manager to generate new token')
+    return false
+  }
+
+  processWebhookPayload(body: Record<string, unknown>): { from: string; message: string; messageId: string; timestamp: string } | null {
+    try {
+      const entry = (body.entry as Array<Record<string, unknown>>)?.[0]
+      const changes = (entry?.changes as Array<Record<string, unknown>>)?.[0]
+      const value = changes?.value as Record<string, unknown>
+      const messages = value?.messages as Array<Record<string, unknown>>
+      if (!messages?.length) return null
+
+      const msg = messages[0]
+      return {
+        from: msg.from as string,
+        message: (msg.text as Record<string, string>)?.body || '',
+        messageId: msg.id as string,
+        timestamp: msg.timestamp as string,
+      }
+    } catch {
+      this.log('error', 'Failed to parse webhook payload')
+      return null
+    }
   }
 }
 

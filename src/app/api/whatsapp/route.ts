@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit } from '@/lib/api-auth'
 import { whatsapp } from '@/lib/whatsapp'
 
 export async function GET(request: NextRequest) {
@@ -15,15 +15,30 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { error: authError } = await requireAuth()
-  if (authError) return authError
-
   let body: Record<string, unknown>
   try {
     body = await request.json()
   } catch {
     return NextResponse.json({ error: 'JSON invalido' }, { status: 400 })
   }
+
+  // Case 1: Incoming webhook from Meta (no auth needed)
+  if (body.object === 'whatsapp_business_account') {
+    const parsed = whatsapp.processWebhookPayload(body)
+    if (parsed) {
+      // TODO: persist incoming message to database / trigger automation
+      console.log('[WhatsApp Webhook] Incoming message:', parsed)
+    }
+    // Meta requires 200 OK response for all webhook deliveries
+    return NextResponse.json({ status: 'received' }, { status: 200 })
+  }
+
+  // Case 2: Send action from our UI (requires auth + rate limit)
+  const rateLimited = checkRateLimit(request)
+  if (rateLimited) return rateLimited
+
+  const { error: authError } = await requireAuth()
+  if (authError) return authError
 
   const { action, to, message, templateName, mediaUrl, mediaType } = body as {
     action?: string
