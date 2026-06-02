@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ChevronDown, FileText, ArrowRight, Trophy, Phone,
@@ -21,7 +21,9 @@ interface ActivityItem {
 }
 
 interface HistorySectionProps {
-  activities: ActivityItem[]
+  leadId?: string
+  activities?: ActivityItem[]
+  className?: string
 }
 
 const typeIcons: Record<string, React.ElementType> = {
@@ -50,11 +52,25 @@ const typeColors: Record<string, string> = {
   assigned: 'bg-gray-50 text-gray-600',
 }
 
-export function HistorySection({ activities }: HistorySectionProps) {
+export function HistorySection({ leadId, activities: propActivities, className }: HistorySectionProps) {
+  const [fetchedActivities, setFetchedActivities] = useState<ActivityItem[]>([])
+  const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
 
+  const activities = propActivities || fetchedActivities
+
+  useEffect(() => {
+    if (propActivities || !leadId) return
+    setLoading(true)
+    fetch(`/api/activities?leadId=${leadId}`)
+      .then(r => r.json())
+      .then(d => setFetchedActivities(d.activities || []))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [leadId, propActivities])
+
   return (
-    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+    <div className={cn("rounded-xl border border-gray-200 bg-white overflow-hidden", className)}>
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-gray-50"
@@ -81,7 +97,11 @@ export function HistorySection({ activities }: HistorySectionProps) {
             className="overflow-hidden"
           >
             <div className="border-t border-gray-100 px-4 py-3">
-              {activities.length > 0 ? (
+              {loading ? (
+                <div className="flex items-center justify-center py-4">
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-200 border-t-sky-500" />
+                </div>
+              ) : activities.length > 0 ? (
                 <div className="space-y-0 max-h-64 overflow-y-auto">
                   {activities.map((activity, idx) => {
                     const Icon = typeIcons[activity.type] || Activity

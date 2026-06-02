@@ -265,6 +265,7 @@ model Activity {
   user   User?  @relation(fields: [userId], references: [id])
 
   @@index([leadId])
+  @@index([createdAt])
 }
 
 // ── Campaign ────────────────────────────────────────────────────────────────
@@ -403,6 +404,9 @@ model Conversation {
   assignee       User?  @relation("ConversationAssignee", fields: [assigneeId], references: [id])
 
   messages ConversationMessage[]
+
+  @@index([organizationId])
+  @@index([lastMessageAt])
 }
 
 model ConversationMessage {

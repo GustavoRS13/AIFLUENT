@@ -49,63 +49,11 @@ const channelColors: Record<ConversationChannel, string> = {
   email: 'text-gray-500',
 }
 
-// ── Demo data (fallback when API has no data) ───────────────────────────────
-
-const demoConversations: Conversation[] = [
-  {
-    id: 'demo-1',
-    leadId: '',
-    name: 'Maria Silva',
-    avatar: 'MS',
-    phone: '11987654321',
-    lastMessage: 'Ola! Gostaria de saber mais sobre os cursos de ingles.',
-    lastMessageAt: new Date(Date.now() - 3 * 60 * 1000).toISOString(),
-    unreadCount: 2,
-    channel: 'whatsapp',
-    messages: [
-      { id: 'm1', direction: 'inbound', content: 'Ola! Vi o anuncio de voces no Instagram.', type: 'text', status: 'read', aiGenerated: false, createdAt: '09:30' },
-      { id: 'm2', direction: 'outbound', content: 'Ola Maria! Obrigado pelo contato. Como posso ajudar?', type: 'text', status: 'read', aiGenerated: false, createdAt: '09:31' },
-      { id: 'm3', direction: 'inbound', content: 'Gostaria de saber mais sobre os cursos de ingles.', type: 'text', status: 'delivered', aiGenerated: false, createdAt: '09:35' },
-    ],
-  },
-  {
-    id: 'demo-2',
-    leadId: '',
-    name: 'Joao Santos',
-    avatar: 'JS',
-    phone: '11999887766',
-    lastMessage: 'Voce tem turmas aos sabados?',
-    lastMessageAt: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
-    unreadCount: 0,
-    channel: 'whatsapp',
-    messages: [
-      { id: 'm4', direction: 'inbound', content: 'Boa tarde! Voce tem turmas aos sabados?', type: 'text', status: 'read', aiGenerated: false, createdAt: '14:20' },
-      { id: 'm5', direction: 'outbound', content: 'Sim! Temos turmas aos sabados pela manha, das 9h as 12h.', type: 'text', status: 'delivered', aiGenerated: false, createdAt: '14:22' },
-      { id: 'm6', direction: 'inbound', content: 'Voce tem turmas aos sabados?', type: 'text', status: 'delivered', aiGenerated: false, createdAt: '14:25' },
-    ],
-  },
-  {
-    id: 'demo-3',
-    leadId: '',
-    name: 'Ana Costa',
-    avatar: 'AC',
-    phone: '21976543210',
-    lastMessage: 'Obrigada pela informacao!',
-    lastMessageAt: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-    unreadCount: 1,
-    channel: 'instagram',
-    messages: [
-      { id: 'm7', direction: 'inbound', content: 'Oi, quanto custa o curso de espanhol?', type: 'text', status: 'read', aiGenerated: false, createdAt: '10:00' },
-      { id: 'm8', direction: 'outbound', content: 'Ola Ana! O investimento mensal e de R$299. Posso te enviar mais detalhes?', type: 'text', status: 'read', aiGenerated: false, createdAt: '10:05' },
-      { id: 'm9', direction: 'inbound', content: 'Obrigada pela informacao!', type: 'text', status: 'delivered', aiGenerated: false, createdAt: '10:10' },
-    ],
-  },
-]
-
 // ── Component ───────────────────────────────────────────────────────────────
 
 export default function AtendimentoPage() {
-  const [conversations, setConversations] = useState<Conversation[]>(demoConversations)
+  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterTab, setFilterTab] = useState<FilterTab>('todos')
@@ -135,8 +83,9 @@ export default function AtendimentoPage() {
         const res = await fetch('/api/conversations')
         if (!res.ok) throw new Error()
         const data = await res.json()
-        if (data.conversations && data.conversations.length > 0) {
-          const mapped: Conversation[] = data.conversations.map((c: Record<string, unknown>) => {
+        const items = data.conversations || []
+        if (Array.isArray(items)) {
+          const mapped: Conversation[] = items.map((c: Record<string, unknown>) => {
             const lead = c.lead as Record<string, unknown> | null
             const messages = c.messages as Array<Record<string, unknown>> | undefined
             const lastMsg = messages?.[0]
@@ -157,7 +106,9 @@ export default function AtendimentoPage() {
           setConversations(mapped)
         }
       } catch {
-        // Keep demo data
+        // API unavailable — keep empty state
+      } finally {
+        setLoading(false)
       }
     }
     fetchConversations()
@@ -311,7 +262,22 @@ export default function AtendimentoPage() {
 
           {/* Conversation list */}
           <div className="flex-1 overflow-y-auto">
-            {filteredConversations.length === 0 && (
+            {loading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-sky-500" />
+              </div>
+            )}
+            {conversations.length === 0 && !loading && (
+              <div className="flex flex-col items-center justify-center py-12 text-center px-4">
+                <MessageCircle className="w-12 h-12 text-gray-300 mb-3" />
+                <h3 className="text-sm font-medium text-gray-900 mb-1">Nenhuma conversa</h3>
+                <p className="text-xs text-gray-500 mb-4">Conecte o WhatsApp Business para receber conversas</p>
+                <button className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white text-xs font-medium rounded-lg transition-colors">
+                  Conectar WhatsApp
+                </button>
+              </div>
+            )}
+            {!loading && filteredConversations.length === 0 && conversations.length > 0 && (
               <div className="flex flex-col items-center justify-center py-12 px-4">
                 <MessageCircle className="h-8 w-8 text-gray-300 mb-2" />
                 <p className="text-sm text-gray-500">Nenhuma conversa encontrada</p>

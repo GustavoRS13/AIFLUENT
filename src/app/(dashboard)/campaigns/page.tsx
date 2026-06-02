@@ -31,8 +31,7 @@ import { CampaignBuilder } from '@/components/campaigns/campaign-builder'
 import { CampaignMetrics, getDemoMetrics } from '@/components/campaigns/campaign-metrics'
 import type { CampaignChannel, CampaignStatus } from '@/types'
 
-// TODO: Connect to /api/campaigns when backend is ready
-const initialCampaigns: CampaignCardData[] = []
+// Campaigns are fetched from API on mount
 
 // ── Detail Panel ─────────────────────────────────────────────────────────────
 
@@ -166,8 +165,40 @@ function CampaignDetailPanel({ campaign, onClose }: { campaign: CampaignCardData
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function CampaignsPage() {
-  const [campaigns, setCampaigns] = React.useState<CampaignCardData[]>(initialCampaigns)
+  const [campaigns, setCampaigns] = React.useState<CampaignCardData[]>([])
   const [activeTab, setActiveTab] = React.useState('all')
+
+  React.useEffect(() => {
+    async function loadCampaigns() {
+      try {
+        const res = await fetch('/api/campaigns')
+        if (res.ok) {
+          const data = await res.json()
+          const items = Array.isArray(data) ? data : []
+          setCampaigns(items.map((c: Record<string, unknown>) => ({
+            id: c.id as string,
+            name: c.name as string,
+            channel: ((c.channel as string) || 'whatsapp') as CampaignChannel,
+            type: ((c.type as string) || 'broadcast') as 'broadcast' | 'sequence' | 'automation',
+            status: ((c.status as string) || 'draft') as CampaignStatus,
+            metrics: {
+              sent: (c.totalSent as number) || 0,
+              delivered: (c.totalDelivered as number) || 0,
+              opened: (c.totalOpened as number) || 0,
+              replied: (c.totalReplied as number) || 0,
+              converted: (c.totalConverted as number) || 0,
+            },
+            createdAt: c.createdAt as string,
+            createdBy: ((c.createdBy as Record<string, unknown>)?.name as string) || 'Sistema',
+            ...(c.scheduledAt ? { scheduledFor: c.scheduledAt as string } : {}),
+          })))
+        }
+      } catch {
+        // API unavailable — keep empty state
+      }
+    }
+    loadCampaigns()
+  }, [])
   const [search, setSearch] = React.useState('')
   const [showBuilder, setShowBuilder] = React.useState(false)
   const [viewMetrics, setViewMetrics] = React.useState<string | null>(null)

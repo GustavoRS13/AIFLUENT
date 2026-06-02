@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Users, Plus, Mail, Phone, MoreHorizontal, Shield, ShieldCheck,
@@ -19,9 +19,6 @@ type TeamMember = {
   stats: { leads: number; conversions: number; rate: number; messages: number }
 }
 
-// TODO: Connect to /api/users when backend is ready
-const initialMembers: TeamMember[] = []
-
 const roleConfig = {
   admin: { label: 'Admin', icon: ShieldCheck, color: 'text-rose-400', bg: 'bg-rose-400/10' },
   manager: { label: 'Gerente', icon: Shield, color: 'text-amber-400', bg: 'bg-amber-400/10' },
@@ -29,9 +26,38 @@ const roleConfig = {
 }
 
 export default function TeamPage() {
-  const [members, setMembers] = useState<TeamMember[]>(initialMembers)
+  const [members, setMembers] = useState<TeamMember[]>([])
+  const [loading, setLoading] = useState(true)
   const [showAddMember, setShowAddMember] = useState(false)
   const [successMsg, setSuccessMsg] = useState(false)
+
+  useEffect(() => {
+    async function loadTeam() {
+      try {
+        const res = await fetch('/api/users')
+        if (res.ok) {
+          const data = await res.json()
+          const users = data.users || data
+          if (Array.isArray(users)) {
+            setMembers(users.map((u: Record<string, unknown>) => ({
+              id: u.id as string,
+              name: u.name as string,
+              email: u.email as string,
+              phone: (u.phone as string) || '',
+              role: (u.role as string as 'admin' | 'manager' | 'agent') || 'agent',
+              isActive: (u.isActive as boolean) ?? true,
+              stats: { leads: 0, conversions: 0, rate: 0, messages: 0 },
+            })))
+          }
+        }
+      } catch {
+        // API unavailable — keep empty state
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadTeam()
+  }, [])
 
   const handleAddMember = (member: TeamMember) => {
     setMembers((prev) => [...prev, member])
@@ -76,6 +102,20 @@ export default function TeamPage() {
           </motion.div>
         ))}
       </div>
+
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-indigo-600" />
+        </div>
+      )}
+
+      {!loading && members.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <Users className="w-12 h-12 text-gray-300 mb-3" />
+          <h3 className="text-base font-semibold text-gray-800">Nenhum membro encontrado</h3>
+          <p className="text-sm text-gray-400 mt-1">Adicione membros para comecar a gerenciar sua equipe</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {members.map((member, i) => {
