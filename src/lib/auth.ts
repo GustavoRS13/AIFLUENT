@@ -59,7 +59,7 @@ async function authenticateWithDB(email: string, password: string) {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.AUTH_SECRET || require('crypto').createHash('sha256').update(process.env.VERCEL_URL || process.env.NEXTAUTH_URL || 'aifluent-crm-2026').digest('hex'),
   trustHost: true,
   providers: [
     Credentials({
