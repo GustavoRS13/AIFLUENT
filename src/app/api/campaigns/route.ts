@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { requireAuth } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit } from '@/lib/api-auth'
 
 const createCampaignSchema = z.object({
   name: z.string().min(1, 'Nome da campanha e obrigatorio').transform((v) => v.trim()),
@@ -14,7 +14,10 @@ const createCampaignSchema = z.object({
   createdById: z.string(),
 })
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const rateLimited = checkRateLimit(request)
+  if (rateLimited) return rateLimited
+
   const { error } = await requireAuth()
   if (error) return error
 
@@ -35,6 +38,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const rateLimited = checkRateLimit(request)
+  if (rateLimited) return rateLimited
+
   const { error: authError } = await requireAuth('gestor')
   if (authError) return authError
 

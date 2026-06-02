@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { requireAuth } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit } from '@/lib/api-auth'
+import { aiLimiter } from '@/lib/rate-limit'
 
 const aiRequestSchema = z.object({
   action: z.enum(['generate-campaign-message', 'score-lead', 'suggest-follow-up'], {
@@ -27,6 +28,9 @@ const campaignTemplates: Record<string, string[]> = {
 }
 
 export async function POST(request: NextRequest) {
+  const rateLimited = checkRateLimit(request, aiLimiter)
+  if (rateLimited) return rateLimited
+
   const { error: authError } = await requireAuth()
   if (authError) return authError
 

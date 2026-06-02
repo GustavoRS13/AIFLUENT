@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
-import { NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/api-auth'
+import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth, checkRateLimit } from '@/lib/api-auth'
+import { seedLimiter } from '@/lib/rate-limit'
 
 
 const firstNames = [
@@ -40,7 +41,10 @@ function randomDate(daysBack: number): Date {
   return d
 }
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  const rateLimited = checkRateLimit(request, seedLimiter)
+  if (rateLimited) return rateLimited
+
   const { error: authError } = await requireAuth('admin')
   if (authError) return authError
 

@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { requireAuth } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit } from '@/lib/api-auth'
 
 const moveLeadSchema = z.object({
   leadId: z.string().min(1, 'leadId e obrigatorio'),
@@ -9,7 +9,10 @@ const moveLeadSchema = z.object({
   newOrder: z.number().int().nonnegative().optional().default(0),
 })
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const rateLimited = checkRateLimit(request)
+  if (rateLimited) return rateLimited
+
   const { error } = await requireAuth()
   if (error) return error
 
@@ -42,6 +45,9 @@ export async function GET() {
 }
 
 export async function PATCH(request: NextRequest) {
+  const rateLimited = checkRateLimit(request)
+  if (rateLimited) return rateLimited
+
   const { error: authError } = await requireAuth('gestor')
   if (authError) return authError
 

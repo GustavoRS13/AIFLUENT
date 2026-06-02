@@ -1,6 +1,37 @@
 import { auth } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 import type { UserRole } from '@/lib/auth'
+import { apiLimiter } from './rate-limit'
+
+/**
+ * Check rate limit for an incoming request.
+ * Returns a 429 NextResponse if rate-limited, or null if allowed.
+ */
+export function checkRateLimit(
+  request: Request,
+  limiter: (id: string) => { success: boolean; remaining: number; resetAt: number } = apiLimiter,
+) {
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip') ||
+    'unknown'
+
+  const result = limiter(ip)
+  if (!result.success) {
+    return NextResponse.json(
+      { error: 'Limite de requisicoes excedido. Tente novamente em breve.' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(Math.ceil((result.resetAt - Date.now()) / 1000)),
+          'X-RateLimit-Limit': '60',
+          'X-RateLimit-Remaining': '0',
+        },
+      },
+    )
+  }
+  return null
+}
 
 /**
  * Require authentication (and optionally a minimum role) for API routes.

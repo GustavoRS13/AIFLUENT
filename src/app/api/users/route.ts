@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import bcrypt from 'bcryptjs'
-import { requireAuth } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit } from '@/lib/api-auth'
 
 async function getPrisma() {
   try {
@@ -21,7 +21,10 @@ const createUserSchema = z.object({
   organizationId: z.string().optional(),
 })
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const rateLimited = checkRateLimit(request)
+  if (rateLimited) return rateLimited
+
   const { error, session } = await requireAuth('admin')
   if (error) return error
 
@@ -54,6 +57,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const rateLimited = checkRateLimit(request)
+  if (rateLimited) return rateLimited
+
   const { error: authError } = await requireAuth('admin')
   if (authError) return authError
 
