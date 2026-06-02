@@ -218,6 +218,7 @@ export function LeadOperationPanel({ leadId, className, onClose }: LeadOperation
           stageName={lead.stage?.name}
           lastContactAt={lead.updatedAt}
           leadId={lead.id}
+          onRefresh={fetchLead}
         />
 
         {/* Deal Management */}

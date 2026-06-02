@@ -6,8 +6,9 @@ import {
   Workflow, Plus, Play, Pause, Zap, Clock, Users, MessageCircle,
   Tag, ArrowRight, MoreHorizontal, Activity,
   GitBranch, Target, Bell, Bot, CheckCircle2,
-  ChevronRight, Filter, Search,
+  ChevronRight, Filter, Search, Loader2, Shuffle,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
 interface Automation {
@@ -49,6 +50,60 @@ const triggerColors: Record<string, string> = {
 export default function AutomationsPage() {
   const [search, setSearch] = useState('')
   const [showActiveOnly, setShowActiveOnly] = useState(false)
+  const [followUpLoading, setFollowUpLoading] = useState(false)
+  const [autoStageLoading, setAutoStageLoading] = useState(false)
+  const [distributeLoading, setDistributeLoading] = useState(false)
+
+  async function handleFollowUp() {
+    setFollowUpLoading(true)
+    try {
+      const res = await fetch('/api/automation/follow-up', { method: 'POST' })
+      const data = await res.json()
+      if (res.ok) {
+        toast.success(`${data.created} tarefa(s) de follow-up criada(s)`)
+      } else {
+        toast.error(data.error || 'Erro ao executar')
+      }
+    } catch {
+      toast.error('Erro de conexao')
+    } finally {
+      setFollowUpLoading(false)
+    }
+  }
+
+  async function handleAutoStage() {
+    setAutoStageLoading(true)
+    try {
+      const res = await fetch('/api/automation/auto-stage', { method: 'POST' })
+      const data = await res.json()
+      if (res.ok) {
+        toast.success(`${data.moved} lead(s) movido(s) de estagio`)
+      } else {
+        toast.error(data.error || 'Erro ao executar')
+      }
+    } catch {
+      toast.error('Erro de conexao')
+    } finally {
+      setAutoStageLoading(false)
+    }
+  }
+
+  async function handleDistribute() {
+    setDistributeLoading(true)
+    try {
+      const res = await fetch('/api/automation/distribute', { method: 'POST' })
+      const data = await res.json()
+      if (res.ok) {
+        toast.success(`${data.distributed} lead(s) distribuido(s)`)
+      } else {
+        toast.error(data.error || 'Erro ao executar')
+      }
+    } catch {
+      toast.error('Erro de conexao')
+    } finally {
+      setDistributeLoading(false)
+    }
+  }
 
   const filtered = initialAutomations.filter((a) => {
     if (showActiveOnly && !a.isActive) return false
@@ -206,6 +261,83 @@ export default function AutomationsPage() {
             </motion.div>
           )
         })}
+      </div>
+
+      {/* AI Automation Actions */}
+      <div className="bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 rounded-2xl p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Bot className="w-5 h-5 text-violet-500" />
+          <h3 className="text-lg font-semibold text-gray-900">Automacoes IA</h3>
+          <span className="text-xs text-violet-500 bg-violet-100 px-2 py-0.5 rounded-full font-medium">Novo</span>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">Execute acoes automaticas baseadas em inteligencia artificial com um clique.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Auto Follow-up */}
+          <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+                <Clock className="w-4 h-4 text-amber-500" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Auto Follow-up</p>
+                <p className="text-[10px] text-gray-400">Leads sem contato 24h+</p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500">Cria tarefas automaticas para leads sem contato nas ultimas 24 horas.</p>
+            <button
+              onClick={handleFollowUp}
+              disabled={followUpLoading}
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 text-xs font-medium transition-colors disabled:opacity-50"
+            >
+              {followUpLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
+              Executar
+            </button>
+          </div>
+
+          {/* Auto Stage */}
+          <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-sky-50 flex items-center justify-center">
+                <ArrowRight className="w-4 h-4 text-sky-500" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Auto Stage</p>
+                <p className="text-[10px] text-gray-400">Mover leads por sinais</p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500">Analisa padroes de atividade e move leads para o proximo estagio automaticamente.</p>
+            <button
+              onClick={handleAutoStage}
+              disabled={autoStageLoading}
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-sky-500 hover:bg-sky-600 text-white px-3 py-2 text-xs font-medium transition-colors disabled:opacity-50"
+            >
+              {autoStageLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
+              Executar
+            </button>
+          </div>
+
+          {/* Distribute */}
+          <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                <Shuffle className="w-4 h-4 text-emerald-500" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Distribuir Leads</p>
+                <p className="text-[10px] text-gray-400">Round-robin automatico</p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500">Distribui leads sem dono entre consultores ativos de forma equilibrada.</p>
+            <button
+              onClick={handleDistribute}
+              disabled={distributeLoading}
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-2 text-xs font-medium transition-colors disabled:opacity-50"
+            >
+              {distributeLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
+              Executar
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Flow Builder Preview */}

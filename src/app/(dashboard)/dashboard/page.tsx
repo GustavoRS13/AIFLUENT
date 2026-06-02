@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   CalendarDays, Sparkles, TrendingUp, Bot, Flame, Target,
-  ArrowRight, Phone, X,
+  ArrowRight, Phone, X, Zap, ArrowRightLeft, Users,
 } from 'lucide-react'
 import { StatsGrid } from '@/components/dashboard/stats-grid'
 import { RevenueChart } from '@/components/dashboard/revenue-chart'
@@ -13,6 +13,7 @@ import { RecentLeads } from '@/components/dashboard/recent-leads'
 import { ActiveCampaigns } from '@/components/dashboard/active-campaigns'
 import { ActivityTimeline } from '@/components/dashboard/activity-timeline'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 import type { DashboardStats } from '@/types'
 
 const emptyStats: DashboardStats = {
@@ -24,6 +25,32 @@ const emptyStats: DashboardStats = {
   campaignsSent: 0,
   responseRate: 0,
   avgResponseTime: 0,
+}
+
+interface ForecastData {
+  forecast: { weighted: number; unweighted: number; bestCase: number; worstCase: number }
+  pipeline: { totalDeals: number; byStage: Record<string, { count: number; value: number; weighted: number }> }
+  realized: { revenue: number; deals: number }
+}
+
+interface FunnelStage {
+  name: string
+  color: string
+  count: number
+  isWon: boolean
+  isLost: boolean
+}
+
+interface FunnelConversion {
+  from: string
+  to: string
+  rate: number
+}
+
+interface FunnelData {
+  stages: FunnelStage[]
+  conversion: FunnelConversion[]
+  lostReasons: Record<string, number>
 }
 
 // TODO: Connect KPI breakdowns to real APIs when backend is ready
@@ -45,16 +72,59 @@ function getFormattedDate(): string {
   }).format(new Date())
 }
 
+function formatCurrency(value: number): string {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value)
+}
+
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats>(emptyStats)
   const [kpiModal, setKpiModal] = useState<string | null>(null)
+  const [forecastData, setForecastData] = useState<ForecastData | null>(null)
+  const [funnelData, setFunnelData] = useState<FunnelData | null>(null)
+  const [automationLoading, setAutomationLoading] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/dashboard')
       .then((res) => res.json())
       .then((data) => setStats(data))
       .catch(() => setStats(emptyStats))
+
+    fetch('/api/forecast')
+      .then((res) => res.json())
+      .then((data) => setForecastData(data))
+      .catch(() => {})
+
+    fetch('/api/reports/funnel')
+      .then((res) => res.json())
+      .then((data) => setFunnelData(data))
+      .catch(() => {})
   }, [])
+
+  const runAutomation = useCallback(async (endpoint: string, label: string) => {
+    setAutomationLoading(endpoint)
+    try {
+      const res = await fetch(`/api/automation/${endpoint}`, { method: 'POST' })
+      const data = await res.json()
+      if (res.ok) {
+        const msg = data.message
+          || (data.created != null ? `${data.created} tarefa(s) de follow-up criada(s)` : null)
+          || (data.distributed != null ? `${data.distributed} lead(s) distribuido(s)` : null)
+          || (data.moved != null ? `${data.moved} lead(s) movido(s)` : null)
+          || `${label} executado com sucesso`
+        toast.success(msg)
+      } else {
+        toast.error(data.error || `Falha ao executar ${label}`)
+      }
+    } catch {
+      toast.error(`Erro de conexao ao executar ${label}`)
+    } finally {
+      setAutomationLoading(null)
+    }
+  }, [])
+
+  const maxFunnelCount = funnelData?.stages?.length
+    ? Math.max(...funnelData.stages.map(s => s.count), 1)
+    : 1
 
   return (
     <div className="space-y-6">
@@ -105,13 +175,40 @@ export default function DashboardPage() {
       <StatsGrid stats={stats} />
 
       {/* Executive KPIs Row */}
-      {/* TODO: Connect to real APIs when backend is ready */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Forecast Mensal', value: 'R$ 0', subtext: 'Baseado no pipeline atual', icon: TrendingUp, color: 'from-emerald-500/10 to-cyan-500/10 border-emerald-500/20', iconColor: 'text-emerald-400' },
-          { label: 'ROI Meta Ads', value: '0x', subtext: 'ROAS medio das campanhas', icon: Target, color: 'from-purple-500/10 to-pink-500/10 border-purple-500/20', iconColor: 'text-purple-400' },
-          { label: 'Leads Quentes', value: '0', subtext: 'Score IA acima de 80', icon: Flame, color: 'from-rose-500/10 to-orange-500/10 border-rose-500/20', iconColor: 'text-rose-400' },
-          { label: 'Chamadas Hoje', value: '0', subtext: 'Nenhuma chamada registrada', icon: Phone, color: 'from-blue-500/10 to-indigo-500/10 border-blue-500/20', iconColor: 'text-blue-400' },
+          {
+            label: 'Forecast Mensal',
+            value: forecastData ? formatCurrency(forecastData.forecast.weighted) : 'R$ 0',
+            subtext: forecastData ? `Melhor cenario: ${formatCurrency(forecastData.forecast.bestCase)}` : 'Baseado no pipeline atual',
+            icon: TrendingUp,
+            color: 'from-emerald-500/10 to-cyan-500/10 border-emerald-500/20',
+            iconColor: 'text-emerald-400',
+          },
+          {
+            label: 'ROI Meta Ads',
+            value: '0x',
+            subtext: 'ROAS medio das campanhas',
+            icon: Target,
+            color: 'from-purple-500/10 to-pink-500/10 border-purple-500/20',
+            iconColor: 'text-purple-400',
+          },
+          {
+            label: 'Leads Quentes',
+            value: '0',
+            subtext: 'Score IA acima de 80',
+            icon: Flame,
+            color: 'from-rose-500/10 to-orange-500/10 border-rose-500/20',
+            iconColor: 'text-rose-400',
+          },
+          {
+            label: 'Chamadas Hoje',
+            value: '0',
+            subtext: 'Nenhuma chamada registrada',
+            icon: Phone,
+            color: 'from-blue-500/10 to-indigo-500/10 border-blue-500/20',
+            iconColor: 'text-blue-400',
+          },
         ].map((kpi, i) => (
           <motion.div
             key={kpi.label}
@@ -130,6 +227,174 @@ export default function DashboardPage() {
           </motion.div>
         ))}
       </div>
+
+      {/* Forecast + Funnel Section */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Forecast Summary */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-white border border-gray-200 rounded-2xl p-6"
+        >
+          <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-emerald-500" />
+            Forecast Preditivo
+          </h3>
+          {forecastData ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-emerald-600 font-medium">Receita Prevista</p>
+                  <p className="text-lg font-bold text-emerald-700 mt-1">{formatCurrency(forecastData.forecast.weighted)}</p>
+                </div>
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-blue-600 font-medium">Melhor Cenario</p>
+                  <p className="text-lg font-bold text-blue-700 mt-1">{formatCurrency(forecastData.forecast.bestCase)}</p>
+                </div>
+                <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-amber-600 font-medium">Pior Cenario</p>
+                  <p className="text-lg font-bold text-amber-700 mt-1">{formatCurrency(forecastData.forecast.worstCase)}</p>
+                </div>
+                <div className="bg-purple-50 border border-purple-100 rounded-xl p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-purple-600 font-medium">Ja Realizado</p>
+                  <p className="text-lg font-bold text-purple-700 mt-1">{formatCurrency(forecastData.realized.revenue)}</p>
+                  <p className="text-[10px] text-purple-500 mt-0.5">{forecastData.realized.deals} negocio(s) fechado(s)</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
+                <span>{forecastData.pipeline.totalDeals} negocio(s) no pipeline</span>
+                <span>Pipeline total: {formatCurrency(forecastData.forecast.unweighted)}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-32 text-sm text-gray-400">
+              Carregando previsao...
+            </div>
+          )}
+        </motion.div>
+
+        {/* Mini Funnel Chart */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="bg-white border border-gray-200 rounded-2xl p-6"
+        >
+          <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <ArrowRightLeft className="w-4 h-4 text-indigo-500" />
+            Funil de Conversao
+          </h3>
+          {funnelData && funnelData.stages.length > 0 ? (
+            <div className="space-y-3">
+              {funnelData.stages.map((stage, i) => {
+                const conversionEntry = funnelData.conversion[i]
+                const barWidth = Math.max((stage.count / maxFunnelCount) * 100, 4)
+                return (
+                  <div key={stage.name} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-700 font-medium truncate max-w-[60%]">{stage.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-900 font-semibold">{stage.count}</span>
+                        {conversionEntry && i > 0 && (
+                          <span className={cn(
+                            'text-[10px] px-1.5 py-0.5 rounded-full font-medium',
+                            conversionEntry.rate >= 50
+                              ? 'bg-emerald-50 text-emerald-600'
+                              : conversionEntry.rate >= 25
+                                ? 'bg-amber-50 text-amber-600'
+                                : 'bg-red-50 text-red-600'
+                          )}>
+                            {conversionEntry.rate}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-2">
+                      <div
+                        className="h-2 rounded-full transition-all duration-500"
+                        style={{
+                          width: `${barWidth}%`,
+                          backgroundColor: stage.color || '#6366f1',
+                        }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+              {Object.keys(funnelData.lostReasons).length > 0 && (
+                <div className="pt-3 border-t border-gray-100">
+                  <p className="text-[10px] uppercase tracking-wider text-gray-400 font-medium mb-2">Motivos de Perda</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {Object.entries(funnelData.lostReasons).slice(0, 4).map(([reason, count]) => (
+                      <span key={reason} className="text-[10px] bg-red-50 text-red-600 px-2 py-0.5 rounded-full">
+                        {reason} ({count})
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-32 text-sm text-gray-400">
+              {funnelData ? 'Nenhum estagio no pipeline' : 'Carregando funil...'}
+            </div>
+          )}
+        </motion.div>
+      </div>
+
+      {/* Automation Quick Actions */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <Bot className="w-4 h-4 text-indigo-500" />
+          Automacoes Rapidas
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <button
+            onClick={() => runAutomation('follow-up', 'Auto Follow-up')}
+            disabled={automationLoading !== null}
+            className="flex flex-col items-start gap-2 rounded-2xl border border-gray-200 bg-white p-4 text-left hover:border-indigo-300 hover:bg-indigo-50/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-amber-500" />
+              <span className="text-sm font-semibold text-gray-900">
+                {automationLoading === 'follow-up' ? 'Executando...' : 'Auto Follow-up'}
+              </span>
+            </div>
+            <span className="text-xs text-gray-500">Criar tarefas para leads sem resposta</span>
+          </button>
+          <button
+            onClick={() => runAutomation('stage', 'Auto Stage')}
+            disabled={automationLoading !== null}
+            className="flex flex-col items-start gap-2 rounded-2xl border border-gray-200 bg-white p-4 text-left hover:border-indigo-300 hover:bg-indigo-50/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <div className="flex items-center gap-2">
+              <ArrowRightLeft className="w-4 h-4 text-blue-500" />
+              <span className="text-sm font-semibold text-gray-900">
+                {automationLoading === 'stage' ? 'Executando...' : 'Auto Stage'}
+              </span>
+            </div>
+            <span className="text-xs text-gray-500">Mover leads baseado em atividade</span>
+          </button>
+          <button
+            onClick={() => runAutomation('distribute', 'Distribuir Leads')}
+            disabled={automationLoading !== null}
+            className="flex flex-col items-start gap-2 rounded-2xl border border-gray-200 bg-white p-4 text-left hover:border-indigo-300 hover:bg-indigo-50/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-emerald-500" />
+              <span className="text-sm font-semibold text-gray-900">
+                {automationLoading === 'distribute' ? 'Executando...' : 'Distribuir Leads'}
+              </span>
+            </div>
+            <span className="text-xs text-gray-500">Atribuir leads sem dono</span>
+          </button>
+        </div>
+      </motion.div>
 
       {/* Charts row */}
       <div className="grid gap-6 lg:grid-cols-5">
@@ -181,7 +446,7 @@ export default function DashboardPage() {
                 {/* Current Value */}
                 <div className="text-center mb-6">
                   <p className="text-3xl font-bold text-gray-900">
-                    {kpiModal === 'Forecast Mensal' && 'R$ 0'}
+                    {kpiModal === 'Forecast Mensal' && (forecastData ? formatCurrency(forecastData.forecast.weighted) : 'R$ 0')}
                     {kpiModal === 'ROI Meta Ads' && '0x'}
                     {kpiModal === 'Leads Quentes' && '0'}
                     {kpiModal === 'Chamadas Hoje' && '0'}

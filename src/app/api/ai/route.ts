@@ -7,7 +7,7 @@ const aiRequestSchema = z.object({
   action: z.enum([
     'generate-campaign-message', 'score-lead', 'suggest-follow-up',
     'suggest-next-step', 'summarize-conversation', 'estimate-probability',
-    'detect-risk', 'generate-response',
+    'detect-risk', 'generate-response', 'full-analysis',
   ], {
     message: 'action invalida',
   }),
@@ -274,6 +274,36 @@ export async function POST(request: NextRequest) {
     const level = risks.some(r => r.severity === 'high') ? 'high' : risks.some(r => r.severity === 'medium') ? 'medium' : risks.length > 0 ? 'low' : 'none'
 
     return NextResponse.json({ risks, level, totalRisks: risks.length })
+  }
+
+  if (action === 'full-analysis') {
+    const { prisma } = await import('@/lib/prisma')
+    const { getAIInsights } = await import('@/lib/ai-service')
+
+    const lead = await prisma.lead.findUnique({
+      where: { id: context?.leadId as string },
+      include: { stage: true, deals: true, activities: { take: 10, orderBy: { createdAt: 'desc' } } },
+    })
+    if (!lead) return NextResponse.json({ error: 'Lead nao encontrado' }, { status: 404 })
+
+    const daysSinceContact = lead.lastContactAt
+      ? Math.floor((Date.now() - new Date(lead.lastContactAt).getTime()) / 86400000)
+      : 999
+
+    const insights = await getAIInsights({
+      leadName: `${lead.firstName} ${lead.lastName || ''}`.trim(),
+      temperature: lead.temperature,
+      score: lead.aiScore,
+      stage: lead.stage?.name || 'Base',
+      daysSinceContact,
+      dealValue: lead.deals.reduce((s, d) => s + (d.value || 0), 0),
+      noteCount: lead.activities.filter(a => a.type === 'note').length,
+      lastNote: lead.activities.find(a => a.type === 'note')?.description || null,
+      courseInterest: lead.courseInterest,
+      recentActivities: lead.activities.slice(0, 5).map(a => `${a.type}: ${a.title}`),
+    })
+
+    return NextResponse.json(insights)
   }
 
   if (action === 'generate-response') {
