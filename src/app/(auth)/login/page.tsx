@@ -85,7 +85,7 @@ export default function LoginPage() {
         <div className="glass-card rounded-2xl p-8">
           {/* Brand */}
           <div className="mb-8 text-center">
-            <img src="/logo.png" alt="AIFLUENT" className="mx-auto mb-4 h-14 w-14 rounded-2xl object-contain" />
+            <img src="/logo.png" alt="AIFLUENT" className="mx-auto mb-6 h-24 w-24 object-contain" />
             <h1 className="gradient-text text-2xl font-bold tracking-tight">
               AIFLUENT
             </h1>
