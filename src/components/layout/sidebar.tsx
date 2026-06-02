@@ -31,7 +31,7 @@ const navigation: NavSection[] = [
   {
     title: 'COMUNICACAO',
     items: [
-      { label: 'WhatsApp', href: '/whatsapp', icon: MessageCircle },
+      { label: 'Atendimento', href: '/atendimento', icon: MessageCircle },
       { label: 'Campanhas', href: '/campaigns', icon: Megaphone },
     ],
   },

@@ -11,6 +11,7 @@ const updateDealSchema = z.object({
   stageId: z.string().optional(),
   title: z.string().optional(),
   expectedCloseAt: z.string().optional(),
+  lostReason: z.string().optional(),
 })
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -57,5 +58,27 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   } catch (err) {
     logger.error('PATCH /api/deals/[id] error', err)
     return NextResponse.json({ error: 'Falha ao atualizar negocio' }, { status: 500 })
+  }
+}
+
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const rl = checkRateLimit(request, apiLimiter); if (rl) return rl
+  const { error } = await requireAuth(); if (error) return error
+  const { id } = await params
+
+  try {
+    const { prisma } = await import('@/lib/prisma')
+    const deal = await prisma.deal.findUnique({
+      where: { id },
+      include: {
+        lead: { select: { id: true, firstName: true, lastName: true, company: true } },
+        stage: { select: { id: true, name: true, color: true } },
+      },
+    })
+    if (!deal) return NextResponse.json({ error: 'Negocio nao encontrado' }, { status: 404 })
+    return NextResponse.json(deal)
+  } catch (err) {
+    logger.error('GET /api/deals/[id] error', err)
+    return NextResponse.json({ error: 'Falha ao buscar negocio' }, { status: 500 })
   }
 }

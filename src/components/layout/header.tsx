@@ -12,7 +12,7 @@ import { CommandPalette } from './command-palette'
 
 const routeTitles: Record<string, string> = {
   '/dashboard': 'Dashboard', '/leads': 'Leads', '/pipeline': 'Pipeline', '/deals': 'Negocios',
-  '/whatsapp': 'WhatsApp', '/campaigns': 'Campanhas',
+  '/whatsapp': 'WhatsApp', '/atendimento': 'Atendimento', '/campaigns': 'Campanhas',
   '/tasks': 'Tarefas', '/team': 'Equipe',
   '/ai-assistant': 'Assistente IA',
 }
