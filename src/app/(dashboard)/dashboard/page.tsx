@@ -6,6 +6,7 @@ import {
   CalendarDays, Sparkles, TrendingUp, Bot, Flame, Target,
   ArrowRight, Phone, X, Zap, ArrowRightLeft, Users,
 } from 'lucide-react'
+import Link from 'next/link'
 import { StatsGrid } from '@/components/dashboard/stats-grid'
 import { RevenueChart } from '@/components/dashboard/revenue-chart'
 import { LeadsBySource } from '@/components/dashboard/leads-by-source'
@@ -82,11 +83,15 @@ export default function DashboardPage() {
   const [forecastData, setForecastData] = useState<ForecastData | null>(null)
   const [funnelData, setFunnelData] = useState<FunnelData | null>(null)
   const [automationLoading, setAutomationLoading] = useState<string | null>(null)
+  const [needsOnboarding, setNeedsOnboarding] = useState(false)
 
   useEffect(() => {
     fetch('/api/dashboard')
       .then((res) => res.json())
-      .then((data) => setStats(data))
+      .then((data) => {
+        setStats(data)
+        if (data.totalLeads === 0) setNeedsOnboarding(true)
+      })
       .catch(() => setStats(emptyStats))
 
     fetch('/api/forecast')
@@ -151,6 +156,30 @@ export default function DashboardPage() {
           <span className="capitalize">{getFormattedDate()}</span>
         </div>
       </motion.div>
+
+      {/* Onboarding Banner */}
+      {needsOnboarding && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-purple-500/10 border border-sky-500/20 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+        >
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/20 shrink-0">
+            <Bot className="w-5 h-5 text-white" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-gray-900 font-medium">Complete o onboarding para comecar</p>
+            <p className="text-xs text-gray-500 mt-0.5">Configure seu pipeline, importe leads e deixe o copiloto IA pronto em 2 minutos.</p>
+          </div>
+          <Link
+            href="/onboarding"
+            className="flex items-center gap-1.5 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white text-xs font-semibold rounded-lg shadow-lg shadow-indigo-500/25 transition-all hover:from-indigo-500 hover:to-indigo-400 shrink-0"
+          >
+            Iniciar configuracao <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </motion.div>
+      )}
 
       {/* AI Insight Banner */}
       <motion.div

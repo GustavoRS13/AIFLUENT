@@ -17,6 +17,7 @@ export const PERMISSIONS = {
   'page:productivity': ['admin', 'gestor', 'operador'],
   'page:team': ['admin'],
   'page:reports': ['admin', 'gestor'],
+  'page:relatorios': ['admin', 'gestor'],
   'page:settings': ['admin'],
   'page:security': ['admin'],
   'page:integrations': ['admin'],

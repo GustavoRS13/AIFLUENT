@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Users, Kanban, Handshake, MessageCircle,
-  Megaphone, Bot, CheckSquare, UsersRound,
+  Megaphone, Bot, CheckSquare, UsersRound, BarChart3,
   ChevronLeft, ChevronRight, LogOut, X, Menu,
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
@@ -40,6 +40,7 @@ const navigation: NavSection[] = [
     items: [
       { label: 'Tarefas', href: '/tasks', icon: CheckSquare },
       { label: 'Equipe', href: '/team', icon: UsersRound },
+      { label: 'Relatorios', href: '/relatorios', icon: BarChart3 },
     ],
   },
   {

@@ -15,6 +15,7 @@ const routeTitles: Record<string, string> = {
   '/whatsapp': 'WhatsApp', '/atendimento': 'Atendimento', '/campaigns': 'Campanhas',
   '/tasks': 'Tarefas', '/team': 'Equipe',
   '/ai-assistant': 'Assistente IA',
+  '/relatorios': 'Relatorios',
 }
 
 export function Header({ onMobileMenuToggle }: { onMobileMenuToggle?: () => void }) {
