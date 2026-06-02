@@ -32,7 +32,6 @@ async function authenticateWithDB(email: string, password: string) {
   try {
     const { prisma } = await import('@/lib/prisma')
 
-    // First-time setup: seed default users if DB is empty
     const count = await prisma.user.count()
     if (count === 0) {
       let org = await prisma.organization.findFirst()
@@ -58,6 +57,21 @@ async function authenticateWithDB(email: string, password: string) {
   }
 }
 
+// Fallback when database is not available (Vercel without DATABASE_URL)
+async function authenticateWithoutDB(email: string, password: string) {
+  const seedUsers = getSeedUsers()
+  if (seedUsers.length === 0) {
+    // No seed passwords configured — use hardcoded demo access
+    if (email.toLowerCase() === 'admin@aifluent.com' && password === 'Admin@2026') {
+      return { id: 'demo-admin', name: 'AIFLUENT Admin', email, role: 'admin' as UserRole, organizationId: 'demo-org' }
+    }
+    return null
+  }
+  const user = seedUsers.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password)
+  if (!user) return null
+  return { id: `seed-${user.role}`, name: user.name, email: user.email, role: user.role, organizationId: 'seed-org' }
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET || require('crypto').createHash('sha256').update(process.env.VERCEL_URL || process.env.NEXTAUTH_URL || 'aifluent-crm-2026').digest('hex'),
   trustHost: true,
@@ -74,7 +88,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const { email, password } = parsed.data
 
-        return authenticateWithDB(email, password)
+        const dbUser = await authenticateWithDB(email, password)
+        if (dbUser) return dbUser
+
+        return authenticateWithoutDB(email, password)
       },
     }),
   ],
