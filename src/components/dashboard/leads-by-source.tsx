@@ -17,14 +17,15 @@ import {
   UserPlus,
   CalendarDays,
 } from 'lucide-react'
+// TODO: Connect to /api/dashboard/sources when backend is ready
 const sourceData = [
-  { name: 'Instagram', value: 342, color: '#E1306C', icon: Camera },
-  { name: 'Facebook', value: 218, color: '#1877F2', icon: Share2 },
-  { name: 'Google', value: 187, color: '#34A853', icon: Search },
-  { name: 'WhatsApp', value: 156, color: '#25D366', icon: MessageCircle },
-  { name: 'Site', value: 124, color: '#6366f1', icon: Globe },
-  { name: 'Indicação', value: 98, color: '#f59e0b', icon: UserPlus },
-  { name: 'Evento', value: 67, color: '#a855f7', icon: CalendarDays },
+  { name: 'Instagram', value: 0, color: '#E1306C', icon: Camera },
+  { name: 'Facebook', value: 0, color: '#1877F2', icon: Share2 },
+  { name: 'Google', value: 0, color: '#34A853', icon: Search },
+  { name: 'WhatsApp', value: 0, color: '#25D366', icon: MessageCircle },
+  { name: 'Site', value: 0, color: '#6366f1', icon: Globe },
+  { name: 'Indicacao', value: 0, color: '#f59e0b', icon: UserPlus },
+  { name: 'Evento', value: 0, color: '#a855f7', icon: CalendarDays },
 ]
 
 const total = sourceData.reduce((sum, d) => sum + d.value, 0)

@@ -22,53 +22,8 @@ interface ActiveCampaign {
   openRate: number
 }
 
-const initialCampaigns: ActiveCampaign[] = [
-  {
-    id: '1',
-    name: 'Vestibular 2026.2 - Lembrete',
-    channel: 'whatsapp',
-    status: 'sending',
-    sent: 1847,
-    total: 2500,
-    openRate: 89.2,
-  },
-  {
-    id: '2',
-    name: 'Bolsas Integrais - Prova',
-    channel: 'email',
-    status: 'completed',
-    sent: 3200,
-    total: 3200,
-    openRate: 42.8,
-  },
-  {
-    id: '3',
-    name: 'EAD - Novas Turmas',
-    channel: 'sms',
-    status: 'sending',
-    sent: 912,
-    total: 1800,
-    openRate: 67.5,
-  },
-  {
-    id: '4',
-    name: 'Pós-Graduação MBA',
-    channel: 'whatsapp',
-    status: 'scheduled',
-    sent: 0,
-    total: 4100,
-    openRate: 0,
-  },
-  {
-    id: '5',
-    name: 'Reengajamento Inativos',
-    channel: 'email',
-    status: 'sending',
-    sent: 2156,
-    total: 5000,
-    openRate: 31.4,
-  },
-]
+// TODO: Connect to /api/campaigns?active=true when backend is ready
+const initialCampaigns: ActiveCampaign[] = []
 
 const channelIcons: Record<CampaignChannel, React.ElementType> = {
   whatsapp: MessageCircle,

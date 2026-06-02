@@ -28,18 +28,8 @@ interface RecentLead {
   date: string
 }
 
-const initialLeads: RecentLead[] = [
-  { id: '1', name: 'Maria Silva', source: 'instagram', course: 'Administração', temperature: 'hot', score: 92, consultant: 'Ana Souza', date: '2026-05-27' },
-  { id: '2', name: 'João Oliveira', source: 'google', course: 'Engenharia', temperature: 'warm', score: 78, consultant: 'Carlos Lima', date: '2026-05-27' },
-  { id: '3', name: 'Fernanda Costa', source: 'whatsapp', course: 'Direito', temperature: 'hot', score: 88, consultant: 'Ana Souza', date: '2026-05-27' },
-  { id: '4', name: 'Pedro Santos', source: 'facebook', course: 'Medicina', temperature: 'cold', score: 45, consultant: 'Bruno Reis', date: '2026-05-26' },
-  { id: '5', name: 'Camila Ferreira', source: 'website', course: 'Psicologia', temperature: 'warm', score: 71, consultant: 'Carlos Lima', date: '2026-05-26' },
-  { id: '6', name: 'Lucas Almeida', source: 'referral', course: 'Arquitetura', temperature: 'hot', score: 95, consultant: 'Ana Souza', date: '2026-05-26' },
-  { id: '7', name: 'Beatriz Rocha', source: 'event', course: 'Design', temperature: 'warm', score: 67, consultant: 'Bruno Reis', date: '2026-05-25' },
-  { id: '8', name: 'Thiago Mendes', source: 'instagram', course: 'Marketing', temperature: 'cold', score: 38, consultant: 'Carlos Lima', date: '2026-05-25' },
-  { id: '9', name: 'Gabriela Nunes', source: 'google', course: 'Ciência da Computação', temperature: 'hot', score: 84, consultant: 'Ana Souza', date: '2026-05-25' },
-  { id: '10', name: 'Rafael Barbosa', source: 'whatsapp', course: 'Economia', temperature: 'warm', score: 73, consultant: 'Bruno Reis', date: '2026-05-24' },
-]
+// TODO: Connect to /api/leads?recent=true when backend is ready
+const initialLeads: RecentLead[] = []
 
 const sourceIcons: Record<LeadSource, React.ElementType> = {
   instagram: Camera,
