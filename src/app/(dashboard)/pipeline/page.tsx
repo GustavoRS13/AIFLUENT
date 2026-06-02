@@ -79,7 +79,7 @@ const GROUP_SOURCE_MAP: Record<string, LeadSource[]> = {
   'organico': ['whatsapp', 'website', 'referral', 'event'],
 }
 
-// No mock data — pipeline loads from API only. Empty columns shown when no leads exist.
+// Pipeline loads from API. Empty columns shown when no leads exist.
 
 export default function PipelinePage() {
   const { stages, setStages, addStage, renameStage, updateStageColor, deleteStage } = usePipelineStore()
