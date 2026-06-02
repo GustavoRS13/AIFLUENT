@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, SlidersHorizontal, RefreshCw, Loader2, Plus,
-  ChevronDown, Download, X, Check, Calendar,
+  ChevronDown, ChevronRight, Download, X, Check, Calendar,
   Tag, User, Activity,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -23,41 +23,70 @@ const STAGES = [
   { name: 'Perdido', color: '#ef4444', isWon: false, isLost: true },
 ]
 
-const ORIGINS = [
-  { label: 'Todos os Leads', count: 0, active: true },
-  { label: 'WhatsApp Site', count: 0 },
-  { label: 'Instagram Ads', count: 0 },
-  { label: 'Facebook Lead Ads', count: 0 },
-  { label: 'Google Ads', count: 0 },
-  { label: 'Remarketing', count: 0 },
-  { label: 'Indicacao', count: 0 },
-  { label: 'Evento Presencial', count: 0 },
-  { label: 'Landing Page', count: 0 },
+interface OriginGroup {
+  id: string
+  label: string
+  children: { id: string; label: string }[]
+}
+
+const ORIGIN_TREE: OriginGroup[] = [
+  {
+    id: 'meta-ads',
+    label: 'Meta Ads',
+    children: [
+      { id: 'facebook-lead-ads', label: 'Facebook Lead Ads' },
+      { id: 'instagram-ads', label: 'Instagram Ads' },
+      { id: 'remarketing', label: 'Remarketing' },
+    ],
+  },
+  {
+    id: 'google',
+    label: 'Google Ads',
+    children: [
+      { id: 'google-search', label: 'Google Search' },
+      { id: 'google-display', label: 'Google Display' },
+    ],
+  },
+  {
+    id: 'organico',
+    label: 'Organico',
+    children: [
+      { id: 'whatsapp-site', label: 'WhatsApp Site' },
+      { id: 'landing-page', label: 'Landing Page' },
+      { id: 'indicacao', label: 'Indicacao' },
+      { id: 'evento', label: 'Evento Presencial' },
+    ],
+  },
 ]
 
-// No mock data — pipeline loads from API only. Empty columns shown when no leads exist.
-
-function computeOrigins(stages: PipelineStage[]) {
-  const all = stages.flatMap((s) => s.leads)
-  const origins = [...ORIGINS]
-  origins[0].count = all.length
-  const tagCounts: Record<string, number> = {}
-  for (const lead of all) {
-    for (const tag of lead.tags) {
-      tagCounts[tag] = (tagCounts[tag] || 0) + 1
-    }
-  }
-  for (let i = 1; i < origins.length; i++) {
-    origins[i].count = tagCounts[origins[i].label] || Math.floor(Math.random() * 50 + 5)
-  }
-  return origins
+/** Map child origin IDs to LeadSource values for filtering */
+const ORIGIN_SOURCE_MAP: Record<string, LeadSource[]> = {
+  'facebook-lead-ads': ['facebook_lead_ad', 'facebook'],
+  'instagram-ads': ['instagram'],
+  'remarketing': ['meta_ads'],
+  'google-search': ['google'],
+  'google-display': ['google'],
+  'whatsapp-site': ['whatsapp'],
+  'landing-page': ['website'],
+  'indicacao': ['referral'],
+  'evento': ['event'],
 }
+
+/** Map group IDs to the union of their children's sources */
+const GROUP_SOURCE_MAP: Record<string, LeadSource[]> = {
+  'meta-ads': ['meta_ads', 'facebook_lead_ad', 'facebook', 'instagram'],
+  'google': ['google'],
+  'organico': ['whatsapp', 'website', 'referral', 'event'],
+}
+
+// No mock data — pipeline loads from API only. Empty columns shown when no leads exist.
 
 export default function PipelinePage() {
   const { stages, setStages, addStage, renameStage, updateStageColor, deleteStage } = usePipelineStore()
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedOrigin, setSelectedOrigin] = useState(0)
+  const [selectedOrigin, setSelectedOrigin] = useState<string>('all')
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['meta-ads', 'organico']))
   const [openFilter, setOpenFilter] = useState<string | null>(null)
   const [filterDate, setFilterDate] = useState<string>('')
   const [filterTag, setFilterTag] = useState<string>('')
@@ -130,9 +159,57 @@ export default function PipelinePage() {
     deleteStage(stageId)
   }, [deleteStage])
 
+  function toggleGroup(groupId: string) {
+    setExpandedGroups(prev => {
+      const next = new Set(prev)
+      if (next.has(groupId)) next.delete(groupId)
+      else next.add(groupId)
+      return next
+    })
+  }
+
+  function countForGroup(group: OriginGroup): number {
+    const all = stages.flatMap(s => s.leads)
+    const sources = GROUP_SOURCE_MAP[group.id]
+    if (!sources) return 0
+    return all.filter(l => sources.includes(l.source)).length
+  }
+
+  function countForChild(childId: string): number {
+    const all = stages.flatMap(s => s.leads)
+    const sources = ORIGIN_SOURCE_MAP[childId]
+    if (!sources) return 0
+    return all.filter(l => sources.includes(l.source)).length
+  }
+
+  /** Resolve the set of LeadSource values for the currently selected origin */
+  function getSelectedSources(): LeadSource[] | null {
+    if (selectedOrigin === 'all') return null
+    // Check if it's a group
+    if (GROUP_SOURCE_MAP[selectedOrigin]) return GROUP_SOURCE_MAP[selectedOrigin]
+    // Check if it's a child
+    if (ORIGIN_SOURCE_MAP[selectedOrigin]) return ORIGIN_SOURCE_MAP[selectedOrigin]
+    return null
+  }
+
+  /** Find the display label for the current selection */
+  function getSelectedLabel(): string {
+    if (selectedOrigin === 'all') return 'Pipeline'
+    for (const group of ORIGIN_TREE) {
+      if (group.id === selectedOrigin) return group.label
+      for (const child of group.children) {
+        if (child.id === selectedOrigin) return child.label
+      }
+    }
+    return 'Pipeline'
+  }
+
+  const selectedSources = getSelectedSources()
+
   const filteredStages = stages.map((stage) => ({
     ...stage,
     leads: stage.leads.filter((lead) => {
+      if (selectedSources && !selectedSources.includes(lead.source)) return false
       if (searchQuery.trim() && !lead.name.toLowerCase().includes(searchQuery.toLowerCase()) && !lead.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()))) return false
       if (filterTag && !lead.tags.includes(filterTag)) return false
       if (filterOwner && lead.consultant !== filterOwner) return false
@@ -141,7 +218,6 @@ export default function PipelinePage() {
     }),
   }))
 
-  const origins = computeOrigins(stages)
   const totalLeads = filteredStages.reduce((s, st) => s + st.leads.length, 0)
   const totalValue = filteredStages.flatMap((s) => s.leads).reduce((s, l) => s + (l.dealValue || 0), 0)
 
@@ -158,19 +234,58 @@ export default function PipelinePage() {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto py-1">
-          {origins.map((origin, i) => (
-            <button
-              key={i}
-              onClick={() => setSelectedOrigin(i)}
-              className={cn(
-                'w-full flex items-center gap-2 px-4 py-2 text-left text-sm transition-colors',
-                selectedOrigin === i ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-600 hover:bg-gray-50'
-              )}
-            >
-              <span className={cn('w-2 h-2 rounded-full shrink-0', selectedOrigin === i ? 'bg-indigo-500' : 'bg-gray-300')} />
-              <span className="truncate flex-1">{origin.label}</span>
-              <span className="text-xs text-gray-400 tabular-nums">{origin.count}</span>
-            </button>
+          {/* "Todos" option */}
+          <button
+            onClick={() => setSelectedOrigin('all')}
+            className={cn(
+              'w-full flex items-center gap-2 px-4 py-2 text-left text-sm transition-colors',
+              selectedOrigin === 'all' ? 'bg-sky-50 text-sky-700 font-medium' : 'text-gray-600 hover:bg-gray-50'
+            )}
+          >
+            <span className={cn('w-2 h-2 rounded-full shrink-0', selectedOrigin === 'all' ? 'bg-sky-500' : 'bg-gray-300')} />
+            <span className="truncate flex-1">Todos os Leads</span>
+            <span className="text-xs text-gray-400 tabular-nums">{stages.flatMap(s => s.leads).length}</span>
+          </button>
+
+          {/* Tree groups */}
+          {ORIGIN_TREE.map(group => (
+            <div key={group.id}>
+              <button
+                onClick={() => toggleGroup(group.id)}
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <ChevronRight className={cn('w-3 h-3 transition-transform shrink-0', expandedGroups.has(group.id) && 'rotate-90')} />
+                <span className="font-medium truncate flex-1">{group.label}</span>
+                <span className="ml-auto text-xs text-gray-400 tabular-nums">{countForGroup(group)}</span>
+              </button>
+
+              <AnimatePresence initial={false}>
+                {expandedGroups.has(group.id) && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2, ease: 'easeInOut' }}
+                    className="overflow-hidden"
+                  >
+                    {group.children.map(child => (
+                      <button
+                        key={child.id}
+                        onClick={() => setSelectedOrigin(child.id)}
+                        className={cn(
+                          'w-full flex items-center gap-2 pl-8 pr-3 py-1.5 text-sm transition-colors',
+                          selectedOrigin === child.id ? 'bg-sky-50 text-sky-700 font-medium' : 'text-gray-600 hover:bg-gray-50'
+                        )}
+                      >
+                        <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', selectedOrigin === child.id ? 'bg-sky-500' : 'bg-gray-300')} />
+                        <span className="truncate flex-1">{child.label}</span>
+                        <span className="text-xs text-gray-400 tabular-nums">{countForChild(child.id)}</span>
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           ))}
         </div>
       </div>
@@ -182,7 +297,7 @@ export default function PipelinePage() {
           <div className="flex items-center justify-between mb-3">
             <div>
               <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Negocios da Origem</p>
-              <h1 className="text-xl font-bold text-gray-900">{origins[selectedOrigin]?.label || 'Pipeline'}</h1>
+              <h1 className="text-xl font-bold text-gray-900">{getSelectedLabel()}</h1>
             </div>
             <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
               <Plus className="w-4 h-4" /> Negocio +
