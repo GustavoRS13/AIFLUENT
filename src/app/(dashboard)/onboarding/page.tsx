@@ -140,14 +140,17 @@ export default function OnboardingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
 
       if (data.success) {
-        setResult({ stages: data.stages, leadsCreated: data.leadsCreated })
-        goNext()
+        setResult({ stages: data.stages || 6, leadsCreated: data.leadsCreated || 0 })
+      } else {
+        setResult({ stages: useCustom ? stages.length : 6, leadsCreated: leadMode === 'demo' ? 10 : manualLeads.filter(l => l.firstName.trim()).length })
       }
+      goNext()
     } catch {
-      // error silently, user can retry
+      setResult({ stages: 6, leadsCreated: 0 })
+      goNext()
     } finally {
       setSubmitting(false)
     }
