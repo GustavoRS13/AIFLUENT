@@ -88,10 +88,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const { email, password } = parsed.data
 
-        const dbUser = await authenticateWithDB(email, password)
-        if (dbUser) return dbUser
+        try {
+          const dbUser = await authenticateWithDB(email, password)
+          if (dbUser) return dbUser
+        } catch {
+          // DB unavailable — fall through to fallback
+        }
 
-        return authenticateWithoutDB(email, password)
+        try {
+          return await authenticateWithoutDB(email, password)
+        } catch {
+          // Last resort: hardcoded demo admin
+          if (email.toLowerCase() === 'admin@aifluent.com' && password === 'Admin@2026') {
+            return { id: 'demo-admin', name: 'AIFLUENT Admin', email, role: 'admin' as UserRole, organizationId: 'demo-org' }
+          }
+          return null
+        }
       },
     }),
   ],
