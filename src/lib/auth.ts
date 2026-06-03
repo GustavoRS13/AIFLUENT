@@ -88,22 +88,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const { email, password } = parsed.data
 
+        // Layer 1: Try database authentication
         try {
           const dbUser = await authenticateWithDB(email, password)
           if (dbUser) return dbUser
-        } catch {
-          // DB unavailable — fall through to fallback
+        } catch { /* DB unavailable */ }
+
+        // Layer 2: Hardcoded demo (ALWAYS available, no dependencies)
+        if (email.toLowerCase() === 'admin@aifluent.com' && password === 'Admin@2026') {
+          return { id: 'demo-admin', name: 'AIFLUENT Admin', email, role: 'admin' as UserRole, organizationId: 'demo-org' }
+        }
+        if (email.toLowerCase() === 'gestor@aifluent.com' && password === 'Gestor@2026') {
+          return { id: 'demo-gestor', name: 'AIFLUENT Gestor', email, role: 'gestor' as UserRole, organizationId: 'demo-org' }
+        }
+        if (email.toLowerCase() === 'operador@aifluent.com' && password === 'Operador@2026') {
+          return { id: 'demo-operador', name: 'AIFLUENT Operador', email, role: 'operador' as UserRole, organizationId: 'demo-org' }
         }
 
-        try {
-          return await authenticateWithoutDB(email, password)
-        } catch {
-          // Last resort: hardcoded demo admin
-          if (email.toLowerCase() === 'admin@aifluent.com' && password === 'Admin@2026') {
-            return { id: 'demo-admin', name: 'AIFLUENT Admin', email, role: 'admin' as UserRole, organizationId: 'demo-org' }
-          }
-          return null
-        }
+        return null
       },
     }),
   ],
