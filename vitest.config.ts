@@ -8,6 +8,14 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
+    // next-auth (beta) imports the bare specifier "next/server" internally,
+    // which Vitest's Node resolver cannot resolve. Inlining lets Vite transform
+    // and resolve it via the package exports map.
+    server: {
+      deps: {
+        inline: [/next-auth/, /@auth\/core/],
+      },
+    },
   },
   resolve: {
     alias: {

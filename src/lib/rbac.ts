@@ -2,7 +2,7 @@ export type UserRole = 'admin' | 'gestor' | 'supervisor' | 'operador'
 
 export const PERMISSIONS = {
   // Pages
-  'page:dashboard': ['admin', 'gestor'],
+  'page:dashboard': ['admin', 'gestor', 'supervisor', 'operador'],
   'page:leads': ['admin', 'gestor', 'supervisor', 'operador'],
   'page:pipeline': ['admin', 'gestor', 'supervisor', 'operador'],
   'page:deals': ['admin', 'gestor', 'supervisor', 'operador'],
@@ -15,7 +15,7 @@ export const PERMISSIONS = {
   'page:automations': ['admin', 'gestor'],
   'page:tasks': ['admin', 'gestor', 'supervisor', 'operador'],
   'page:productivity': ['admin', 'gestor'],
-  'page:team': ['admin', 'gestor'],
+  'page:team': ['admin'],
   'page:reports': ['admin', 'gestor'],
   'page:relatorios': ['admin', 'gestor'],
   'page:settings': ['admin'],

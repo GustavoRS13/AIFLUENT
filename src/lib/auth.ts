@@ -57,23 +57,40 @@ async function authenticateWithDB(email: string, password: string) {
   }
 }
 
-// Fallback when database is not available (Vercel without DATABASE_URL)
-async function authenticateWithoutDB(email: string, password: string) {
-  const seedUsers = getSeedUsers()
-  if (seedUsers.length === 0) {
-    // No seed passwords configured — use hardcoded demo access
-    if (email.toLowerCase() === 'admin@aifluent.com' && password === 'Admin@2026') {
-      return { id: 'demo-admin', name: 'AIFLUENT Admin', email, role: 'admin' as UserRole, organizationId: 'demo-org' }
-    }
-    return null
-  }
-  const user = seedUsers.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password)
-  if (!user) return null
-  return { id: `seed-${user.role}`, name: user.name, email: user.email, role: user.role, organizationId: 'seed-org' }
+/**
+ * Authorize a login attempt. Authentication is DATABASE-ONLY — there is NO
+ * hardcoded fallback and NO demo backdoor. If the database has no matching
+ * active user (or the password is wrong), login is denied.
+ * Exported so the contract can be unit-tested directly.
+ */
+export async function authorizeCredentials(credentials: unknown) {
+  const parsed = loginSchema.safeParse(credentials)
+  if (!parsed.success) return null
+
+  const { email, password } = parsed.data
+  return authenticateWithDB(email, password)
 }
 
+/**
+ * Resolve the auth signing key from the environment. Throws — aborting
+ * application boot — when AUTH_SECRET is missing or too weak. There is NO key
+ * derived from a constant string (which would allow JWT forgery).
+ */
+export function resolveAuthSecret(): string {
+  const value = process.env.AUTH_SECRET
+  if (!value || value.length < 16) {
+    throw new Error(
+      'AUTH_SECRET ausente ou muito curto (mínimo 16 caracteres). ' +
+        'Defina AUTH_SECRET no ambiente para iniciar a aplicação.',
+    )
+  }
+  return value
+}
+
+const signingKey = resolveAuthSecret()
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  secret: process.env.AUTH_SECRET || require('crypto').createHash('sha256').update(process.env.VERCEL_URL || process.env.NEXTAUTH_URL || 'aifluent-crm-2026').digest('hex'),
+  secret: signingKey,
   trustHost: true,
   providers: [
     Credentials({
@@ -83,29 +100,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: 'Senha', type: 'password' },
       },
       async authorize(credentials) {
-        const parsed = loginSchema.safeParse(credentials)
-        if (!parsed.success) return null
-
-        const { email, password } = parsed.data
-
-        // Layer 1: Try database authentication
-        try {
-          const dbUser = await authenticateWithDB(email, password)
-          if (dbUser) return dbUser
-        } catch { /* DB unavailable */ }
-
-        // Layer 2: Hardcoded demo (ALWAYS available, no dependencies)
-        if (email.toLowerCase() === 'admin@aifluent.com' && password === 'Admin@2026') {
-          return { id: 'demo-admin', name: 'AIFLUENT Admin', email, role: 'admin' as UserRole, organizationId: 'demo-org', teamId: null }
-        }
-        if (email.toLowerCase() === 'gestor@aifluent.com' && password === 'Gestor@2026') {
-          return { id: 'demo-gestor', name: 'AIFLUENT Gestor', email, role: 'gestor' as UserRole, organizationId: 'demo-org', teamId: null }
-        }
-        if (email.toLowerCase() === 'operador@aifluent.com' && password === 'Operador@2026') {
-          return { id: 'demo-operador', name: 'AIFLUENT Operador', email, role: 'operador' as UserRole, organizationId: 'demo-org', teamId: null }
-        }
-
-        return null
+        // DATABASE-ONLY authentication. No hardcoded/demo fallback.
+        return authorizeCredentials(credentials)
       },
     }),
   ],
