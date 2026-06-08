@@ -198,6 +198,9 @@ model Tag {
   organization   Organization @relation(fields: [organizationId], references: [id])
 
   leads LeadTag[]
+
+  // Hot path: ingestLead busca tag por (organizationId, name) em todo lead.
+  @@index([organizationId, name])
 }
 
 model LeadTag {
