@@ -65,11 +65,11 @@ export function getAuthUrl(state: string, redirectUri: string): string {
   return `https://www.facebook.com/v21.0/dialog/oauth?${p.toString()}`;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function graphGet(
   path: string,
   token: string,
   params: Record<string, string> = {},
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
   const p = new URLSearchParams({
     access_token: token,
@@ -245,14 +245,16 @@ export async function subscribePageToLeadgen(
   const p = new URLSearchParams({
     access_token: pageToken,
     appsecret_proof: proof(pageToken),
-    subscribed_fields: 'leadgen',
-  })
+    subscribed_fields: "leadgen",
+  });
   const res = await fetch(`${GRAPH}/${pageId}/subscribed_apps`, {
-    method: 'POST',
+    method: "POST",
     body: p,
-  })
-  const data = await res.json()
+  });
+  const data = await res.json();
   if (!res.ok || data.error) {
-    throw new Error(data.error?.message || 'Falha ao inscrever pagina no webhook')
+    throw new Error(
+      data.error?.message || "Falha ao inscrever pagina no webhook",
+    );
   }
 }
