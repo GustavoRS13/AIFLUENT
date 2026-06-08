@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { requireAuth, checkRateLimit, getOrgId } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit, requireOrgId } from '@/lib/api-auth'
 import { logger } from '@/lib/logger'
 
 const createCampaignSchema = z.object({
@@ -11,8 +11,7 @@ const createCampaignSchema = z.object({
   subject: z.string().optional(),
   content: z.string().optional(),
   scheduledAt: z.string().optional().nullable(),
-  organizationId: z.string(),
-  createdById: z.string(),
+  // organizationId/createdById derivados da sessao (nao confiar no corpo)
 })
 
 export async function GET(request: NextRequest) {
@@ -22,11 +21,12 @@ export async function GET(request: NextRequest) {
   const { error, session } = await requireAuth()
   if (error) return error
 
-  const orgId = getOrgId(session)
+  const { orgId, error: orgError } = requireOrgId(session)
+  if (orgError) return orgError
 
   try {
     const campaigns = await prisma.campaign.findMany({
-      where: orgId ? { organizationId: orgId } : {},
+      where: { organizationId: orgId },
       include: {
         createdBy: { select: { id: true, name: true, avatar: true } },
         _count: { select: { leads: true, sequences: true } },
@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
   const { error: authError, session: postSession } = await requireAuth('gestor')
   if (authError) return authError
 
-  const postOrgId = getOrgId(postSession)
+  const { orgId: postOrgId, error: postOrgError } = requireOrgId(postSession)
+  if (postOrgError) return postOrgError
 
   try {
     let body: unknown
@@ -76,8 +77,8 @@ export async function POST(request: NextRequest) {
         subject: data.subject,
         content: data.content,
         scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : null,
-        organizationId: postOrgId || data.organizationId,
-        createdById: data.createdById,
+        organizationId: postOrgId,
+        createdById: (postSession!.user as Record<string, unknown>).id as string,
       },
     })
 

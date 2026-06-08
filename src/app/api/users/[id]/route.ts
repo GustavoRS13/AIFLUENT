@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, checkRateLimit, getOrgId } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit, requireOrgId } from '@/lib/api-auth'
 import { apiLimiter } from '@/lib/rate-limit'
 import { logger } from '@/lib/logger'
 import { z } from 'zod'
@@ -31,13 +31,14 @@ export async function PATCH(
     }
 
     const { prisma } = await import('@/lib/prisma')
-    const orgId = getOrgId(session)
+    const { orgId, error: orgError } = requireOrgId(session)
+    if (orgError) return orgError
 
     const user = await prisma.user.findUnique({ where: { id } })
     if (!user) {
       return NextResponse.json({ error: 'Usuario nao encontrado' }, { status: 404 })
     }
-    if (orgId && user.organizationId !== orgId) {
+    if (user.organizationId !== orgId) {
       return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
     }
 

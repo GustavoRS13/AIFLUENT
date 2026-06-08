@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, checkRateLimit, getOrgId } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit, requireOrgId } from '@/lib/api-auth'
 import { apiLimiter } from '@/lib/rate-limit'
 import { z } from 'zod'
 import { logger } from '@/lib/logger'
@@ -16,12 +16,13 @@ const createTaskSchema = z.object({
 export async function GET(request: Request) {
   const rl = checkRateLimit(request, apiLimiter); if (rl) return rl
   const { error, session } = await requireAuth(); if (error) return error
-  const orgId = getOrgId(session)
+  const { orgId, error: orgError } = requireOrgId(session)
+  if (orgError) return orgError
   const userRole = (session!.user as Record<string, unknown>).role as string
   const userId = (session!.user as Record<string, unknown>).id as string
   try {
     const { prisma } = await import('@/lib/prisma')
-    const where: Record<string, unknown> = orgId ? { organizationId: orgId } : {}
+    const where: Record<string, unknown> = { organizationId: orgId }
 
     // Role-based data isolation: operador sees only tasks assigned to or created by them
     if (userRole === 'operador' && userId) {
@@ -46,6 +47,8 @@ export async function GET(request: Request) {
 export async function POST(request: NextRequest) {
   const rl = checkRateLimit(request, apiLimiter); if (rl) return rl
   const { error, session } = await requireAuth(); if (error) return error
+  const { orgId, error: orgError } = requireOrgId(session)
+  if (orgError) return orgError
   try {
     const body = await request.json()
     const parsed = createTaskSchema.safeParse(body)
@@ -58,23 +61,13 @@ export async function POST(request: NextRequest) {
 
     const { prisma } = await import('@/lib/prisma')
     const userId = (session!.user as Record<string, unknown>).id as string
-    const taskOrgId = getOrgId(session)
-
-    let resolvedOrgId = taskOrgId
-    if (!resolvedOrgId) {
-      const org = await prisma.organization.findFirst()
-      if (org) { resolvedOrgId = org.id } else {
-        const newOrg = await prisma.organization.create({ data: { name: 'AIFLUENT', slug: 'aifluent' } })
-        resolvedOrgId = newOrg.id
-      }
-    }
 
     const task = await prisma.task.create({
       data: {
         ...parsed.data,
         dueDate: parsed.data.dueDate ? new Date(parsed.data.dueDate) : undefined,
         creatorId: userId,
-        organizationId: resolvedOrgId,
+        organizationId: orgId,
       },
     })
     return NextResponse.json(task, { status: 201 })

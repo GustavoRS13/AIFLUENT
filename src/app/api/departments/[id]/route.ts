@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { requireAuth, checkRateLimit, getOrgId } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit, requireOrgId } from '@/lib/api-auth'
 import { apiLimiter } from '@/lib/rate-limit'
 import { logger } from '@/lib/logger'
 
@@ -17,7 +17,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const { error, session } = await requireAuth('admin')
   if (error) return error
   const { id } = await params
-  const orgId = getOrgId(session)
+  const { orgId, error: orgError } = requireOrgId(session)
+  if (orgError) return orgError
 
   let body: unknown
   try {
@@ -39,7 +40,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     const existing = await prisma.team.findUnique({ where: { id } })
     if (!existing) return NextResponse.json({ error: 'Departamento nao encontrado' }, { status: 404 })
-    if (orgId && existing.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+    if (existing.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
     const data: Record<string, unknown> = {}
     for (const [key, value] of Object.entries(parsed.data)) {
@@ -68,7 +69,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   const { error, session } = await requireAuth('admin')
   if (error) return error
   const { id } = await params
-  const orgId = getOrgId(session)
+  const { orgId, error: orgError } = requireOrgId(session)
+  if (orgError) return orgError
 
   try {
     const { prisma } = await import('@/lib/prisma')
@@ -80,7 +82,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       },
     })
     if (!existing) return NextResponse.json({ error: 'Departamento nao encontrado' }, { status: 404 })
-    if (orgId && existing.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+    if (existing.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
     if (existing._count.leads > 0 || existing._count.members > 0) {
       return NextResponse.json(

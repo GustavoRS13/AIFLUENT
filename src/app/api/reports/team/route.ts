@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { requireAuth, checkRateLimit } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit, requireOrgId } from '@/lib/api-auth'
 import { apiLimiter } from '@/lib/rate-limit'
 import { logger } from '@/lib/logger'
 
@@ -9,7 +9,8 @@ export async function GET(request: Request) {
 
   try {
     const { prisma } = await import('@/lib/prisma')
-    const orgId = (session!.user as Record<string, unknown>).organizationId as string
+    const { orgId, error: orgError } = requireOrgId(session)
+    if (orgError) return orgError
 
     const users = await prisma.user.findMany({
       where: { organizationId: orgId, isActive: true },

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, checkRateLimit } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit, requireOrgId } from '@/lib/api-auth'
 import { apiLimiter } from '@/lib/rate-limit'
 import { sendEmail } from '@/lib/email-service'
 import { logger } from '@/lib/logger'
@@ -16,11 +16,20 @@ const sendEmailSchema = z.object({
 export async function POST(request: NextRequest) {
   const rl = checkRateLimit(request, apiLimiter); if (rl) return rl
   const { error: authError, session } = await requireAuth('gestor'); if (authError) return authError
+  const { orgId, error: orgError } = requireOrgId(session)
+  if (orgError) return orgError
 
   try {
     const body = await request.json()
     const parsed = sendEmailSchema.safeParse(body)
     if (!parsed.success) return NextResponse.json({ error: 'Dados invalidos', details: parsed.error.flatten().fieldErrors }, { status: 400 })
+
+    // Se um lead e referenciado, ele precisa pertencer a org da sessao
+    if (parsed.data.leadId) {
+      const { prisma } = await import('@/lib/prisma')
+      const ownLead = await prisma.lead.findFirst({ where: { id: parsed.data.leadId, organizationId: orgId }, select: { id: true } })
+      if (!ownLead) return NextResponse.json({ error: 'Lead nao encontrado' }, { status: 404 })
+    }
 
     const result = await sendEmail(parsed.data)
 

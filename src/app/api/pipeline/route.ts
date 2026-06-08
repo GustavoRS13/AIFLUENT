@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { requireAuth, checkRateLimit, getOrgId } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit, requireOrgId } from '@/lib/api-auth'
 import { logger } from '@/lib/logger'
 
 const moveLeadSchema = z.object({
@@ -17,11 +17,12 @@ export async function GET(request: NextRequest) {
   const { error, session } = await requireAuth()
   if (error) return error
 
-  const orgId = getOrgId(session)
+  const { orgId, error: orgError } = requireOrgId(session)
+  if (orgError) return orgError
 
   try {
     const pipeline = await prisma.pipeline.findFirst({
-      where: { isDefault: true, ...(orgId ? { organizationId: orgId } : {}) },
+      where: { isDefault: true, organizationId: orgId },
       include: {
         stages: {
           orderBy: { order: 'asc' },
@@ -51,8 +52,10 @@ export async function PATCH(request: NextRequest) {
   const rateLimited = checkRateLimit(request)
   if (rateLimited) return rateLimited
 
-  const { error: authError } = await requireAuth('gestor')
+  const { error: authError, session } = await requireAuth('gestor')
   if (authError) return authError
+  const { orgId, error: orgError } = requireOrgId(session)
+  if (orgError) return orgError
 
   try {
     let body: unknown
@@ -71,6 +74,9 @@ export async function PATCH(request: NextRequest) {
     }
 
     const { leadId, stageId, newOrder } = parsed.data
+
+    const own = await prisma.lead.findFirst({ where: { id: leadId, organizationId: orgId }, select: { id: true } })
+    if (!own) return NextResponse.json({ error: 'Lead nao encontrado' }, { status: 404 })
 
     await prisma.lead.update({
       where: { id: leadId },

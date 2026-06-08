@@ -7,10 +7,7 @@ import {
   Sparkles,
   TrendingUp,
   Bot,
-  Flame,
-  Target,
   ArrowRight,
-  Phone,
   X,
   Zap,
   ArrowRightLeft,
@@ -223,29 +220,6 @@ export default function DashboardPage() {
         </motion.div>
       )}
 
-      {/* AI Insight Banner */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-indigo-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4"
-      >
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
-          <Bot className="w-5 h-5 text-white" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm text-gray-900 font-medium">
-            Insight IA: Nenhum insight disponivel
-          </p>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Adicione leads e campanhas para receber insights automaticos da IA.
-          </p>
-        </div>
-        <button className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 text-xs font-medium rounded-lg transition-colors shrink-0">
-          Ver detalhes <ArrowRight className="w-3 h-3" />
-        </button>
-      </motion.div>
-
       {/* Stats grid - 8 cards */}
       <StatsGrid stats={stats} />
 
@@ -263,30 +237,6 @@ export default function DashboardPage() {
             icon: TrendingUp,
             color: "from-emerald-500/10 to-cyan-500/10 border-emerald-500/20",
             iconColor: "text-emerald-400",
-          },
-          {
-            label: "ROI Meta Ads",
-            value: "0x",
-            subtext: "ROAS medio das campanhas",
-            icon: Target,
-            color: "from-purple-500/10 to-pink-500/10 border-purple-500/20",
-            iconColor: "text-purple-400",
-          },
-          {
-            label: "Leads Quentes",
-            value: "0",
-            subtext: "Score IA acima de 80",
-            icon: Flame,
-            color: "from-rose-500/10 to-orange-500/10 border-rose-500/20",
-            iconColor: "text-rose-400",
-          },
-          {
-            label: "Chamadas Hoje",
-            value: "0",
-            subtext: "Nenhuma chamada registrada",
-            icon: Phone,
-            color: "from-blue-500/10 to-indigo-500/10 border-blue-500/20",
-            iconColor: "text-blue-400",
           },
         ].map((kpi, i) => (
           <motion.div
@@ -588,9 +538,6 @@ export default function DashboardPage() {
                       (forecastData
                         ? formatCurrency(forecastData.forecast.weighted)
                         : "R$ 0")}
-                    {kpiModal === "ROI Meta Ads" && "0x"}
-                    {kpiModal === "Leads Quentes" && "0"}
-                    {kpiModal === "Chamadas Hoje" && "0"}
                   </p>
                   <p className="text-sm text-gray-500 mt-1">Valor atual</p>
                 </div>

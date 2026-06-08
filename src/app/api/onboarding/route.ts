@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, checkRateLimit, getOrgId } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit, requireOrgId } from '@/lib/api-auth'
 import { apiLimiter } from '@/lib/rate-limit'
 import { logger } from '@/lib/logger'
 import { z } from 'zod'
@@ -20,6 +20,15 @@ const onboardingSchema = z.object({
     .optional(),
 })
 
+// Garante que todo lead criado no onboarding receba ao menos 1 tag (pela origem)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function ensureLeadTag(prisma: any, leadId: string, orgId: string, source: string) {
+  const name = (source || 'manual').trim() || 'manual'
+  let tag = await prisma.tag.findFirst({ where: { name, organizationId: orgId } })
+  if (!tag) tag = await prisma.tag.create({ data: { name, organizationId: orgId } })
+  await prisma.leadTag.create({ data: { leadId, tagId: tag.id } })
+}
+
 export async function POST(request: NextRequest) {
   const rl = checkRateLimit(request, apiLimiter)
   if (rl) return rl
@@ -33,7 +42,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Dados invalidos' }, { status: 400 })
 
     const { prisma } = await import('@/lib/prisma')
-    const orgId = getOrgId(session)
+    const { orgId, error: orgError } = requireOrgId(session)
+    if (orgError) return orgError
     const userId = (session!.user as Record<string, unknown>).id as string
 
     // 1. Update organization name
@@ -189,7 +199,7 @@ export async function POST(request: NextRequest) {
         // Distribute across non-terminal stages
         const safeStages = stages.filter((s) => !s.isWon && !s.isLost)
         const stageIdx = i % Math.max(safeStages.length, 1)
-        await prisma.lead.create({
+        const created = await prisma.lead.create({
           data: {
             firstName: lead.firstName,
             lastName: lead.lastName,
@@ -203,6 +213,7 @@ export async function POST(request: NextRequest) {
             createdById: userId,
           },
         })
+        await ensureLeadTag(prisma, created.id, orgId, lead.source)
         leadsCreated++
       }
     }
@@ -216,7 +227,7 @@ export async function POST(request: NextRequest) {
       const firstStage = stages[0]
 
       for (const lead of parsed.data.manualLeads) {
-        await prisma.lead.create({
+        const created = await prisma.lead.create({
           data: {
             firstName: lead.firstName,
             phone: lead.phone,
@@ -226,6 +237,7 @@ export async function POST(request: NextRequest) {
             createdById: userId,
           },
         })
+        await ensureLeadTag(prisma, created.id, orgId, lead.source || 'manual')
         leadsCreated++
       }
     }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, checkRateLimit } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit, requireOrgId } from '@/lib/api-auth'
 import { apiLimiter } from '@/lib/rate-limit'
 import { z } from 'zod'
 import { logger } from '@/lib/logger'
@@ -15,7 +15,9 @@ const updateTaskSchema = z.object({
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const rl = checkRateLimit(request, apiLimiter); if (rl) return rl
-  const { error } = await requireAuth(); if (error) return error
+  const { error, session } = await requireAuth(); if (error) return error
+  const { orgId, error: orgError } = requireOrgId(session)
+  if (orgError) return orgError
   const { id } = await params
 
   try {
@@ -31,6 +33,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const { prisma } = await import('@/lib/prisma')
     const existing = await prisma.task.findUnique({ where: { id } })
     if (!existing) return NextResponse.json({ error: 'Tarefa nao encontrada' }, { status: 404 })
+    if (existing.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
     const data: Record<string, unknown> = {}
     for (const [key, value] of Object.entries(parsed.data)) {

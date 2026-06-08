@@ -3,8 +3,6 @@ import { z } from "zod";
 import { requireAuth, checkRateLimit, requireOrgId } from "@/lib/api-auth";
 import { logger } from "@/lib/logger";
 
-const memoryLeads: Record<string, unknown>[] = [];
-
 async function getPrisma() {
   try {
     const { prisma } = await import("@/lib/prisma");
@@ -114,13 +112,10 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({
-    leads: memoryLeads,
-    total: memoryLeads.length,
-    page: 1,
-    limit: 50,
-    totalPages: 1,
-  });
+  return NextResponse.json(
+    { error: "Banco de dados indisponivel" },
+    { status: 503 },
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -227,18 +222,8 @@ export async function POST(request: NextRequest) {
     logger.error("POST /api/leads DB error", error);
   }
 
-  const fakeLead = {
-    id: `lead_${Date.now()}`,
-    ...data,
-    status: "new",
-    score: 0,
-    country: "Brasil",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    consultant: null,
-    stage: null,
-    tags: (data.tags || []).map((t: string) => ({ tag: { name: t } })),
-  };
-  memoryLeads.unshift(fakeLead);
-  return NextResponse.json(fakeLead, { status: 201 });
+  return NextResponse.json(
+    { error: "Banco de dados indisponivel" },
+    { status: 503 },
+  );
 }

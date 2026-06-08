@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, checkRateLimit, getOrgId } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit, requireOrgId } from '@/lib/api-auth'
 import { apiLimiter } from '@/lib/rate-limit'
 import { logger } from '@/lib/logger'
 import { z } from 'zod'
@@ -25,11 +25,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (!parsed.success) return NextResponse.json({ error: 'Dados invalidos', details: parsed.error.flatten().fieldErrors }, { status: 400 })
 
     const { prisma } = await import('@/lib/prisma')
-    const orgId = getOrgId(session)
+    const { orgId, error: orgError } = requireOrgId(session)
+    if (orgError) return orgError
 
     const existing = await prisma.deal.findUnique({ where: { id }, include: { lead: true } })
     if (!existing) return NextResponse.json({ error: 'Negocio nao encontrado' }, { status: 404 })
-    if (orgId && existing.lead.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+    if (existing.lead.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
     const data: Record<string, unknown> = {}
     for (const [key, value] of Object.entries(parsed.data)) {
@@ -63,19 +64,21 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const rl = checkRateLimit(request, apiLimiter); if (rl) return rl
-  const { error } = await requireAuth(); if (error) return error
+  const { error, session } = await requireAuth(); if (error) return error
   const { id } = await params
 
   try {
     const { prisma } = await import('@/lib/prisma')
+    const { orgId, error: orgError } = requireOrgId(session)
+    if (orgError) return orgError
     const deal = await prisma.deal.findUnique({
       where: { id },
       include: {
-        lead: { select: { id: true, firstName: true, lastName: true, company: true } },
+        lead: { select: { id: true, firstName: true, lastName: true, company: true, organizationId: true } },
         stage: { select: { id: true, name: true, color: true } },
       },
     })
-    if (!deal) return NextResponse.json({ error: 'Negocio nao encontrado' }, { status: 404 })
+    if (!deal || deal.lead.organizationId !== orgId) return NextResponse.json({ error: 'Negocio nao encontrado' }, { status: 404 })
     return NextResponse.json(deal)
   } catch (err) {
     logger.error('GET /api/deals/[id] error', err)

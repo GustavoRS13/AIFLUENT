@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { requireAuth, checkRateLimit, getOrgId } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit, requireOrgId } from '@/lib/api-auth'
 import { apiLimiter } from '@/lib/rate-limit'
 import { logger } from '@/lib/logger'
 
@@ -16,7 +16,8 @@ export async function POST(request: NextRequest) {
   if (rl) return rl
   const { error, session } = await requireAuth('gestor')
   if (error) return error
-  const orgId = getOrgId(session)
+  const { orgId, error: orgError } = requireOrgId(session)
+  if (orgError) return orgError
   const userId = (session!.user as Record<string, unknown>).id as string
   const userName = (session!.user as Record<string, unknown>).name as string
 
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
     // Verify toTeam exists and belongs to org
     const toTeam = await prisma.team.findUnique({ where: { id: toTeamId } })
     if (!toTeam) return NextResponse.json({ error: 'Departamento destino nao encontrado' }, { status: 404 })
-    if (orgId && toTeam.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+    if (toTeam.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
     let fromTeamId: string | null = null
     let fromTeamName = '(nenhum)'
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
     if (entityType === 'lead') {
       const lead = await prisma.lead.findUnique({ where: { id: entityId } })
       if (!lead) return NextResponse.json({ error: 'Lead nao encontrado' }, { status: 404 })
-      if (orgId && lead.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+      if (lead.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
       fromTeamId = lead.teamId
       leadId = lead.id
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
         include: { lead: { select: { id: true } } },
       })
       if (!conversation) return NextResponse.json({ error: 'Conversa nao encontrada' }, { status: 404 })
-      if (orgId && conversation.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+      if (conversation.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
       fromTeamId = conversation.teamId
       leadId = conversation.leadId
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
         toTeamId,
         fromUserId: userId,
         reason,
-        organizationId: orgId || toTeam.organizationId,
+        organizationId: orgId,
       },
     })
 
@@ -123,7 +124,8 @@ export async function GET(request: Request) {
   if (rl) return rl
   const { error, session } = await requireAuth()
   if (error) return error
-  const orgId = getOrgId(session)
+  const { orgId, error: orgError } = requireOrgId(session)
+  if (orgError) return orgError
 
   try {
     const url = new URL(request.url)
@@ -135,8 +137,7 @@ export async function GET(request: Request) {
     }
 
     const { prisma } = await import('@/lib/prisma')
-    const where: Record<string, unknown> = { entityType, entityId }
-    if (orgId) where.organizationId = orgId
+    const where: Record<string, unknown> = { entityType, entityId, organizationId: orgId }
 
     const transfers = await prisma.transfer.findMany({
       where,

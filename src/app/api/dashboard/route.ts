@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAuth, checkRateLimit } from "@/lib/api-auth";
+import { requireAuth, checkRateLimit, requireOrgId } from "@/lib/api-auth";
 import { apiLimiter } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
@@ -8,33 +8,28 @@ export async function GET(request: Request) {
   if (rateLimited) return rateLimited;
   const { error, session } = await requireAuth();
   if (error) return error;
+  const { orgId, error: orgError } = requireOrgId(session);
+  if (orgError) return orgError;
 
   try {
     const url = new URL(request.url);
     const teamIdFilter = url.searchParams.get("teamId") || "";
     const { prisma } = await import("@/lib/prisma");
-    const orgId = (session!.user as Record<string, unknown>).organizationId as
-      | string
-      | undefined;
     const userRole = (session!.user as Record<string, unknown>).role as string;
     const userId = (session!.user as Record<string, unknown>).id as string;
 
     // Base org filter
-    const leadWhere: Record<string, unknown> = orgId
-      ? { organizationId: orgId }
-      : {};
+    const leadWhere: Record<string, unknown> = { organizationId: orgId };
     if (teamIdFilter) leadWhere.teamId = teamIdFilter;
     const dealWhere: Record<string, unknown> = {
       status: "open",
-      ...(orgId ? { lead: { organizationId: orgId } } : {}),
+      lead: { organizationId: orgId },
     };
     const wonDealWhere: Record<string, unknown> = {
       status: "won",
-      ...(orgId ? { lead: { organizationId: orgId } } : {}),
+      lead: { organizationId: orgId },
     };
-    const campaignWhere: Record<string, unknown> = orgId
-      ? { organizationId: orgId }
-      : {};
+    const campaignWhere: Record<string, unknown> = { organizationId: orgId };
 
     // Role-based data isolation: operador sees only their own metrics
     if (userRole === "operador" && userId) {
@@ -67,12 +62,10 @@ export async function GET(request: Request) {
       prisma.deal.count({ where: dealWhere }),
       prisma.deal.aggregate({ _sum: { value: true }, where: wonDealWhere }),
       prisma.campaign.count({ where: campaignWhere }),
-      orgId
-        ? prisma.organization.findUnique({
-            where: { id: orgId },
-            select: { name: true },
-          })
-        : Promise.resolve(null),
+      prisma.organization.findUnique({
+        where: { id: orgId },
+        select: { name: true },
+      }),
     ]);
 
     return NextResponse.json({

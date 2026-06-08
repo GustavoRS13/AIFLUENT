@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, checkRateLimit, getOrgId } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit, requireOrgId } from '@/lib/api-auth'
 import { apiLimiter } from '@/lib/rate-limit'
 import { logger } from '@/lib/logger'
 import { z } from 'zod'
@@ -22,14 +22,15 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) return NextResponse.json({ error: 'Dados invalidos', details: parsed.error.flatten().fieldErrors }, { status: 400 })
 
     const { prisma } = await import('@/lib/prisma')
-    const orgId = getOrgId(session)
+    const { orgId, error: orgError } = requireOrgId(session)
+    if (orgError) return orgError
     const userId = (session!.user as Record<string, unknown>).id as string
     const userRole = (session!.user as Record<string, unknown>).role as string
 
     // Verify lead belongs to org
     const lead = await prisma.lead.findUnique({ where: { id: parsed.data.leadId } })
     if (!lead) return NextResponse.json({ error: 'Lead nao encontrado' }, { status: 404 })
-    if (orgId && lead.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+    if (lead.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
     // Role-based isolation: operador can only create activities on their leads
     if (userRole === 'operador' && userId && lead.consultantId !== userId) {
@@ -59,14 +60,15 @@ export async function GET(request: NextRequest) {
     if (!leadId) return NextResponse.json({ error: 'leadId obrigatorio' }, { status: 400 })
 
     const { prisma } = await import('@/lib/prisma')
-    const orgId = getOrgId(session)
+    const { orgId, error: orgError } = requireOrgId(session)
+    if (orgError) return orgError
     const userRole = (session!.user as Record<string, unknown>).role as string
     const userId = (session!.user as Record<string, unknown>).id as string
 
     // Verify lead belongs to org
     const lead = await prisma.lead.findUnique({ where: { id: leadId } })
     if (!lead) return NextResponse.json({ error: 'Lead nao encontrado' }, { status: 404 })
-    if (orgId && lead.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+    if (lead.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
     // Role-based isolation: operador can only view activities on their leads
     if (userRole === 'operador' && userId && lead.consultantId !== userId) {

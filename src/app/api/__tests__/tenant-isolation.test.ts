@@ -20,8 +20,11 @@ vi.mock("@/lib/prisma", () => {
     conversation: { findUnique: vi.fn(), update: vi.fn() },
     conversationMessage: { create: vi.fn() },
     auditLog: { create: vi.fn() },
-    tag: { findFirst: vi.fn(), create: vi.fn() },
-    leadTag: { create: vi.fn() },
+    tag: {
+      findFirst: vi.fn().mockResolvedValue(null),
+      create: vi.fn().mockResolvedValue({ id: "t1" }),
+    },
+    leadTag: { create: vi.fn().mockResolvedValue({}) },
     deal: { count: vi.fn().mockResolvedValue(0), findMany: vi.fn() },
     task: { count: vi.fn().mockResolvedValue(0) },
   };

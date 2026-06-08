@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, checkRateLimit, getOrgId } from '@/lib/api-auth'
+import { requireAuth, checkRateLimit, requireOrgId } from '@/lib/api-auth'
 import { apiLimiter } from '@/lib/rate-limit'
 import { logger } from '@/lib/logger'
 import { z } from 'zod'
@@ -32,12 +32,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (!parsed.success) return NextResponse.json({ error: 'Dados invalidos', details: parsed.error.flatten().fieldErrors }, { status: 400 })
 
     const { prisma } = await import('@/lib/prisma')
-    const orgId = getOrgId(session)
+    const { orgId, error: orgError } = requireOrgId(session)
+    if (orgError) return orgError
 
     // Verify lead belongs to this org
     const existing = await prisma.lead.findUnique({ where: { id } })
     if (!existing) return NextResponse.json({ error: 'Lead nao encontrado' }, { status: 404 })
-    if (orgId && existing.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+    if (existing.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
     const data: Record<string, unknown> = {}
     for (const [key, value] of Object.entries(parsed.data)) {
@@ -103,7 +104,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   try {
     const { prisma } = await import('@/lib/prisma')
-    const orgId = getOrgId(session)
+    const { orgId, error: orgError } = requireOrgId(session)
+    if (orgError) return orgError
 
     const lead = await prisma.lead.findUnique({
       where: { id },
@@ -116,7 +118,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       },
     })
     if (!lead) return NextResponse.json({ error: 'Lead nao encontrado' }, { status: 404 })
-    if (orgId && lead.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+    if (lead.organizationId !== orgId) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
     return NextResponse.json(lead)
   } catch (err) {
