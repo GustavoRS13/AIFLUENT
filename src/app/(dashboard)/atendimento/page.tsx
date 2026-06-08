@@ -70,16 +70,26 @@ function fmtTime(iso?: string): string {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapApiMessage(m: any): ChatMessage {
+  let mediaId: string | undefined;
+  if (m.metadata) {
+    try {
+      mediaId = JSON.parse(m.metadata).mediaId || undefined;
+    } catch {
+      /* metadata pode não ser JSON */
+    }
+  }
+  const t = (m.contentType as ChatMessage["type"]) || "text";
   return {
     id: m.id,
     direction: m.direction === "outbound" ? "outbound" : "inbound",
     content: m.content,
-    type: (m.contentType as ChatMessage["type"]) || "text",
+    type: ["text", "image", "audio", "document"].includes(t) ? t : "text",
     status: ["sent", "delivered", "read"].includes(m.status)
       ? (m.status as ChatMessage["status"])
       : "sent",
     aiGenerated: !!m.aiGenerated,
     createdAt: fmtTime(m.createdAt),
+    mediaId,
   };
 }
 
@@ -249,19 +259,38 @@ export default function AtendimentoPage() {
   }, [input, selectedId, addMessage, setInput, setShowEmoji]);
 
   const handleFileUpload = useCallback(
-    (file: File, type: "document" | "image") => {
+    async (file: File, type: "document" | "image") => {
+      if (!selectedId) return;
+      // Exibe otimista
       addMessage({
-        id: `msg-${Date.now()}`,
+        id: `tmp-${Date.now()}`,
         direction: "outbound",
-        content:
-          type === "image" ? "[Imagem enviada]" : `[Arquivo: ${file.name}]`,
+        content: type === "image" ? "[Imagem]" : `[Arquivo] ${file.name}`,
         type: type === "image" ? "image" : "document",
         status: "sent",
         aiGenerated: false,
         createdAt: now(),
       });
+      try {
+        const fd = new FormData();
+        fd.append("file", file);
+        await fetch(`/api/conversations/${selectedId}/media`, {
+          method: "POST",
+          body: fd,
+        });
+        const res = await fetch(`/api/conversations/${selectedId}`);
+        if (res.ok) {
+          const { conversation } = await res.json();
+          const msgs: ChatMessage[] = (conversation.messages || []).map(
+            mapApiMessage,
+          );
+          setAllMessages((prev) => ({ ...prev, [selectedId]: msgs }));
+        }
+      } catch {
+        /* otimista já exibido */
+      }
     },
-    [addMessage],
+    [selectedId, addMessage],
   );
 
   const handleAudioToggleLocal = useCallback(() => {
@@ -600,6 +629,8 @@ export default function AtendimentoPage() {
                     status={msg.status}
                     aiGenerated={msg.aiGenerated}
                     senderName={msg.sender}
+                    type={msg.type}
+                    mediaId={msg.mediaId}
                   />
                 ))}
                 <div ref={messagesEndRef} />

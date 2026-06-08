@@ -122,6 +122,15 @@ function mapMessage(m: any): ChatMessage {
     aiGenerated: !!m.aiGenerated,
     createdAt: formatTime(m.createdAt),
     sender: m.aiGenerated ? "IA" : undefined,
+    mediaId: (() => {
+      try {
+        return m.metadata
+          ? JSON.parse(m.metadata).mediaId || undefined
+          : undefined;
+      } catch {
+        return undefined;
+      }
+    })(),
   };
 }
 
@@ -466,6 +475,8 @@ export default function InboxPage() {
                   status={msg.status}
                   aiGenerated={msg.aiGenerated}
                   senderName={msg.sender}
+                  type={msg.type}
+                  mediaId={msg.mediaId}
                 />
               ))
             )}

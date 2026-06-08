@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Bot, Check, CheckCheck } from "lucide-react";
+import { Bot, Check, CheckCheck, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface ChatBubbleProps {
@@ -11,6 +11,8 @@ export interface ChatBubbleProps {
   status?: "sent" | "delivered" | "read";
   aiGenerated?: boolean;
   senderName?: string;
+  type?: "text" | "image" | "audio" | "document";
+  mediaId?: string;
 }
 
 export function ChatMessageBubble({
@@ -20,7 +22,14 @@ export function ChatMessageBubble({
   status,
   aiGenerated,
   senderName,
+  type = "text",
+  mediaId,
 }: ChatBubbleProps) {
+  const mediaSrc = mediaId ? `/api/whatsapp/media/${mediaId}` : undefined;
+  // Legenda só aparece se não for o placeholder automático
+  const showCaption =
+    !!content &&
+    !/^\[(image|audio|document|video|imagem|arquivo)/i.test(content);
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -49,9 +58,37 @@ export function ChatMessageBubble({
         {senderName && !aiGenerated && direction === "outbound" && (
           <p className="text-[10px] text-emerald-700 mb-1">{senderName}</p>
         )}
-        <p className="text-sm whitespace-pre-wrap leading-relaxed text-gray-900">
-          {content}
-        </p>
+        {type === "image" && mediaSrc ? (
+          <a href={mediaSrc} target="_blank" rel="noopener noreferrer">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={mediaSrc}
+              alt={content || "Imagem"}
+              className="rounded-md max-w-[240px] max-h-[280px] object-cover"
+            />
+          </a>
+        ) : type === "audio" && mediaSrc ? (
+          <audio controls src={mediaSrc} className="max-w-[240px]" />
+        ) : type === "document" && mediaSrc ? (
+          <a
+            href={mediaSrc}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-sm text-gray-900 underline"
+          >
+            <FileText className="w-4 h-4 shrink-0" />
+            {content || "Documento"}
+          </a>
+        ) : (
+          <p className="text-sm whitespace-pre-wrap leading-relaxed text-gray-900">
+            {content}
+          </p>
+        )}
+        {showCaption && type !== "text" && (
+          <p className="text-sm whitespace-pre-wrap leading-relaxed text-gray-900 mt-1">
+            {content}
+          </p>
+        )}
         <div
           className={cn(
             "flex items-center gap-1 mt-1",
