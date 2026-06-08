@@ -84,7 +84,7 @@ function mapApiMessage(m: any): ChatMessage {
     direction: m.direction === "outbound" ? "outbound" : "inbound",
     content: m.content,
     type: ["text", "image", "audio", "document"].includes(t) ? t : "text",
-    status: ["sent", "delivered", "read"].includes(m.status)
+    status: ["sent", "delivered", "read", "failed"].includes(m.status)
       ? (m.status as ChatMessage["status"])
       : "sent",
     aiGenerated: !!m.aiGenerated,
@@ -303,12 +303,26 @@ export default function AtendimentoPage() {
         createdAt: now(),
       });
       try {
+        // Extensão coerente com o mime real gravado
+        const ext = blob.type.includes("ogg")
+          ? "ogg"
+          : blob.type.includes("mp4")
+            ? "m4a"
+            : blob.type.includes("mpeg")
+              ? "mp3"
+              : "webm";
         const fd = new FormData();
-        fd.append("file", blob, "audio.ogg");
-        await fetch(`/api/conversations/${selectedId}/media`, {
+        fd.append("file", blob, `audio.${ext}`);
+        const up = await fetch(`/api/conversations/${selectedId}/media`, {
           method: "POST",
           body: fd,
         });
+        const upData = await up.json().catch(() => ({}));
+        if (!up.ok || upData?.ok === false) {
+          alert(
+            "Não consegui enviar o áudio pelo WhatsApp (o formato gravado pelo seu navegador pode não ser aceito). Tente pelo Chrome/Firefox atualizado ou envie como arquivo.",
+          );
+        }
         const res = await fetch(`/api/conversations/${selectedId}`);
         if (res.ok) {
           const { conversation } = await res.json();

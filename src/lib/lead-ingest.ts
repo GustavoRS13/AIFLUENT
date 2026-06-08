@@ -85,6 +85,23 @@ export async function ingestLead(
     .filter(Boolean);
   const effectiveTags = tagNames.length ? tagNames : ["manual"];
 
+  // Etapa padrão do funil quando não informada — senão o lead some do Kanban.
+  // Best-effort: se não houver pipeline configurado, o lead ainda é criado
+  // (sem etapa), nunca quebrando a ingestão.
+  let stageId = input.stageId;
+  if (!stageId) {
+    try {
+      const firstStage = await prisma.pipelineStage.findFirst({
+        where: { pipeline: { organizationId: orgId, isDefault: true } },
+        orderBy: { order: "asc" },
+        select: { id: true },
+      });
+      stageId = firstStage?.id ?? undefined;
+    } catch {
+      stageId = undefined;
+    }
+  }
+
   let leadId: string;
   const deduped = !!existing;
 
@@ -121,7 +138,7 @@ export async function ingestLead(
         notes: input.notes,
         city: input.city,
         state: input.state,
-        stageId: input.stageId,
+        stageId,
         metaAdId: input.metaAdId,
         fbLeadId: input.fbLeadId,
         utmSource: input.utmSource,

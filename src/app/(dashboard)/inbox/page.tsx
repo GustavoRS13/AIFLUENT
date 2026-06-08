@@ -106,7 +106,7 @@ function mapConversation(c: any): UIConversation {
   };
 }
 
-const OUTBOUND_STATUS = new Set(["sent", "delivered", "read"]);
+const OUTBOUND_STATUS = new Set(["sent", "delivered", "read", "failed"]);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapMessage(m: any): ChatMessage {

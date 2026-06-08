@@ -1,14 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Bot, Check, CheckCheck, FileText } from "lucide-react";
+import { Bot, Check, CheckCheck, FileText, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface ChatBubbleProps {
   direction: "inbound" | "outbound";
   content: string;
   timestamp: string;
-  status?: "sent" | "delivered" | "read";
+  status?: "sent" | "delivered" | "read" | "failed";
   aiGenerated?: boolean;
   senderName?: string;
   type?: "text" | "image" | "audio" | "document";
@@ -98,7 +98,11 @@ export function ChatMessageBubble({
           <span className="text-[10px] text-gray-500">{timestamp}</span>
           {direction === "outbound" &&
             status &&
-            (status === "read" ? (
+            (status === "failed" ? (
+              <span className="flex items-center gap-0.5 text-[10px] text-rose-600 font-medium">
+                <AlertCircle className="w-3.5 h-3.5" /> falhou
+              </span>
+            ) : status === "read" ? (
               <CheckCheck className="w-3.5 h-3.5 text-sky-500" />
             ) : status === "delivered" ? (
               <CheckCheck className="w-3.5 h-3.5 text-gray-400" />

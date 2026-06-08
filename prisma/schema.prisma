@@ -170,6 +170,7 @@ model Lead {
   @@index([status])
   @@index([createdAt])
   @@index([teamId])
+  @@index([organizationId, fbLeadId])
 }
 
 // ── LeadList ────────────────────────────────────────────────────────────────
@@ -284,6 +285,7 @@ model Activity {
 
   @@index([leadId])
   @@index([createdAt])
+  @@index([userId, createdAt])
 }
 
 // ── Campaign ────────────────────────────────────────────────────────────────
@@ -427,6 +429,8 @@ model Conversation {
 
   @@index([organizationId])
   @@index([lastMessageAt])
+  @@index([leadId])
+  @@index([status])
 }
 
 model ConversationMessage {
@@ -436,7 +440,10 @@ model ConversationMessage {
   contentType String   @default("text")
   mediaUrl    String?
   mediaType   String?
+  mediaId     String?
   status      String   @default("sent")
+  errorCode   String?
+  errorTitle  String?
   externalId  String?
   aiGenerated Boolean  @default(false)
   metadata    String?
@@ -446,6 +453,10 @@ model ConversationMessage {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   senderId       String?
   sender         User?  @relation("MessageSender", fields: [senderId], references: [id])
+
+  @@index([conversationId])
+  @@index([externalId])
+  @@index([mediaId])
 }
 
 // ── Phone Calls ─────────────────────────────────────────────────────────────

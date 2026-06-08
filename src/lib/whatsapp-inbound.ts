@@ -99,6 +99,7 @@ export async function persistInboundMessage(
       content: msg.content,
       contentType: msg.contentType,
       mediaType: msg.mediaType,
+      mediaId: msg.mediaId,
       status: "received",
       externalId: msg.externalId,
       metadata: JSON.stringify({
@@ -131,7 +132,11 @@ export async function persistStatusUpdate(
   await prisma.conversationMessage
     .updateMany({
       where: { externalId: st.externalId },
-      data: { status: st.status },
+      data: {
+        status: st.status,
+        errorCode: st.errorCode != null ? String(st.errorCode) : undefined,
+        errorTitle: st.errorTitle,
+      },
     })
     .catch(() => {});
 }

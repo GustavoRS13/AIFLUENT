@@ -7,7 +7,7 @@ export interface ChatMessage {
   direction: "inbound" | "outbound";
   content: string;
   type: "text" | "image" | "audio" | "document";
-  status: "sent" | "delivered" | "read";
+  status: "sent" | "delivered" | "read" | "failed";
   aiGenerated: boolean;
   createdAt: string;
   sender?: string;

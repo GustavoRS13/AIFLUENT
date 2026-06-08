@@ -17,22 +17,24 @@ export async function GET(
 
   try {
     const { prisma } = await import("@/lib/prisma");
-    // Verifica que a mídia pertence a uma conversa da empresa do usuário
+    // Verifica posse: a mídia precisa estar referenciada (match EXATO de mediaId)
+    // por uma mensagem da empresa do usuário. Sem isso, IDOR/vazamento cross-tenant.
     const msg = await prisma.conversationMessage.findFirst({
       where: {
-        metadata: { contains: id },
+        mediaId: id,
         conversation: { organizationId: orgId },
       },
-      select: { id: true },
+      select: { mediaId: true },
     });
-    if (!msg) {
+    if (!msg?.mediaId) {
       return NextResponse.json(
         { error: "Midia nao encontrada" },
         { status: 404 },
       );
     }
 
-    const meta = await whatsapp.getMediaUrl(id);
+    // Baixa o id CONFIRMADO como pertencente à org (não o cru da URL)
+    const meta = await whatsapp.getMediaUrl(msg.mediaId);
     if ("error" in meta) {
       return NextResponse.json({ error: meta.error }, { status: 404 });
     }

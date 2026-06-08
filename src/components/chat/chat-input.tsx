@@ -44,13 +44,28 @@ export function ChatInput({
   const startRecording = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mr = new MediaRecorder(stream);
+      // WhatsApp aceita ogg(opus)/mp4(aac)/mpeg/amr. Escolhe o melhor formato
+      // SUPORTADO pelo navegador, na ordem de compatibilidade com o WhatsApp.
+      const candidates = [
+        "audio/ogg;codecs=opus",
+        "audio/mp4",
+        "audio/mpeg",
+        "audio/webm;codecs=opus",
+        "audio/webm",
+      ];
+      const mimeType =
+        typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported
+          ? candidates.find((c) => MediaRecorder.isTypeSupported(c))
+          : undefined;
+      const mr = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       chunksRef.current = [];
       mr.ondataavailable = (e) => {
         if (e.data.size > 0) chunksRef.current.push(e.data);
       };
       mr.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/ogg" });
+        // Usa o mime REAL gravado (não rotula errado)
+        const realType = mr.mimeType || mimeType || "audio/webm";
+        const blob = new Blob(chunksRef.current, { type: realType });
         stream.getTracks().forEach((t) => t.stop());
         if (blob.size > 0) onAudioRecorded?.(blob);
       };

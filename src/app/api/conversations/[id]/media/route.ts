@@ -94,6 +94,7 @@ export async function POST(
         content: caption || `[${type}] ${file.name}`,
         contentType: type,
         mediaType: mime,
+        mediaId,
         status,
         externalId,
         metadata: JSON.stringify({ mediaId, filename: file.name }),
