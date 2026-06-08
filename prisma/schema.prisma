@@ -681,3 +681,45 @@ model Integration {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
 }
+
+// ── Meta Ads (Facebook Lead Ads) ──────────────────────────────────────────────
+// Conexão OAuth por empresa (multi-tenant). Sem @relation: isolamento via
+// organizationId + org-scope na aplicação.
+model MetaConnection {
+  id             String    @id @default(cuid())
+  organizationId String    @unique
+  adAccountId    String?
+  adAccountName  String?
+  businessId     String?
+  pageId         String?
+  pageName       String?
+  pageToken      String?
+  userToken      String?
+  tokenExpiresAt DateTime?
+  scopes         String?
+  status         String    @default("connected") // connected | disconnected | error
+  lastSyncAt     DateTime?
+  lastError      String?
+  leadsReceived  Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([pageId])
+}
+
+// Formulários Lead Ads sincronizados e seu vínculo com a empresa.
+model MetaLeadForm {
+  id             String    @id @default(cuid())
+  organizationId String
+  formId         String    @unique
+  formName       String?
+  pageId         String?
+  isLinked       Boolean   @default(false)
+  leadsReceived  Int       @default(0)
+  lastLeadAt     DateTime?
+  lastError      String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([organizationId])
+}

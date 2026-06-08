@@ -33,6 +33,7 @@ vi.mock("@/lib/prisma", () => {
       findFirst: vi.fn().mockResolvedValue(null),
       create: vi.fn().mockResolvedValue({}),
     },
+    campaign: { findUnique: vi.fn(), update: vi.fn() },
     deal: { count: vi.fn().mockResolvedValue(0), findMany: vi.fn() },
     task: { count: vi.fn().mockResolvedValue(0) },
   };
@@ -45,6 +46,7 @@ import { POST as leadsPOST } from "../leads/route";
 import { POST as usersPOST } from "../users/route";
 import { POST as conversationsPOST } from "../conversations/route";
 import { POST as aiChatPOST } from "../ai/chat/route";
+import { PATCH as campaignPATCH } from "../campaigns/[id]/route";
 
 const mockedRequireAuth = vi.mocked(requireAuth);
 
@@ -230,5 +232,46 @@ describe("AI chat — queries scoped by org (Audit #4)", () => {
     for (const call of calls) {
       expect(call[0]?.where?.organizationId).toBe("org-1");
     }
+  });
+});
+
+describe("Campaigns PATCH — cross-tenant IDOR closed", () => {
+  function paramReq(body: unknown, id: string) {
+    return [
+      jsonReq(body) as never,
+      { params: Promise.resolve({ id }) } as never,
+    ] as const;
+  }
+
+  it("returns 404 and does not update a campaign of another org", async () => {
+    mockedRequireAuth.mockResolvedValue(
+      session({ id: "u1", role: "gestor", organizationId: "org-1" }) as never,
+    );
+    (prisma.campaign.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
+      organizationId: "org-2",
+    });
+    const res = await campaignPATCH(
+      ...paramReq({ status: "pausada" }, "c-other"),
+    );
+    expect(res.status).toBe(404);
+    expect(prisma.campaign.update).not.toHaveBeenCalled();
+  });
+
+  it("updates a campaign that belongs to the session org", async () => {
+    mockedRequireAuth.mockResolvedValue(
+      session({ id: "u1", role: "gestor", organizationId: "org-1" }) as never,
+    );
+    (prisma.campaign.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
+      organizationId: "org-1",
+    });
+    (prisma.campaign.update as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: "c-mine",
+      status: "pausada",
+    });
+    const res = await campaignPATCH(
+      ...paramReq({ status: "pausada" }, "c-mine"),
+    );
+    expect(res.status).toBe(200);
+    expect(prisma.campaign.update).toHaveBeenCalled();
   });
 });

@@ -1,28 +1,32 @@
-import { prisma } from '@/lib/prisma'
-import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
-import { requireAuth, checkRateLimit, requireOrgId } from '@/lib/api-auth'
-import { logger } from '@/lib/logger'
+import { prisma } from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { requireAuth, checkRateLimit, requireOrgId } from "@/lib/api-auth";
+import { logger } from "@/lib/logger";
 
 const createCampaignSchema = z.object({
-  name: z.string().min(1, 'Nome da campanha e obrigatorio').transform((v) => v.trim()),
-  type: z.string().default('broadcast'),
-  channel: z.string().default('whatsapp'),
+  name: z
+    .string()
+    .min(1, "Nome da campanha e obrigatorio")
+    .transform((v) => v.trim()),
+  type: z.string().default("broadcast"),
+  channel: z.string().default("whatsapp"),
   subject: z.string().optional(),
   content: z.string().optional(),
   scheduledAt: z.string().optional().nullable(),
+  status: z.string().optional(),
   // organizationId/createdById derivados da sessao (nao confiar no corpo)
-})
+});
 
 export async function GET(request: NextRequest) {
-  const rateLimited = checkRateLimit(request)
-  if (rateLimited) return rateLimited
+  const rateLimited = checkRateLimit(request);
+  if (rateLimited) return rateLimited;
 
-  const { error, session } = await requireAuth()
-  if (error) return error
+  const { error, session } = await requireAuth();
+  if (error) return error;
 
-  const { orgId, error: orgError } = requireOrgId(session)
-  if (orgError) return orgError
+  const { orgId, error: orgError } = requireOrgId(session);
+  if (orgError) return orgError;
 
   try {
     const campaigns = await prisma.campaign.findMany({
@@ -31,43 +35,50 @@ export async function GET(request: NextRequest) {
         createdBy: { select: { id: true, name: true, avatar: true } },
         _count: { select: { leads: true, sequences: true } },
       },
-      orderBy: { createdAt: 'desc' },
-    })
+      orderBy: { createdAt: "desc" },
+    });
 
-    return NextResponse.json(campaigns)
+    return NextResponse.json(campaigns);
   } catch (error) {
-    logger.error('GET /api/campaigns error', error)
-    return NextResponse.json({ error: 'Erro ao buscar campanhas' }, { status: 500 })
+    logger.error("GET /api/campaigns error", error);
+    return NextResponse.json(
+      { error: "Erro ao buscar campanhas" },
+      { status: 500 },
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
-  const rateLimited = checkRateLimit(request)
-  if (rateLimited) return rateLimited
+  const rateLimited = checkRateLimit(request);
+  if (rateLimited) return rateLimited;
 
-  const { error: authError, session: postSession } = await requireAuth('gestor')
-  if (authError) return authError
+  const { error: authError, session: postSession } =
+    await requireAuth("gestor");
+  if (authError) return authError;
 
-  const { orgId: postOrgId, error: postOrgError } = requireOrgId(postSession)
-  if (postOrgError) return postOrgError
+  const { orgId: postOrgId, error: postOrgError } = requireOrgId(postSession);
+  if (postOrgError) return postOrgError;
 
   try {
-    let body: unknown
+    let body: unknown;
     try {
-      body = await request.json()
+      body = await request.json();
     } catch {
-      return NextResponse.json({ error: 'JSON invalido' }, { status: 400 })
+      return NextResponse.json({ error: "JSON invalido" }, { status: 400 });
     }
 
-    const parsed = createCampaignSchema.safeParse(body)
+    const parsed = createCampaignSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Dados invalidos', details: parsed.error.flatten().fieldErrors },
+        {
+          error: "Dados invalidos",
+          details: parsed.error.flatten().fieldErrors,
+        },
         { status: 400 },
-      )
+      );
     }
 
-    const data = parsed.data
+    const data = parsed.data;
 
     const campaign = await prisma.campaign.create({
       data: {
@@ -77,14 +88,19 @@ export async function POST(request: NextRequest) {
         subject: data.subject,
         content: data.content,
         scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : null,
+        status: data.status || "rascunho",
         organizationId: postOrgId,
-        createdById: (postSession!.user as Record<string, unknown>).id as string,
+        createdById: (postSession!.user as Record<string, unknown>)
+          .id as string,
       },
-    })
+    });
 
-    return NextResponse.json(campaign, { status: 201 })
+    return NextResponse.json(campaign, { status: 201 });
   } catch (error) {
-    logger.error('POST /api/campaigns error', error)
-    return NextResponse.json({ error: 'Erro ao criar campanha' }, { status: 500 })
+    logger.error("POST /api/campaigns error", error);
+    return NextResponse.json(
+      { error: "Erro ao criar campanha" },
+      { status: 500 },
+    );
   }
 }

@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { useState, useMemo, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Handshake,
   DollarSign,
@@ -10,111 +10,180 @@ import {
   LayoutList,
   Columns3,
   Plus,
-  MoreHorizontal,
-  Calendar,
   Building2,
-  User,
-  ArrowUpRight,
   X,
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { formatCurrency, formatDate } from '@/lib/utils'
+  Check,
+  Ban,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
-type DealStage = 'prospeccao' | 'qualificacao' | 'proposta' | 'negociacao' | 'fechamento' | 'ganho' | 'perdido'
+type DealStatus = "open" | "won" | "lost";
 
-type Deal = {
-  id: string
-  title: string
-  value: number
-  company: string
-  leadName: string
-  stage: DealStage
-  probability: number
-  expectedClose: string
-  assignedTo: string
-  createdAt: string
+interface Stage {
+  id: string;
+  name: string;
+  color?: string;
 }
 
-// ── Config ──────────────────────────────────────────────────────────────────
-
-const stageConfig: Record<DealStage, { label: string; color: string; bg: string }> = {
-  prospeccao: { label: 'Prospecção', color: 'text-gray-500', bg: 'bg-gray-100 border-gray-300' },
-  qualificacao: { label: 'Qualificação', color: 'text-blue-400', bg: 'bg-blue-400/10 border-blue-400/20' },
-  proposta: { label: 'Proposta', color: 'text-violet-400', bg: 'bg-violet-400/10 border-violet-400/20' },
-  negociacao: { label: 'Negociação', color: 'text-amber-400', bg: 'bg-amber-400/10 border-amber-400/20' },
-  fechamento: { label: 'Fechamento', color: 'text-cyan-400', bg: 'bg-cyan-400/10 border-cyan-400/20' },
-  ganho: { label: 'Ganho', color: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/20' },
-  perdido: { label: 'Perdido', color: 'text-rose-400', bg: 'bg-rose-400/10 border-rose-400/20' },
+interface Deal {
+  id: string;
+  title: string;
+  value: number;
+  probability: number;
+  status: DealStatus;
+  stageId?: string;
+  stageName: string;
+  leadName: string;
+  company: string;
 }
 
-const pipelineStages: DealStage[] = ['prospeccao', 'qualificacao', 'proposta', 'negociacao', 'fechamento']
+const statusConfig: Record<
+  DealStatus,
+  { label: string; color: string; bg: string }
+> = {
+  open: {
+    label: "Aberto",
+    color: "text-amber-600",
+    bg: "bg-amber-50 border-amber-200",
+  },
+  won: {
+    label: "Ganho",
+    color: "text-emerald-600",
+    bg: "bg-emerald-50 border-emerald-200",
+  },
+  lost: {
+    label: "Perdido",
+    color: "text-rose-600",
+    bg: "bg-rose-50 border-rose-200",
+  },
+};
 
-// Deals fetched from /api/deals — starts empty, loads from DB
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapDeal(d: any): Deal {
+  return {
+    id: d.id,
+    title: d.title || "Sem titulo",
+    value: d.value || 0,
+    probability: d.probability ?? 50,
+    status: (d.status as DealStatus) || "open",
+    stageId: d.stage?.id || d.stageId,
+    stageName: d.stage?.name || "—",
+    leadName:
+      `${d.lead?.firstName || ""} ${d.lead?.lastName || ""}`.trim() ||
+      "Sem contato",
+    company: d.lead?.company || "—",
+  };
+}
 
 // ── Component ───────────────────────────────────────────────────────────────
 
 export default function DealsPage() {
-  const [deals, setDeals] = useState<Deal[]>([])
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [stages, setStages] = useState<Stage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"table" | "pipeline">("table");
+  const [statusFilter, setStatusFilter] = useState<"all" | DealStatus>("all");
+  const [showNewDeal, setShowNewDeal] = useState(false);
 
+  const loadDeals = useCallback(async () => {
+    try {
+      const res = await fetch("/api/deals");
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setDeals((data.deals || []).map(mapDeal));
+      setError("");
+    } catch {
+      setError("Falha ao carregar negocios");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadStages = useCallback(async () => {
+    try {
+      const res = await fetch("/api/pipeline");
+      if (!res.ok) return;
+      const pipeline = await res.json();
+      const s = (pipeline?.stages || []).map(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (st: any) => ({ id: st.id, name: st.name, color: st.color }),
+      );
+      setStages(s);
+    } catch {
+      /* estágios são opcionais para a tela funcionar */
+    }
+  }, []);
+
+  /* eslint-disable react-hooks/set-state-in-effect -- carregamento inicial assíncrono */
   useEffect(() => {
-    // TODO: Connect to /api/deals when backend is ready
-    fetch('/api/deals')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.deals && data.deals.length > 0) {
-          setDeals(data.deals.map((d: Record<string, unknown>) => ({
-            id: d.id as string,
-            title: d.title as string,
-            value: (d.value as number) || 0,
-            company: ((d.lead as Record<string, unknown>)?.company as string) || 'Sem empresa',
-            leadName: `${(d.lead as Record<string, unknown>)?.firstName || ''} ${(d.lead as Record<string, unknown>)?.lastName || ''}`.trim() || 'Sem contato',
-            stage: 'prospeccao' as DealStage,
-            probability: (d.probability as number) || 50,
-            expectedClose: d.expectedCloseAt ? new Date(d.expectedCloseAt as string).toISOString().split('T')[0] : '',
-            assignedTo: 'AIFLUENT',
-            createdAt: d.createdAt ? new Date(d.createdAt as string).toISOString().split('T')[0] : '',
-          })))
-        }
-      })
-      .catch(() => { /* keep empty array */ })
-  }, [])
-  const [viewMode, setViewMode] = useState<'table' | 'pipeline'>('table')
-  const [stageFilter, setStageFilter] = useState<'all' | 'open' | 'ganho' | 'perdido'>('all')
-  const [showNewDeal, setShowNewDeal] = useState(false)
-  const [successMsg, setSuccessMsg] = useState(false)
+    loadDeals();
+    loadStages();
+  }, [loadDeals, loadStages]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  const moveStage = useCallback(
+    async (dealId: string, stageId: string) => {
+      setBusyId(dealId);
+      try {
+        await fetch(`/api/deals/${dealId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ stageId }),
+        });
+        await loadDeals();
+      } catch {
+        setError("Falha ao mover estagio");
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [loadDeals],
+  );
+
+  const closeDeal = useCallback(
+    async (dealId: string, status: "won" | "lost") => {
+      setBusyId(dealId);
+      try {
+        await fetch(`/api/deals/${dealId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
+        });
+        await loadDeals();
+      } catch {
+        setError("Falha ao concluir negocio");
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [loadDeals],
+  );
 
   const filtered = useMemo(() => {
-    if (stageFilter === 'all') return deals
-    if (stageFilter === 'open') return deals.filter((d) => d.stage !== 'ganho' && d.stage !== 'perdido')
-    return deals.filter((d) => d.stage === stageFilter)
-  }, [stageFilter, deals])
+    if (statusFilter === "all") return deals;
+    return deals.filter((d) => d.status === statusFilter);
+  }, [statusFilter, deals]);
 
   const stats = useMemo(() => {
-    const openDeals = deals.filter((d) => d.stage !== 'ganho' && d.stage !== 'perdido')
-    const wonDeals = deals.filter((d) => d.stage === 'ganho')
-    const totalValue = openDeals.reduce((s, d) => s + d.value, 0)
-    const avgSize = openDeals.length > 0 ? totalValue / openDeals.length : 0
-    const winRate = deals.length > 0 ? (wonDeals.length / deals.length) * 100 : 0
+    const open = deals.filter((d) => d.status === "open");
+    const won = deals.filter((d) => d.status === "won");
+    const totalValue = open.reduce((s, d) => s + d.value, 0);
+    const closed = deals.filter((d) => d.status !== "open").length;
     return {
-      totalDeals: openDeals.length,
+      totalDeals: open.length,
       totalValue,
-      avgSize,
-      winRate,
-    }
-  }, [deals])
-
-  const handleCreateDeal = (newDeal: Deal) => {
-    setDeals((prev) => [newDeal, ...prev])
-    setShowNewDeal(false)
-    setSuccessMsg(true)
-    setTimeout(() => setSuccessMsg(false), 3000)
-  }
+      avgSize: open.length > 0 ? totalValue / open.length : 0,
+      winRate: closed > 0 ? (won.length / closed) * 100 : 0,
+    };
+  }, [deals]);
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Negócios</h1>
@@ -131,33 +200,46 @@ export default function DealsPage() {
         </button>
       </div>
 
+      {error && (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          {error}
+        </div>
+      )}
+
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { icon: Handshake, title: 'Negócios Abertos', value: stats.totalDeals, change: 8.5 },
-          { icon: DollarSign, title: 'Valor Total', value: formatCurrency(stats.totalValue), change: 15.2 },
-          { icon: TrendingUp, title: 'Ticket Médio', value: formatCurrency(stats.avgSize), change: 4.8 },
-          { icon: Trophy, title: 'Taxa de Ganho', value: `${stats.winRate.toFixed(1)}%`, change: 2.1 },
-        ].map((stat, i) => (
-          <motion.div
+          {
+            icon: Handshake,
+            title: "Negócios Abertos",
+            value: stats.totalDeals,
+          },
+          {
+            icon: DollarSign,
+            title: "Valor em Aberto",
+            value: formatCurrency(stats.totalValue),
+          },
+          {
+            icon: TrendingUp,
+            title: "Ticket Médio",
+            value: formatCurrency(stats.avgSize),
+          },
+          {
+            icon: Trophy,
+            title: "Taxa de Ganho",
+            value: `${stats.winRate.toFixed(1)}%`,
+          },
+        ].map((stat) => (
+          <div
             key={stat.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
             className="bg-white border border-gray-200 rounded-2xl p-6"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-2 bg-indigo-500/10 rounded-lg">
-                <stat.icon className="w-5 h-5 text-indigo-400" />
-              </div>
-              <div className="flex items-center gap-1 text-sm text-emerald-400">
-                <ArrowUpRight className="w-3 h-3" />
-                {stat.change}%
-              </div>
+            <div className="p-2 bg-indigo-500/10 rounded-lg w-fit mb-4">
+              <stat.icon className="w-5 h-5 text-indigo-400" />
             </div>
-            <p className="text-2xl font-bold text-gray-900">{typeof stat.value === 'number' ? stat.value : stat.value}</p>
+            <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
             <p className="text-sm text-gray-500 mt-1">{stat.title}</p>
-          </motion.div>
+          </div>
         ))}
       </div>
 
@@ -166,20 +248,20 @@ export default function DealsPage() {
         <div className="flex items-center gap-2">
           {(
             [
-              { key: 'all', label: 'Todos' },
-              { key: 'open', label: 'Abertos' },
-              { key: 'ganho', label: 'Ganhos' },
-              { key: 'perdido', label: 'Perdidos' },
+              { key: "all", label: "Todos" },
+              { key: "open", label: "Abertos" },
+              { key: "won", label: "Ganhos" },
+              { key: "lost", label: "Perdidos" },
             ] as const
           ).map((f) => (
             <button
               key={f.key}
-              onClick={() => setStageFilter(f.key)}
+              onClick={() => setStatusFilter(f.key)}
               className={cn(
-                'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-                stageFilter === f.key
-                  ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                statusFilter === f.key
+                  ? "bg-indigo-600/20 text-indigo-400 border border-indigo-500/30"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50",
               )}
             >
               {f.label}
@@ -189,20 +271,24 @@ export default function DealsPage() {
 
         <div className="flex items-center gap-1 rounded-lg border border-gray-200 bg-gray-50 p-0.5">
           <button
-            onClick={() => setViewMode('table')}
+            onClick={() => setViewMode("table")}
             className={cn(
-              'p-1.5 rounded-md transition-colors',
-              viewMode === 'table' ? 'bg-gray-200 text-gray-900' : 'text-gray-400 hover:text-gray-700'
+              "p-1.5 rounded-md transition-colors",
+              viewMode === "table"
+                ? "bg-gray-200 text-gray-900"
+                : "text-gray-400 hover:text-gray-700",
             )}
             title="Lista"
           >
             <LayoutList className="h-4 w-4" />
           </button>
           <button
-            onClick={() => setViewMode('pipeline')}
+            onClick={() => setViewMode("pipeline")}
             className={cn(
-              'p-1.5 rounded-md transition-colors',
-              viewMode === 'pipeline' ? 'bg-gray-200 text-gray-900' : 'text-gray-400 hover:text-gray-700'
+              "p-1.5 rounded-md transition-colors",
+              viewMode === "pipeline"
+                ? "bg-gray-200 text-gray-900"
+                : "text-gray-400 hover:text-gray-700",
             )}
             title="Pipeline"
           >
@@ -212,168 +298,205 @@ export default function DealsPage() {
       </div>
 
       {/* Content */}
-      <AnimatePresence mode="wait">
-        {viewMode === 'table' ? (
-          <motion.div
-            key="table"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-          >
-            <DealsTable deals={filtered} />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="pipeline"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-          >
-            <DealsPipeline deals={filtered} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {loading ? (
+        <div className="bg-white border border-gray-200 rounded-2xl py-16 text-center text-sm text-gray-400">
+          Carregando negócios...
+        </div>
+      ) : viewMode === "table" ? (
+        <DealsTable
+          deals={filtered}
+          stages={stages}
+          busyId={busyId}
+          onMove={moveStage}
+          onClose={closeDeal}
+        />
+      ) : (
+        <DealsPipeline deals={filtered} stages={stages} />
+      )}
 
-      {/* Success Toast */}
       <AnimatePresence>
-        {successMsg && (
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 40 }}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3 shadow-lg"
-          >
-            <div className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="text-sm font-medium text-emerald-700">Negocio criado com sucesso!</span>
-          </motion.div>
+        {showNewDeal && (
+          <NewDealModal
+            stages={stages}
+            onClose={() => setShowNewDeal(false)}
+            onCreated={() => {
+              setShowNewDeal(false);
+              loadDeals();
+            }}
+          />
         )}
-      </AnimatePresence>
-
-      {/* New Deal Modal */}
-      <AnimatePresence>
-        {showNewDeal && <NewDealModal onClose={() => setShowNewDeal(false)} onSave={handleCreateDeal} />}
       </AnimatePresence>
     </div>
-  )
+  );
 }
 
 // ── Table View ──────────────────────────────────────────────────────────────
 
-function DealsTable({ deals }: { deals: Deal[] }) {
+function DealsTable({
+  deals,
+  stages,
+  busyId,
+  onMove,
+  onClose,
+}: {
+  deals: Deal[];
+  stages: Stage[];
+  busyId: string | null;
+  onMove: (id: string, stageId: string) => void;
+  onClose: (id: string, status: "won" | "lost") => void;
+}) {
+  if (deals.length === 0) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-2xl flex flex-col items-center justify-center py-16 text-center">
+        <Handshake className="w-10 h-10 text-gray-400 mb-3" />
+        <p className="text-sm text-gray-500">Nenhum negócio ainda</p>
+        <p className="text-xs text-gray-400 mt-1">
+          Crie um negócio a partir de um lead para começar o pipeline.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-200">
-              {['Negócio', 'Valor', 'Empresa', 'Estágio', 'Probabilidade', 'Previsão', 'Responsável'].map((h) => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              {[
+                "Negócio",
+                "Valor",
+                "Empresa",
+                "Estágio",
+                "Prob.",
+                "Status",
+                "Ações",
+              ].map((h) => (
+                <th
+                  key={h}
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
+                >
                   {h}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {deals.map((deal, i) => (
-              <motion.tr
+            {deals.map((deal) => (
+              <tr
                 key={deal.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.03 }}
-                className="border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer group"
+                className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
               >
                 <td className="px-4 py-3">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{deal.title}</p>
-                    <p className="text-xs text-gray-400">{deal.leadName}</p>
-                  </div>
+                  <p className="text-sm font-medium text-gray-900">
+                    {deal.title}
+                  </p>
+                  <p className="text-xs text-gray-400">{deal.leadName}</p>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="text-sm font-semibold text-emerald-400">
+                  <span className="text-sm font-semibold text-emerald-600">
                     {formatCurrency(deal.value)}
                   </span>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
                     <Building2 className="w-3.5 h-3.5 text-gray-400" />
-                    <span className="text-sm text-gray-700">{deal.company}</span>
+                    <span className="text-sm text-gray-700">
+                      {deal.company}
+                    </span>
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className={cn(
-                    'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border',
-                    stageConfig[deal.stage].bg,
-                    stageConfig[deal.stage].color
-                  )}>
-                    {stageConfig[deal.stage].label}
+                  {deal.status === "open" && stages.length > 0 ? (
+                    <select
+                      value={deal.stageId || ""}
+                      disabled={busyId === deal.id}
+                      onChange={(e) => onMove(deal.id, e.target.value)}
+                      className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white text-gray-700 focus:outline-none focus:border-indigo-400"
+                    >
+                      {stages.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span className="text-xs text-gray-500">
+                      {deal.stageName}
+                    </span>
+                  )}
+                </td>
+                <td className="px-4 py-3">
+                  <span className="text-xs text-gray-500">
+                    {deal.probability}%
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-16 h-1.5 rounded-full bg-gray-100 overflow-hidden">
-                      <div
-                        className={cn(
-                          'h-full rounded-full transition-all',
-                          deal.probability >= 75 ? 'bg-emerald-500' :
-                          deal.probability >= 50 ? 'bg-amber-500' :
-                          deal.probability >= 25 ? 'bg-blue-500' : 'bg-gray-400'
-                        )}
-                        style={{ width: `${deal.probability}%` }}
-                      />
-                    </div>
-                    <span className="text-xs text-gray-500">{deal.probability}%</span>
-                  </div>
+                  <span
+                    className={cn(
+                      "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border",
+                      statusConfig[deal.status].bg,
+                      statusConfig[deal.status].color,
+                    )}
+                  >
+                    {statusConfig[deal.status].label}
+                  </span>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                    <span className="text-sm text-gray-500">{formatDate(deal.expectedClose)}</span>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center">
-                      <span className="text-[10px] font-bold text-gray-900">
-                        {deal.assignedTo.split(' ').map((n) => n[0]).join('').slice(0, 2)}
-                      </span>
+                  {deal.status === "open" ? (
+                    <div className="flex items-center gap-1">
+                      <button
+                        disabled={busyId === deal.id}
+                        onClick={() => onClose(deal.id, "won")}
+                        title="Marcar como ganho"
+                        className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors disabled:opacity-50"
+                      >
+                        <Check className="w-4 h-4" />
+                      </button>
+                      <button
+                        disabled={busyId === deal.id}
+                        onClick={() => onClose(deal.id, "lost")}
+                        title="Marcar como perdido"
+                        className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-50"
+                      >
+                        <Ban className="w-4 h-4" />
+                      </button>
                     </div>
-                    <span className="text-xs text-gray-500 hidden lg:block">{deal.assignedTo.split(' ')[0]}</span>
-                  </div>
+                  ) : (
+                    <span className="text-xs text-gray-300">—</span>
+                  )}
                 </td>
-              </motion.tr>
+              </tr>
             ))}
           </tbody>
         </table>
       </div>
-
-      {deals.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Handshake className="w-10 h-10 text-gray-400 mb-3" />
-          <p className="text-sm text-gray-400">Nenhum negócio encontrado</p>
-        </div>
-      )}
     </div>
-  )
+  );
 }
 
-// ── Pipeline View ───────────────────────────────────────────────────────────
+// ── Pipeline View (por estágio real, somente abertos) ─────────────────────────
 
-function DealsPipeline({ deals }: { deals: Deal[] }) {
+function DealsPipeline({ deals, stages }: { deals: Deal[]; stages: Stage[] }) {
+  const openDeals = deals.filter((d) => d.status === "open");
+  if (stages.length === 0) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-2xl py-16 text-center text-sm text-gray-400">
+        Configure o pipeline para usar a visão por estágios.
+      </div>
+    );
+  }
   return (
     <div className="flex gap-4 overflow-x-auto pb-4">
-      {pipelineStages.map((stage) => {
-        const stageDeals = deals.filter((d) => d.stage === stage)
-        const stageTotal = stageDeals.reduce((s, d) => s + d.value, 0)
-
+      {stages.map((stage) => {
+        const stageDeals = openDeals.filter((d) => d.stageId === stage.id);
+        const stageTotal = stageDeals.reduce((s, d) => s + d.value, 0);
         return (
-          <div key={stage} className="min-w-[280px] flex-1">
-            {/* Column header */}
+          <div key={stage.id} className="min-w-[280px] flex-1">
             <div className="mb-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className={cn('text-sm font-medium', stageConfig[stage].color)}>
-                  {stageConfig[stage].label}
+                <span className="text-sm font-medium text-gray-700">
+                  {stage.name}
                 </span>
                 <span className="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded-full">
                   {stageDeals.length}
@@ -383,72 +506,27 @@ function DealsPipeline({ deals }: { deals: Deal[] }) {
                 {formatCurrency(stageTotal)}
               </span>
             </div>
-
-            {/* Column cards */}
             <div className="space-y-2">
-              {stageDeals.map((deal, i) => (
-                <motion.div
+              {stageDeals.map((deal) => (
+                <div
                   key={deal.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="bg-white border border-gray-200 rounded-xl p-4 hover:bg-gray-50 hover:border-gray-200 transition-all cursor-pointer group"
+                  className="bg-white border border-gray-200 rounded-xl p-4"
                 >
-                  <div className="flex items-start justify-between mb-2">
-                    <h4 className="text-sm font-medium text-gray-900 leading-tight line-clamp-2">
-                      {deal.title}
-                    </h4>
-                    <button className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
-                      <MoreHorizontal className="w-4 h-4 text-gray-400" />
-                    </button>
-                  </div>
-
-                  <p className="text-lg font-bold text-emerald-400 mb-3">
+                  <h4 className="text-sm font-medium text-gray-900 leading-tight line-clamp-2">
+                    {deal.title}
+                  </h4>
+                  <p className="text-lg font-bold text-emerald-600 my-2">
                     {formatCurrency(deal.value)}
                   </p>
-
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <Building2 className="w-3 h-3 shrink-0" />
-                      <span className="truncate">{deal.company}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <User className="w-3 h-3 shrink-0" />
-                      <span className="truncate">{deal.leadName}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <Calendar className="w-3 h-3 shrink-0" />
-                      <span>{formatDate(deal.expectedClose)}</span>
-                    </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <Building2 className="w-3 h-3 shrink-0" />
+                    <span className="truncate">{deal.company}</span>
                   </div>
-
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center">
-                        <span className="text-[8px] font-bold text-gray-900">
-                          {deal.assignedTo.split(' ').map((n) => n[0]).join('').slice(0, 2)}
-                        </span>
-                      </div>
-                      <span className="text-xs text-gray-400">{deal.assignedTo.split(' ')[0]}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-10 h-1 rounded-full bg-gray-100 overflow-hidden">
-                        <div
-                          className={cn(
-                            'h-full rounded-full',
-                            deal.probability >= 75 ? 'bg-emerald-500' :
-                            deal.probability >= 50 ? 'bg-amber-500' :
-                            deal.probability >= 25 ? 'bg-blue-500' : 'bg-gray-400'
-                          )}
-                          style={{ width: `${deal.probability}%` }}
-                        />
-                      </div>
-                      <span className="text-[10px] text-gray-400">{deal.probability}%</span>
-                    </div>
-                  </div>
-                </motion.div>
+                  <p className="text-xs text-gray-400 mt-1 truncate">
+                    {deal.leadName} · {deal.probability}%
+                  </p>
+                </div>
               ))}
-
               {stageDeals.length === 0 && (
                 <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center">
                   <p className="text-xs text-gray-400">Nenhum negócio</p>
@@ -456,47 +534,89 @@ function DealsPipeline({ deals }: { deals: Deal[] }) {
               )}
             </div>
           </div>
-        )
+        );
       })}
     </div>
-  )
+  );
 }
 
-// ── New Deal Modal ──────────────────────────────────────────────────────────
+// ── New Deal Modal ────────────────────────────────────────────────────────────
 
-function NewDealModal({ onClose, onSave }: { onClose: () => void; onSave: (deal: Deal) => void }) {
+interface LeadOption {
+  id: string;
+  name: string;
+}
+
+function NewDealModal({
+  stages,
+  onClose,
+  onCreated,
+}: {
+  stages: Stage[];
+  onClose: () => void;
+  onCreated: () => void;
+}) {
+  const [leads, setLeads] = useState<LeadOption[]>([]);
   const [form, setForm] = useState({
-    title: '',
-    value: '',
-    company: '',
-    leadName: '',
-    stage: 'prospeccao' as DealStage,
-    probability: '50',
-    expectedClose: '',
-  })
+    title: "",
+    value: "",
+    probability: "50",
+    leadId: "",
+    stageId: stages[0]?.id || "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState("");
 
-  const handleChange = (field: string, val: string) => {
-    setForm((prev) => ({ ...prev, [field]: val }))
-  }
+  useEffect(() => {
+    fetch("/api/leads?limit=100")
+      .then((r) => r.json())
+      .then((d) => {
+        setLeads(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (d.leads || []).map((l: any) => ({
+            id: l.id,
+            name:
+              `${l.firstName || ""} ${l.lastName || ""}`.trim() || "Sem nome",
+          })),
+        );
+      })
+      .catch(() => {});
+  }, []);
 
-  const handleSubmit = () => {
-    if (!form.title.trim()) return
-    const deal: Deal = {
-      id: `d-${Date.now()}`,
-      title: form.title,
-      value: parseFloat(form.value) || 0,
-      company: form.company || 'Sem empresa',
-      leadName: form.leadName || 'Sem contato',
-      stage: form.stage,
-      probability: parseInt(form.probability) || 50,
-      expectedClose: form.expectedClose || new Date().toISOString().slice(0, 10),
-      assignedTo: 'AIFLUENT',
-      createdAt: new Date().toISOString().slice(0, 10),
+  const canSubmit =
+    !!form.title.trim() && !!form.leadId && !!form.stageId && !saving;
+
+  const handleSubmit = async () => {
+    if (!canSubmit) return;
+    setSaving(true);
+    setErr("");
+    try {
+      const res = await fetch("/api/deals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: form.title.trim(),
+          value: Number(form.value) || 0,
+          probability: Number(form.probability) || 50,
+          leadId: form.leadId,
+          stageId: form.stageId,
+        }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setErr((d as { error?: string }).error || "Falha ao criar negocio");
+        setSaving(false);
+        return;
+      }
+      onCreated();
+    } catch {
+      setErr("Erro de conexao");
+      setSaving(false);
     }
-    onSave(deal)
-  }
+  };
 
-  const inputClass = "w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors"
+  const inputClass =
+    "w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none transition-colors";
 
   return (
     <motion.div
@@ -513,87 +633,100 @@ function NewDealModal({ onClose, onSave }: { onClose: () => void; onSave: (deal:
         className="w-full max-w-lg bg-white border border-gray-200 rounded-2xl shadow-2xl"
       >
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Novo Negocio</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-900 transition-colors">
+          <h2 className="text-lg font-semibold text-gray-900">Novo Negócio</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-900 transition-colors"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="p-6 space-y-4">
           <div>
-            <label className="block text-sm text-gray-500 mb-2">Titulo do Negocio *</label>
+            <label className="block text-sm text-gray-500 mb-2">Título *</label>
             <input
               value={form.title}
-              onChange={(e) => handleChange('title', e.target.value)}
-              placeholder="Ex: MBA Executivo - Empresa X"
+              onChange={(e) =>
+                setForm((p) => ({ ...p, title: e.target.value }))
+              }
+              placeholder="Ex: Plano Anual - Business English"
               className={inputClass}
             />
           </div>
+          <div>
+            <label className="block text-sm text-gray-500 mb-2">Lead *</label>
+            <select
+              value={form.leadId}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, leadId: e.target.value }))
+              }
+              className={inputClass}
+            >
+              <option value="">Selecione um lead</option>
+              {leads.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.name}
+                </option>
+              ))}
+            </select>
+            {leads.length === 0 && (
+              <p className="text-xs text-gray-400 mt-1">
+                Nenhum lead disponível — cadastre um lead primeiro.
+              </p>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-500 mb-2">Valor (R$)</label>
+              <label className="block text-sm text-gray-500 mb-2">
+                Valor (R$)
+              </label>
               <input
                 type="number"
                 value={form.value}
-                onChange={(e) => handleChange('value', e.target.value)}
-                placeholder="0,00"
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, value: e.target.value }))
+                }
+                placeholder="0"
                 className={inputClass}
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-500 mb-2">Probabilidade (%)</label>
+              <label className="block text-sm text-gray-500 mb-2">
+                Probabilidade (%)
+              </label>
               <input
                 type="number"
-                value={form.probability}
-                onChange={(e) => handleChange('probability', e.target.value)}
-                placeholder="50"
                 min={0}
                 max={100}
+                value={form.probability}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, probability: e.target.value }))
+                }
                 className={inputClass}
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm text-gray-500 mb-2">Empresa</label>
-            <input
-              value={form.company}
-              onChange={(e) => handleChange('company', e.target.value)}
-              placeholder="Nome da empresa"
+            <label className="block text-sm text-gray-500 mb-2">
+              Estágio *
+            </label>
+            <select
+              value={form.stageId}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, stageId: e.target.value }))
+              }
               className={inputClass}
-            />
+            >
+              <option value="">Selecione um estágio</option>
+              {stages.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
           </div>
-          <div>
-            <label className="block text-sm text-gray-500 mb-2">Lead</label>
-            <input
-              value={form.leadName}
-              onChange={(e) => handleChange('leadName', e.target.value)}
-              placeholder="Nome do contato"
-              className={inputClass}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-gray-500 mb-2">Estagio</label>
-              <select
-                value={form.stage}
-                onChange={(e) => handleChange('stage', e.target.value)}
-                className={inputClass}
-              >
-                {Object.entries(stageConfig).map(([key, cfg]) => (
-                  <option key={key} value={key}>{cfg.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm text-gray-500 mb-2">Previsao de Fechamento</label>
-              <input
-                type="date"
-                value={form.expectedClose}
-                onChange={(e) => handleChange('expectedClose', e.target.value)}
-                className={inputClass}
-              />
-            </div>
-          </div>
+          {err && <p className="text-sm text-rose-500">{err}</p>}
         </div>
 
         <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
@@ -605,16 +738,18 @@ function NewDealModal({ onClose, onSave }: { onClose: () => void; onSave: (deal:
           </button>
           <button
             onClick={handleSubmit}
-            disabled={!form.title.trim()}
+            disabled={!canSubmit}
             className={cn(
               "px-5 py-2.5 text-white text-sm font-medium rounded-xl transition-colors",
-              form.title.trim() ? "bg-indigo-600 hover:bg-indigo-500" : "bg-gray-300 cursor-not-allowed"
+              canSubmit
+                ? "bg-indigo-600 hover:bg-indigo-500"
+                : "bg-gray-300 cursor-not-allowed",
             )}
           >
-            Criar Negocio
+            {saving ? "Criando..." : "Criar Negócio"}
           </button>
         </div>
       </motion.div>
     </motion.div>
-  )
+  );
 }

@@ -37,6 +37,8 @@ export interface IngestLeadInput {
   utmMedium?: string;
   utmCampaign?: string;
   createdById?: string;
+  // Atribuição completa da origem (campanha/adset/ad/form) — salva no histórico.
+  attribution?: Record<string, unknown>;
 }
 
 export interface IngestResult {
@@ -95,6 +97,9 @@ export async function ingestLead(
           title: `Re-entrada via ${source}`,
           description: `Lead recebido novamente pelo canal ${input.channel || source}`,
           leadId,
+          metadata: input.attribution
+            ? JSON.stringify(input.attribution)
+            : undefined,
         },
       })
       .catch(() => {});
@@ -135,6 +140,9 @@ export async function ingestLead(
           title: `Origem: ${source}`,
           description: `Lead capturado pelo canal ${input.channel || source}`,
           leadId,
+          metadata: input.attribution
+            ? JSON.stringify(input.attribution)
+            : undefined,
         },
       })
       .catch(() => {});
