@@ -18,7 +18,6 @@ interface ChatMessage {
   actions?: { label: string; icon: React.ElementType }[]
 }
 
-// TODO: Connect to /api/ai when backend is ready
 const initialChat: ChatMessage[] = [
   {
     id: '1',

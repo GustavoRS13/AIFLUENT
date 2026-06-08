@@ -1,29 +1,29 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
-import { requireAuth, checkRateLimit, requireOrgId } from '@/lib/api-auth'
-import { logger } from '@/lib/logger'
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { requireAuth, checkRateLimit, requireOrgId } from "@/lib/api-auth";
+import { logger } from "@/lib/logger";
 
-const memoryLeads: Record<string, unknown>[] = []
+const memoryLeads: Record<string, unknown>[] = [];
 
 async function getPrisma() {
   try {
-    const { prisma } = await import('@/lib/prisma')
-    return prisma
+    const { prisma } = await import("@/lib/prisma");
+    return prisma;
   } catch {
-    return null
+    return null;
   }
 }
 
 const createLeadSchema = z.object({
-  firstName: z.string().min(1, 'Nome obrigatorio'),
+  firstName: z.string().min(1, "Nome obrigatorio"),
   lastName: z.string().optional(),
-  email: z.string().email().optional().or(z.literal('')),
+  email: z.string().email().optional().or(z.literal("")),
   phone: z.string().optional(),
   whatsapp: z.string().optional(),
   company: z.string().optional(),
   jobTitle: z.string().optional(),
-  source: z.string().default('manual'),
-  temperature: z.enum(['cold', 'warm', 'hot']).default('warm'),
+  source: z.string().default("manual"),
+  temperature: z.enum(["cold", "warm", "hot"]).default("warm"),
   courseInterest: z.string().optional(),
   languageLevel: z.string().optional(),
   notes: z.string().optional(),
@@ -34,39 +34,41 @@ const createLeadSchema = z.object({
   // SECURITY: organizationId/consultantId/teamId/createdById are intentionally
   // NOT accepted from the client. The tenant and creator are always derived
   // from the authenticated session to prevent cross-tenant assignment.
-})
+});
 
 export async function GET(request: NextRequest) {
-  const rateLimited = checkRateLimit(request)
-  if (rateLimited) return rateLimited
+  const rateLimited = checkRateLimit(request);
+  if (rateLimited) return rateLimited;
 
-  const { error, session } = await requireAuth()
-  if (error) return error
+  const { error, session } = await requireAuth();
+  if (error) return error;
 
-  const { orgId, error: orgError } = requireOrgId(session)
-  if (orgError) return orgError
-  const userRole = (session!.user as Record<string, unknown>).role as string
-  const userId = (session!.user as Record<string, unknown>).id as string
-  const prisma = await getPrisma()
+  const { orgId, error: orgError } = requireOrgId(session);
+  if (orgError) return orgError;
+  const userRole = (session!.user as Record<string, unknown>).role as string;
+  const userId = (session!.user as Record<string, unknown>).id as string;
+  const prisma = await getPrisma();
 
   if (prisma) {
     try {
-      const { searchParams } = request.nextUrl
-      const search = searchParams.get('search') || ''
-      const source = searchParams.get('source') || ''
-      const temperature = searchParams.get('temperature') || ''
-      const status = searchParams.get('status') || ''
-      const stageId = searchParams.get('stageId') || ''
-      const sortBy = searchParams.get('sortBy') || 'createdAt'
-      const sortOrder = (searchParams.get('sortOrder') || 'desc') as 'asc' | 'desc'
-      const page = parseInt(searchParams.get('page') || '1')
-      const limit = parseInt(searchParams.get('limit') || '50')
+      const { searchParams } = request.nextUrl;
+      const search = searchParams.get("search") || "";
+      const source = searchParams.get("source") || "";
+      const temperature = searchParams.get("temperature") || "";
+      const status = searchParams.get("status") || "";
+      const stageId = searchParams.get("stageId") || "";
+      const sortBy = searchParams.get("sortBy") || "createdAt";
+      const sortOrder = (searchParams.get("sortOrder") || "desc") as
+        | "asc"
+        | "desc";
+      const page = parseInt(searchParams.get("page") || "1");
+      const limit = parseInt(searchParams.get("limit") || "50");
 
-      const where: Record<string, unknown> = { organizationId: orgId }
+      const where: Record<string, unknown> = { organizationId: orgId };
 
       // Role-based data isolation: operador sees only their assigned leads
-      if (userRole === 'operador' && userId) {
-        where.consultantId = userId
+      if (userRole === "operador" && userId) {
+        where.consultantId = userId;
       }
       if (search) {
         where.OR = [
@@ -75,14 +77,14 @@ export async function GET(request: NextRequest) {
           { email: { contains: search } },
           { phone: { contains: search } },
           { whatsapp: { contains: search } },
-        ]
+        ];
       }
-      const teamId = searchParams.get('teamId') || ''
-      if (source) where.source = source
-      if (temperature) where.temperature = temperature
-      if (status) where.status = status
-      if (stageId) where.stageId = stageId
-      if (teamId) where.teamId = teamId
+      const teamId = searchParams.get("teamId") || "";
+      if (source) where.source = source;
+      if (temperature) where.temperature = temperature;
+      if (status) where.status = status;
+      if (stageId) where.stageId = stageId;
+      if (teamId) where.teamId = teamId;
 
       const [leads, total] = await Promise.all([
         prisma.lead.findMany({
@@ -98,11 +100,17 @@ export async function GET(request: NextRequest) {
           take: limit,
         }),
         prisma.lead.count({ where }),
-      ])
+      ]);
 
-      return NextResponse.json({ leads, total, page, limit, totalPages: Math.ceil(total / limit) })
+      return NextResponse.json({
+        leads,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      });
     } catch (error) {
-      logger.error('GET /api/leads DB error', error)
+      logger.error("GET /api/leads DB error", error);
     }
   }
 
@@ -112,41 +120,41 @@ export async function GET(request: NextRequest) {
     page: 1,
     limit: 50,
     totalPages: 1,
-  })
+  });
 }
 
 export async function POST(request: NextRequest) {
-  const rateLimited = checkRateLimit(request)
-  if (rateLimited) return rateLimited
+  const rateLimited = checkRateLimit(request);
+  if (rateLimited) return rateLimited;
 
-  const { error: authError, session } = await requireAuth('gestor')
-  if (authError) return authError
+  const { error: authError, session } = await requireAuth("gestor");
+  if (authError) return authError;
 
-  const { orgId, error: orgError } = requireOrgId(session)
-  if (orgError) return orgError
-  const createdById = (session!.user as Record<string, unknown>).id as string
+  const { orgId, error: orgError } = requireOrgId(session);
+  if (orgError) return orgError;
+  const createdById = (session!.user as Record<string, unknown>).id as string;
 
-  let body: unknown
+  let body: unknown;
   try {
-    body = await request.json()
+    body = await request.json();
   } catch {
-    return NextResponse.json({ error: 'JSON invalido' }, { status: 400 })
+    return NextResponse.json({ error: "JSON invalido" }, { status: 400 });
   }
 
-  const parsed = createLeadSchema.safeParse(body)
+  const parsed = createLeadSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: 'Dados invalidos', details: parsed.error.flatten().fieldErrors },
+      { error: "Dados invalidos", details: parsed.error.flatten().fieldErrors },
       { status: 400 },
-    )
+    );
   }
 
-  const data = parsed.data
+  const data = parsed.data;
 
   try {
-    const prisma = await getPrisma()
+    const prisma = await getPrisma();
     if (prisma) {
-      const resolvedOrgId = orgId
+      const resolvedOrgId = orgId;
       const lead = await prisma.lead.create({
         data: {
           firstName: data.firstName,
@@ -172,55 +180,65 @@ export async function POST(request: NextRequest) {
           stage: { select: { id: true, name: true, color: true } },
           tags: { include: { tag: true } },
         },
-      })
+      });
 
-      if (data.tags && data.tags.length > 0) {
-        for (const tagName of data.tags) {
-          let tag = await prisma.tag.findFirst({
-            where: { name: tagName, organizationId: resolvedOrgId },
-          })
-          if (!tag) {
-            tag = await prisma.tag.create({
-              data: { name: tagName, organizationId: resolvedOrgId },
-            })
-          }
-          await prisma.leadTag.create({
-            data: { leadId: lead.id, tagId: tag.id },
-          })
+      // Regra de negocio: TODO lead deve ter ao menos 1 tag. Quando nenhuma tag
+      // e enviada (criacao rapida, importacao, entrada por canal), usamos a
+      // origem (source) como tag padrao para garantir a obrigatoriedade.
+      const effectiveTags =
+        data.tags && data.tags.length > 0
+          ? data.tags
+          : [data.source || "manual"];
+      for (const tagName of effectiveTags) {
+        const name = tagName.trim();
+        if (!name) continue;
+        let tag = await prisma.tag.findFirst({
+          where: { name, organizationId: resolvedOrgId },
+        });
+        if (!tag) {
+          tag = await prisma.tag.create({
+            data: { name, organizationId: resolvedOrgId },
+          });
         }
+        await prisma.leadTag.create({
+          data: { leadId: lead.id, tagId: tag.id },
+        });
       }
 
       // Audit log
       try {
         await prisma.auditLog.create({
           data: {
-            action: 'lead_created',
-            entity: 'Lead',
+            action: "lead_created",
+            entity: "Lead",
             entityId: lead.id,
-            details: JSON.stringify({ firstName: lead.firstName, source: lead.source }),
+            details: JSON.stringify({
+              firstName: lead.firstName,
+              source: lead.source,
+            }),
             organizationId: resolvedOrgId,
           },
-        })
+        });
       } catch {} // Don't fail if audit fails
 
-      return NextResponse.json(lead, { status: 201 })
+      return NextResponse.json(lead, { status: 201 });
     }
   } catch (error) {
-    logger.error('POST /api/leads DB error', error)
+    logger.error("POST /api/leads DB error", error);
   }
 
   const fakeLead = {
     id: `lead_${Date.now()}`,
     ...data,
-    status: 'new',
+    status: "new",
     score: 0,
-    country: 'Brasil',
+    country: "Brasil",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     consultant: null,
     stage: null,
     tags: (data.tags || []).map((t: string) => ({ tag: { name: t } })),
-  }
-  memoryLeads.unshift(fakeLead)
-  return NextResponse.json(fakeLead, { status: 201 })
+  };
+  memoryLeads.unshift(fakeLead);
+  return NextResponse.json(fakeLead, { status: 201 });
 }
