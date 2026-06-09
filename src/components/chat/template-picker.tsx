@@ -43,6 +43,7 @@ export function TemplatePicker({ open, onClose, onSend }: TemplatePickerProps) {
   const [params, setParams] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- carregamento assíncrono ao abrir */
   useEffect(() => {
     if (!open) return;
     setLoading(true);
@@ -57,6 +58,7 @@ export function TemplatePicker({ open, onClose, onSend }: TemplatePickerProps) {
       .catch(() => setError("Falha ao carregar templates"))
       .finally(() => setLoading(false));
   }, [open]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   function pick(t: Template) {
     setSelected(t);
