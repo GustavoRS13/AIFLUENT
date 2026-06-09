@@ -36,6 +36,7 @@ interface Conversation {
   phone?: string;
   lastMessage: string;
   lastMessageAt: string;
+  lastInboundAt?: string | null;
   unreadCount: number;
   channel: ConversationChannel;
   assignee?: string;
@@ -154,6 +155,7 @@ export default function AtendimentoPage() {
                 lastMessageAt: (c.lastMessageAt ||
                   c.updatedAt ||
                   new Date().toISOString()) as string,
+                lastInboundAt: (c.lastInboundAt as string | null) ?? null,
                 unreadCount: (c.unreadCount as number) || 0,
                 channel: (c.channel as ConversationChannel) || "whatsapp",
                 assignee: (c.assignee as Record<string, unknown>)?.name as
@@ -613,7 +615,7 @@ export default function AtendimentoPage() {
                           {conv.lastMessage}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
-                          <SLATimer lastMessageAt={conv.lastMessageAt} />
+                          <SLATimer lastInboundAt={conv.lastInboundAt} />
                           {conv.unreadCount > 0 && (
                             <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-sky-500 px-1 text-[10px] font-bold text-white">
                               {conv.unreadCount}
@@ -726,7 +728,7 @@ export default function AtendimentoPage() {
                       })()}
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <SLATimer lastMessageAt={selectedConv.lastMessageAt} />
+                      <SLATimer lastInboundAt={selectedConv.lastInboundAt} />
                       {selectedConv.phone && (
                         <span className="text-[10px] text-gray-400">
                           {selectedConv.phone}

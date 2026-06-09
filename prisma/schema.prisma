@@ -410,6 +410,7 @@ model Conversation {
   priority      String    @default("normal")
   subject       String?
   lastMessageAt DateTime?
+  lastInboundAt DateTime?
   unreadCount   Int       @default(0)
   aiSuggestion  String?
   metadata      String?

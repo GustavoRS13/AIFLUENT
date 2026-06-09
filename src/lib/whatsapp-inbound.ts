@@ -111,10 +111,15 @@ export async function persistInboundMessage(
     },
   });
 
-  // 4. atualiza o histórico da conversa
+  // 4. atualiza o histórico da conversa (lastInboundAt reinicia a janela de 24h)
+  const inboundNow = new Date();
   await prisma.conversation.update({
     where: { id: conversation.id },
-    data: { lastMessageAt: new Date(), unreadCount: { increment: 1 } },
+    data: {
+      lastMessageAt: inboundNow,
+      lastInboundAt: inboundNow,
+      unreadCount: { increment: 1 },
+    },
   });
 
   return { deduped: false, leadId: lead.id, conversationId: conversation.id };
