@@ -16,6 +16,7 @@ interface SLATimerProps {
 export function SLATimer({ lastInboundAt, className }: SLATimerProps) {
   const [remaining, setRemaining] = useState<number | null>(null);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- timer de contagem regressiva */
   useEffect(() => {
     if (!lastInboundAt) {
       setRemaining(null);
@@ -29,6 +30,7 @@ export function SLATimer({ lastInboundAt, className }: SLATimerProps) {
     const interval = setInterval(calc, 1000);
     return () => clearInterval(interval);
   }, [lastInboundAt]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Sem mensagem recebida ainda → não há janela aberta
   if (!lastInboundAt) {
