@@ -1,442 +1,466 @@
-'use client'
+"use client";
 
-import { useEffect, useState, useCallback, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect, useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Search, SlidersHorizontal, RefreshCw, Loader2, Plus,
-  ChevronDown, ChevronRight, Download, X, Check, Calendar,
-  Tag, User, Activity,
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { usePipelineStore, type PipelineStage } from '@/stores/pipeline-store'
-import { KanbanBoard } from '@/components/pipeline/kanban-board'
-import { LeadOperationPanel } from '@/components/atendimento/lead-operation-panel'
-import type { KanbanCard, LeadSource, LeadTemperature } from '@/types'
+  Search,
+  RefreshCw,
+  Loader2,
+  Plus,
+  ChevronDown,
+  ChevronRight,
+  MoreVertical,
+  Pencil,
+  Trash2,
+  X,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { usePipelineStore, type PipelineStage } from "@/stores/pipeline-store";
+import { KanbanBoard } from "@/components/pipeline/kanban-board";
+import { LeadOperationPanel } from "@/components/atendimento/lead-operation-panel";
+import type { KanbanCard, LeadSource, LeadTemperature } from "@/types";
 
-const STAGES = [
-  { name: 'Base', color: '#6366f1', isWon: false, isLost: false },
-  { name: 'Prospeccao', color: '#8b5cf6', isWon: false, isLost: false },
-  { name: 'Conexao', color: '#06b6d4', isWon: false, isLost: false },
-  { name: 'Proposta', color: '#f59e0b', isWon: false, isLost: false },
-  { name: 'Negociacao', color: '#f97316', isWon: false, isLost: false },
-  { name: 'Fechamento', color: '#10b981', isWon: true, isLost: false },
-  { name: 'Perdido', color: '#ef4444', isWon: false, isLost: true },
-]
-
-interface OriginGroup {
-  id: string
-  label: string
-  children: { id: string; label: string }[]
+interface Funnel {
+  id: string;
+  name: string;
+  groupName: string | null;
+  isDefault: boolean;
+  hidden: boolean;
+  leadCount: number;
 }
 
-const ORIGIN_TREE: OriginGroup[] = [
-  {
-    id: 'meta-ads',
-    label: 'Meta Ads',
-    children: [
-      { id: 'facebook-lead-ads', label: 'Facebook Lead Ads' },
-      { id: 'instagram-ads', label: 'Instagram Ads' },
-      { id: 'remarketing', label: 'Remarketing' },
-    ],
-  },
-  {
-    id: 'google',
-    label: 'Google Ads',
-    children: [
-      { id: 'google-search', label: 'Google Search' },
-      { id: 'google-display', label: 'Google Display' },
-    ],
-  },
-  {
-    id: 'organico',
-    label: 'Organico',
-    children: [
-      { id: 'whatsapp-site', label: 'WhatsApp Site' },
-      { id: 'landing-page', label: 'Landing Page' },
-      { id: 'indicacao', label: 'Indicacao' },
-      { id: 'evento', label: 'Evento Presencial' },
-    ],
-  },
-]
-
-/** Map child origin IDs to LeadSource values for filtering */
-const ORIGIN_SOURCE_MAP: Record<string, LeadSource[]> = {
-  'facebook-lead-ads': ['facebook_lead_ad', 'facebook'],
-  'instagram-ads': ['instagram'],
-  'remarketing': ['meta_ads'],
-  'google-search': ['google'],
-  'google-display': ['google'],
-  'whatsapp-site': ['whatsapp'],
-  'landing-page': ['website'],
-  'indicacao': ['referral'],
-  'evento': ['event'],
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapStages(stages: any[]): PipelineStage[] {
+  return stages.map((stage) => ({
+    id: stage.id,
+    name: stage.name,
+    color: stage.color,
+    order: stage.order,
+    isWon: stage.isWon,
+    isLost: stage.isLost,
+    leads: (stage.leads || []).map(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (l: any): KanbanCard => ({
+        id: l.id,
+        name: [l.firstName, l.lastName].filter(Boolean).join(" "),
+        photo: l.avatar ?? null,
+        phone: l.phone ?? null,
+        whatsapp: l.whatsapp ?? null,
+        email: l.email ?? null,
+        source: (l.source || "manual") as LeadSource,
+        consultant: l.consultant?.name ?? null,
+        lastInteraction: l.lastContactAt ?? null,
+        temperature: (l.temperature || "warm") as LeadTemperature,
+        aiScore: l.aiScore ?? null,
+        tags: Array.isArray(l.tags)
+          ? l.tags
+              .map((t: { tag?: { name?: string } }) => t.tag?.name ?? "")
+              .filter(Boolean)
+          : [],
+        courseInterest: l.courseInterest ?? null,
+        status: l.status as KanbanCard["status"],
+        entryDate: l.createdAt ?? new Date().toISOString(),
+      }),
+    ),
+  }));
 }
-
-/** Map group IDs to the union of their children's sources */
-const GROUP_SOURCE_MAP: Record<string, LeadSource[]> = {
-  'meta-ads': ['meta_ads', 'facebook_lead_ad', 'facebook', 'instagram'],
-  'google': ['google'],
-  'organico': ['whatsapp', 'website', 'referral', 'event'],
-}
-
-// Pipeline loads from API. Empty columns shown when no leads exist.
 
 export default function PipelinePage() {
-  const { stages, setStages, addStage, renameStage, updateStageColor, deleteStage } = usePipelineStore()
-  const [loading, setLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedOrigin, setSelectedOrigin] = useState<string>('all')
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['meta-ads', 'organico']))
-  const [openFilter, setOpenFilter] = useState<string | null>(null)
-  const [filterDate, setFilterDate] = useState<string>('')
-  const [filterTag, setFilterTag] = useState<string>('')
-  const [filterOwner, setFilterOwner] = useState<string>('')
-  const [filterStatus, setFilterStatus] = useState<string>('')
-  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
-  const filterRef = useRef<HTMLDivElement>(null)
+  const {
+    stages,
+    setStages,
+    addStage,
+    renameStage,
+    updateStageColor,
+    deleteStage,
+  } = usePipelineStore();
+  const [funnels, setFunnels] = useState<Funnel[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const [boardLoading, setBoardLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [menuId, setMenuId] = useState<string | null>(null);
+  const [newOpen, setNewOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newGroup, setNewGroup] = useState("");
+
+  const loadFunnels = useCallback(async () => {
+    try {
+      const res = await fetch("/api/pipelines");
+      const d = await res.json();
+      const items: Funnel[] = d.pipelines || [];
+      setFunnels(items);
+      setExpanded((prev) => {
+        if (prev.size > 0) return prev;
+        return new Set(items.map((f) => f.groupName || "Sem grupo"));
+      });
+      setSelectedId((cur) =>
+        cur && items.some((f) => f.id === cur)
+          ? cur
+          : (items.find((f) => f.isDefault)?.id ?? items[0]?.id ?? null),
+      );
+    } catch {
+      /* mantém */
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadBoard = useCallback(
+    async (pid: string) => {
+      setBoardLoading(true);
+      try {
+        const res = await fetch(`/api/pipeline?pipelineId=${pid}`);
+        const data = await res.json();
+        setStages(mapStages(data?.stages || []));
+      } catch {
+        setStages([]);
+      } finally {
+        setBoardLoading(false);
+      }
+    },
+    [setStages],
+  );
+
+  /* eslint-disable react-hooks/set-state-in-effect -- carregamento assíncrono */
+  useEffect(() => {
+    loadFunnels();
+  }, [loadFunnels]);
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (filterRef.current && !filterRef.current.contains(e.target as Node)) setOpenFilter(null)
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    if (selectedId) loadBoard(selectedId);
+  }, [selectedId, loadBoard]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
-  const fetchPipeline = useCallback(async () => {
-    setLoading(true)
-    try {
-      const res = await fetch('/api/pipeline')
-      if (res.ok) {
-        const data = await res.json()
-        if (data?.stages?.length > 0) {
-          const mapped: PipelineStage[] = data.stages.map((stage: { id: string; name: string; color: string; order: number; isWon: boolean; isLost: boolean; leads: Array<Record<string, unknown>> }) => ({
-            id: stage.id, name: stage.name, color: stage.color, order: stage.order, isWon: stage.isWon, isLost: stage.isLost,
-            leads: (stage.leads || []).map((l: Record<string, unknown>): KanbanCard => ({
-              id: l.id as string, name: [l.firstName, l.lastName].filter(Boolean).join(' '),
-              photo: (l.avatar as string) ?? null, phone: (l.phone as string) ?? null, whatsapp: (l.whatsapp as string) ?? null, email: (l.email as string) ?? null,
-              source: ((l.source as string) || 'manual') as LeadSource, consultant: (l.consultant && typeof l.consultant === 'object') ? ((l.consultant as Record<string, string>).name ?? null) : null,
-              lastInteraction: (l.lastContactAt as string) ?? null, temperature: ((l.temperature as string) || 'warm') as LeadTemperature,
-              aiScore: (l.aiScore as number) ?? null, tags: Array.isArray(l.tags) ? (l.tags as Array<{ tag?: { name?: string } }>).map((t) => t.tag?.name ?? '').filter(Boolean) : [],
-              courseInterest: (l.courseInterest as string) ?? null, status: (l.status as string) as KanbanCard['status'], entryDate: (l.createdAt as string) ?? new Date().toISOString(),
-            })),
-          }))
-          setStages(mapped)
-          setLoading(false)
-          return
-        }
+  const handleMoveLead = useCallback(
+    async (leadId: string, stageId: string, newOrder: number) => {
+      try {
+        await fetch("/api/pipeline", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ leadId, stageId, newOrder }),
+        });
+      } catch {
+        /* otimista no board */
       }
-    } catch { /* fallback */ }
+    },
+    [],
+  );
 
-    const defaultStages: PipelineStage[] = STAGES.map((s, i) => {
-      return { id: `stage-${i}`, name: s.name, color: s.color, order: i, isWon: s.isWon, isLost: s.isLost, leads: [] }
-    })
-    setStages(defaultStages)
-    setLoading(false)
-  }, [setStages])
-
-  useEffect(() => { fetchPipeline() }, [fetchPipeline])
-
-  const handleMoveLead = useCallback(async (leadId: string, stageId: string, newOrder: number) => {
-    try { await fetch('/api/pipeline', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ leadId, stageId, newOrder }) }) } catch {}
-  }, [])
-
-  const handleAddStage = useCallback(() => {
-    const defaultColors = ['#6366f1', '#8b5cf6', '#06b6d4', '#f59e0b', '#f97316', '#10b981', '#ef4444', '#ec4899', '#3b82f6', '#a855f7']
-    const color = defaultColors[stages.length % defaultColors.length]
-    addStage(`Nova Etapa ${stages.length + 1}`, color)
-  }, [stages.length, addStage])
-
-  const handleRenameStage = useCallback((stageId: string, name: string) => {
-    renameStage(stageId, name)
-  }, [renameStage])
-
-  const handleUpdateStageColor = useCallback((stageId: string, color: string) => {
-    updateStageColor(stageId, color)
-  }, [updateStageColor])
-
-  const handleDeleteStage = useCallback((stageId: string) => {
-    deleteStage(stageId)
-  }, [deleteStage])
-
-  function toggleGroup(groupId: string) {
-    setExpandedGroups(prev => {
-      const next = new Set(prev)
-      if (next.has(groupId)) next.delete(groupId)
-      else next.add(groupId)
-      return next
-    })
+  async function createFunnel() {
+    if (!newName.trim()) return;
+    await fetch("/api/pipelines", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: newName.trim(),
+        groupName: newGroup.trim(),
+      }),
+    });
+    setNewOpen(false);
+    setNewName("");
+    setNewGroup("");
+    loadFunnels();
   }
 
-  function countForGroup(group: OriginGroup): number {
-    const all = stages.flatMap(s => s.leads)
-    const sources = GROUP_SOURCE_MAP[group.id]
-    if (!sources) return 0
-    return all.filter(l => sources.includes(l.source)).length
+  async function renameFunnel(f: Funnel) {
+    const name = window.prompt("Novo nome do funil:", f.name);
+    if (!name || name.trim() === f.name) return;
+    await fetch(`/api/pipelines/${f.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name.trim() }),
+    });
+    setMenuId(null);
+    loadFunnels();
   }
 
-  function countForChild(childId: string): number {
-    const all = stages.flatMap(s => s.leads)
-    const sources = ORIGIN_SOURCE_MAP[childId]
-    if (!sources) return 0
-    return all.filter(l => sources.includes(l.source)).length
-  }
-
-  /** Resolve the set of LeadSource values for the currently selected origin */
-  function getSelectedSources(): LeadSource[] | null {
-    if (selectedOrigin === 'all') return null
-    // Check if it's a group
-    if (GROUP_SOURCE_MAP[selectedOrigin]) return GROUP_SOURCE_MAP[selectedOrigin]
-    // Check if it's a child
-    if (ORIGIN_SOURCE_MAP[selectedOrigin]) return ORIGIN_SOURCE_MAP[selectedOrigin]
-    return null
-  }
-
-  /** Find the display label for the current selection */
-  function getSelectedLabel(): string {
-    if (selectedOrigin === 'all') return 'Pipeline'
-    for (const group of ORIGIN_TREE) {
-      if (group.id === selectedOrigin) return group.label
-      for (const child of group.children) {
-        if (child.id === selectedOrigin) return child.label
-      }
+  async function deleteFunnel(f: Funnel) {
+    if (
+      !window.confirm(
+        `Excluir o funil "${f.name}"? Os leads dele ficam sem etapa (não são apagados).`,
+      )
+    )
+      return;
+    const res = await fetch(`/api/pipelines/${f.id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      alert(d.error || "Não foi possível excluir.");
+      return;
     }
-    return 'Pipeline'
+    setMenuId(null);
+    if (selectedId === f.id) setSelectedId(null);
+    loadFunnels();
   }
 
-  const selectedSources = getSelectedSources()
+  function toggleGroup(g: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(g)) next.delete(g);
+      else next.add(g);
+      return next;
+    });
+  }
+
+  // Agrupa os funis por groupName (preservando ordem de chegada)
+  const groups: { name: string; items: Funnel[] }[] = [];
+  for (const f of funnels) {
+    const g = f.groupName || "Sem grupo";
+    let bucket = groups.find((x) => x.name === g);
+    if (!bucket) {
+      bucket = { name: g, items: [] };
+      groups.push(bucket);
+    }
+    bucket.items.push(f);
+  }
+
+  const selectedFunnel = funnels.find((f) => f.id === selectedId);
 
   const filteredStages = stages.map((stage) => ({
     ...stage,
-    leads: stage.leads.filter((lead) => {
-      if (selectedSources && !selectedSources.includes(lead.source)) return false
-      if (searchQuery.trim() && !lead.name.toLowerCase().includes(searchQuery.toLowerCase()) && !lead.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()))) return false
-      if (filterTag && !lead.tags.includes(filterTag)) return false
-      if (filterOwner && lead.consultant !== filterOwner) return false
-      if (filterStatus && lead.status !== filterStatus) return false
-      return true
-    }),
-  }))
-
-  const totalLeads = filteredStages.reduce((s, st) => s + st.leads.length, 0)
-  const totalValue = filteredStages.flatMap((s) => s.leads).reduce((s, l) => s + (l.dealValue || 0), 0)
+    leads: searchQuery.trim()
+      ? stage.leads.filter(
+          (l) =>
+            l.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            l.tags.some((t) =>
+              t.toLowerCase().includes(searchQuery.toLowerCase()),
+            ),
+        )
+      : stage.leads,
+  }));
+  const totalLeads = filteredStages.reduce((s, st) => s + st.leads.length, 0);
 
   return (
     <div className="flex h-[calc(100dvh-4rem)] -m-6">
-      {/* Sidebar de Origens */}
-      <div className="hidden lg:flex w-[240px] border-r border-gray-200 bg-white flex-col shrink-0">
+      {/* Barra de Funis */}
+      <div className="hidden lg:flex w-[260px] border-r border-gray-200 bg-white flex-col shrink-0">
         <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Origens</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <button className="p-1 rounded text-gray-400 hover:text-gray-600 transition-colors"><Search className="w-3.5 h-3.5" /></button>
-          </div>
+          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Funis
+          </span>
+          <button
+            onClick={() => setNewOpen(true)}
+            title="Novo funil"
+            className="flex h-6 w-6 items-center justify-center rounded text-indigo-600 hover:bg-indigo-50"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
         </div>
         <div className="flex-1 overflow-y-auto py-1">
-          {/* "Todos" option */}
-          <button
-            onClick={() => setSelectedOrigin('all')}
-            className={cn(
-              'w-full flex items-center gap-2 px-4 py-2 text-left text-sm transition-colors',
-              selectedOrigin === 'all' ? 'bg-sky-50 text-sky-700 font-medium' : 'text-gray-600 hover:bg-gray-50'
-            )}
-          >
-            <span className={cn('w-2 h-2 rounded-full shrink-0', selectedOrigin === 'all' ? 'bg-sky-500' : 'bg-gray-300')} />
-            <span className="truncate flex-1">Todos os Leads</span>
-            <span className="text-xs text-gray-400 tabular-nums">{stages.flatMap(s => s.leads).length}</span>
-          </button>
-
-          {/* Tree groups */}
-          {ORIGIN_TREE.map(group => (
-            <div key={group.id}>
-              <button
-                onClick={() => toggleGroup(group.id)}
-                className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                <ChevronRight className={cn('w-3 h-3 transition-transform shrink-0', expandedGroups.has(group.id) && 'rotate-90')} />
-                <span className="font-medium truncate flex-1">{group.label}</span>
-                <span className="ml-auto text-xs text-gray-400 tabular-nums">{countForGroup(group)}</span>
-              </button>
-
-              <AnimatePresence initial={false}>
-                {expandedGroups.has(group.id) && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2, ease: 'easeInOut' }}
-                    className="overflow-hidden"
-                  >
-                    {group.children.map(child => (
-                      <button
-                        key={child.id}
-                        onClick={() => setSelectedOrigin(child.id)}
-                        className={cn(
-                          'w-full flex items-center gap-2 pl-8 pr-3 py-1.5 text-sm transition-colors',
-                          selectedOrigin === child.id ? 'bg-sky-50 text-sky-700 font-medium' : 'text-gray-600 hover:bg-gray-50'
-                        )}
-                      >
-                        <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', selectedOrigin === child.id ? 'bg-sky-500' : 'bg-gray-300')} />
-                        <span className="truncate flex-1">{child.label}</span>
-                        <span className="text-xs text-gray-400 tabular-nums">{countForChild(child.id)}</span>
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+          {loading ? (
+            <div className="flex justify-center py-6">
+              <Loader2 className="h-5 w-5 animate-spin text-gray-300" />
             </div>
-          ))}
+          ) : (
+            groups.map((group) => (
+              <div key={group.name} className="mb-1">
+                <button
+                  onClick={() => toggleGroup(group.name)}
+                  className="w-full flex items-center gap-1 px-3 py-1.5 text-left text-xs font-bold uppercase tracking-wide text-gray-500 hover:bg-gray-50"
+                >
+                  {expanded.has(group.name) ? (
+                    <ChevronDown className="w-3 h-3" />
+                  ) : (
+                    <ChevronRight className="w-3 h-3" />
+                  )}
+                  {group.name}
+                  <span className="ml-auto text-[10px] text-gray-400">
+                    {group.items.length}
+                  </span>
+                </button>
+                {expanded.has(group.name) &&
+                  group.items.map((f) => (
+                    <div
+                      key={f.id}
+                      className={cn(
+                        "group relative flex items-center pl-7 pr-2 py-1.5 text-sm cursor-pointer transition-colors",
+                        selectedId === f.id
+                          ? "bg-indigo-50 text-indigo-700 font-medium"
+                          : "text-gray-700 hover:bg-gray-50",
+                      )}
+                      onClick={() => setSelectedId(f.id)}
+                    >
+                      <span className="truncate flex-1">{f.name}</span>
+                      <span className="text-[10px] text-gray-400 mr-1">
+                        {f.leadCount}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMenuId(menuId === f.id ? null : f.id);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-gray-200"
+                      >
+                        <MoreVertical className="w-3.5 h-3.5 text-gray-400" />
+                      </button>
+                      {menuId === f.id && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-40"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setMenuId(null);
+                            }}
+                          />
+                          <div className="absolute right-2 top-7 z-50 w-36 rounded-lg border border-gray-200 bg-white shadow-lg py-1">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                renameFunnel(f);
+                              }}
+                              className="flex w-full items-center gap-2 px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50"
+                            >
+                              <Pencil className="w-3.5 h-3.5" /> Renomear
+                            </button>
+                            {!f.isDefault && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteFunnel(f);
+                                }}
+                                className="flex w-full items-center gap-2 px-3 py-1.5 text-xs text-rose-600 hover:bg-rose-50"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" /> Excluir
+                              </button>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            ))
+          )}
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
+      {/* Conteúdo */}
+      <div className="flex-1 flex flex-col min-w-0">
         <div className="px-6 py-4 border-b border-gray-200 bg-white">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Negocios da Origem</p>
-              <h1 className="text-xl font-bold text-gray-900">{getSelectedLabel()}</h1>
+              <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                Funil
+              </p>
+              <h1 className="text-xl font-bold text-gray-900">
+                {selectedFunnel?.name || "Pipeline"}
+              </h1>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
-              <Plus className="w-4 h-4" /> Negocio +
-            </button>
           </div>
-
-          {/* Filters bar */}
-          <div className="flex items-center gap-2 flex-wrap" ref={filterRef}>
+          <div className="flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
-                value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar..." className="pl-9 pr-4 py-2 w-56 border border-gray-200 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 bg-gray-50"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar lead..."
+                className="pl-9 pr-4 py-2 w-64 border border-gray-200 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 bg-gray-50"
               />
             </div>
-
-            {/* Data filter */}
-            <div className="relative">
-              <button onClick={() => setOpenFilter(openFilter === 'data' ? null : 'data')} className={cn('flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors', filterDate ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'text-gray-600 border-gray-200 hover:bg-gray-50')}>
-                <Calendar className="w-3.5 h-3.5" /> Data {filterDate && <span className="text-xs bg-indigo-100 text-indigo-600 px-1.5 rounded-full">1</span>} <ChevronDown className="w-3 h-3" />
-              </button>
-              <AnimatePresence>
-                {openFilter === 'data' && (
-                  <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }} className="absolute top-full left-0 mt-1 w-52 bg-white border border-gray-200 rounded-xl shadow-lg p-3 z-50 space-y-1">
-                    {['Hoje', 'Ultimos 7 dias', 'Ultimos 30 dias', 'Este mes', 'Mes passado'].map((d) => (
-                      <button key={d} onClick={() => { setFilterDate(filterDate === d ? '' : d); setOpenFilter(null) }} className={cn('w-full text-left px-3 py-1.5 rounded-lg text-sm transition-colors flex items-center justify-between', filterDate === d ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50')}>
-                        {d} {filterDate === d && <Check className="w-3.5 h-3.5 text-indigo-600" />}
-                      </button>
-                    ))}
-                    {filterDate && <button onClick={() => { setFilterDate(''); setOpenFilter(null) }} className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-rose-500 hover:bg-rose-50 mt-1">Limpar filtro</button>}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Tags filter */}
-            <div className="relative">
-              <button onClick={() => setOpenFilter(openFilter === 'tags' ? null : 'tags')} className={cn('flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors', filterTag ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'text-gray-600 border-gray-200 hover:bg-gray-50')}>
-                <Tag className="w-3.5 h-3.5" /> Tags {filterTag && <span className="text-xs bg-indigo-100 text-indigo-600 px-1.5 rounded-full">1</span>} <ChevronDown className="w-3 h-3" />
-              </button>
-              <AnimatePresence>
-                {openFilter === 'tags' && (
-                  <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }} className="absolute top-full left-0 mt-1 w-56 bg-white border border-gray-200 rounded-xl shadow-lg p-3 z-50 space-y-1 max-h-64 overflow-y-auto">
-                    {['Botao whatsapp site', 'Home_NEW', 'RMKT 1 MES', 'LP - Ingles MSI', 'ex_alunos_MSI_300_50%', 'ex_alunos_MSI_50%off', 'Black_MSI_EX', 'MSI', 'RENOVACAO MSI', 'ultima semana cliente'].map((t) => (
-                      <button key={t} onClick={() => { setFilterTag(filterTag === t ? '' : t); setOpenFilter(null) }} className={cn('w-full text-left px-3 py-1.5 rounded-lg text-sm transition-colors flex items-center justify-between', filterTag === t ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50')}>
-                        <span className="truncate">{t}</span> {filterTag === t && <Check className="w-3.5 h-3.5 text-indigo-600 shrink-0" />}
-                      </button>
-                    ))}
-                    {filterTag && <button onClick={() => { setFilterTag(''); setOpenFilter(null) }} className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-rose-500 hover:bg-rose-50 mt-1">Limpar filtro</button>}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Dono do negocio filter */}
-            <div className="relative">
-              <button onClick={() => setOpenFilter(openFilter === 'owner' ? null : 'owner')} className={cn('flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors', filterOwner ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'text-gray-600 border-gray-200 hover:bg-gray-50')}>
-                <User className="w-3.5 h-3.5" /> Dono {filterOwner && <span className="text-xs bg-indigo-100 text-indigo-600 px-1.5 rounded-full">1</span>} <ChevronDown className="w-3 h-3" />
-              </button>
-              <AnimatePresence>
-                {openFilter === 'owner' && (
-                  <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }} className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg p-3 z-50 space-y-1">
-                    {['Gustavo', 'Ana', 'Carlos', 'Pedro', 'Maria'].map((o) => (
-                      <button key={o} onClick={() => { setFilterOwner(filterOwner === o ? '' : o); setOpenFilter(null) }} className={cn('w-full text-left px-3 py-1.5 rounded-lg text-sm transition-colors flex items-center justify-between', filterOwner === o ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50')}>
-                        {o} {filterOwner === o && <Check className="w-3.5 h-3.5 text-indigo-600" />}
-                      </button>
-                    ))}
-                    {filterOwner && <button onClick={() => { setFilterOwner(''); setOpenFilter(null) }} className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-rose-500 hover:bg-rose-50 mt-1">Limpar filtro</button>}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Status filter */}
-            <div className="relative">
-              <button onClick={() => setOpenFilter(openFilter === 'status' ? null : 'status')} className={cn('flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors', filterStatus ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'text-gray-600 border-gray-200 hover:bg-gray-50')}>
-                <Activity className="w-3.5 h-3.5" /> Status {filterStatus && <span className="text-xs bg-indigo-100 text-indigo-600 px-1.5 rounded-full">1</span>} <ChevronDown className="w-3 h-3" />
-              </button>
-              <AnimatePresence>
-                {openFilter === 'status' && (
-                  <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }} className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg p-3 z-50 space-y-1">
-                    {[{ v: 'new', l: 'Novo' }, { v: 'contacted', l: 'Contatado' }, { v: 'qualified', l: 'Qualificado' }, { v: 'negotiating', l: 'Negociando' }, { v: 'converted', l: 'Convertido' }, { v: 'lost', l: 'Perdido' }].map((s) => (
-                      <button key={s.v} onClick={() => { setFilterStatus(filterStatus === s.v ? '' : s.v); setOpenFilter(null) }} className={cn('w-full text-left px-3 py-1.5 rounded-lg text-sm transition-colors flex items-center justify-between', filterStatus === s.v ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50')}>
-                        {s.l} {filterStatus === s.v && <Check className="w-3.5 h-3.5 text-indigo-600" />}
-                      </button>
-                    ))}
-                    {filterStatus && <button onClick={() => { setFilterStatus(''); setOpenFilter(null) }} className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-rose-500 hover:bg-rose-50 mt-1">Limpar filtro</button>}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Active filters indicator */}
-            {(filterDate || filterTag || filterOwner || filterStatus) && (
-              <button onClick={() => { setFilterDate(''); setFilterTag(''); setFilterOwner(''); setFilterStatus('') }} className="flex items-center gap-1 px-2 py-1 text-xs text-rose-500 hover:bg-rose-50 rounded-lg transition-colors">
-                <X className="w-3 h-3" /> Limpar tudo
-              </button>
-            )}
-          </div>
-
-          {/* Summary */}
-          <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
-            <span className="font-medium text-gray-900">{totalLeads.toLocaleString('pt-BR')} oportunidades</span>
-            <span>de Negocio</span>
-            {totalValue > 0 && <span className="text-emerald-600 font-medium">R${totalValue.toLocaleString('pt-BR')}</span>}
-            <div className="ml-auto flex items-center gap-2">
-              <button onClick={fetchPipeline} className="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
-                <RefreshCw className={cn('w-4 h-4', loading && 'animate-spin')} />
-              </button>
-              <button className="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"><Download className="w-4 h-4" /></button>
-              <button className="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"><SlidersHorizontal className="w-4 h-4" /></button>
-            </div>
+            <span className="text-sm text-gray-500">
+              <span className="font-medium text-gray-900">{totalLeads}</span>{" "}
+              oportunidades
+            </span>
+            <button
+              onClick={() => selectedId && loadBoard(selectedId)}
+              className="ml-auto p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+            >
+              <RefreshCw
+                className={cn("w-4 h-4", boardLoading && "animate-spin")}
+              />
+            </button>
           </div>
         </div>
 
-        {/* Kanban */}
         <div className="flex-1 overflow-hidden px-4 py-4 bg-gray-50">
-          {loading ? (
+          {boardLoading ? (
             <div className="flex items-center justify-center h-full">
               <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
             </div>
           ) : (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="h-full"
+            >
               <KanbanBoard
                 filteredStages={filteredStages}
                 onMoveLead={handleMoveLead}
-                onAddLead={() => { /* TODO: open add-lead modal */ }}
+                onAddLead={() => {}}
                 onCardClick={(card) => setSelectedLeadId(card.id)}
-                onAddStage={handleAddStage}
-                onRenameStage={handleRenameStage}
-                onUpdateStageColor={handleUpdateStageColor}
-                onDeleteStage={handleDeleteStage}
+                onAddStage={() =>
+                  addStage(`Nova Etapa ${stages.length + 1}`, "#6366f1")
+                }
+                onRenameStage={renameStage}
+                onUpdateStageColor={updateStageColor}
+                onDeleteStage={deleteStage}
               />
             </motion.div>
           )}
         </div>
       </div>
 
-      {/* Slide-over: Painel de operacoes do lead */}
+      {/* Modal novo funil */}
+      {newOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
+          onClick={() => setNewOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-gray-900">Novo funil</h3>
+              <button onClick={() => setNewOpen(false)}>
+                <X className="h-5 w-5 text-gray-400" />
+              </button>
+            </div>
+            <label className="text-xs text-gray-500">Nome</label>
+            <input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Ex.: Prospecção ativa"
+              className="mt-1 mb-3 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
+            />
+            <label className="text-xs text-gray-500">Grupo</label>
+            <input
+              value={newGroup}
+              onChange={(e) => setNewGroup(e.target.value)}
+              placeholder="Ex.: IM, B2C, B2B..."
+              list="grupos"
+              className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
+            />
+            <datalist id="grupos">
+              {groups.map((g) => (
+                <option key={g.name} value={g.name} />
+              ))}
+            </datalist>
+            <p className="mt-2 text-[11px] text-gray-400">
+              O funil nasce com as 7 etapas padrão (Base → Perdido).
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={() => setNewOpen(false)}
+                className="rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={createFunnel}
+                disabled={!newName.trim()}
+                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+              >
+                Criar funil
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Slide-over do lead */}
       <AnimatePresence>
         {selectedLeadId && (
           <>
@@ -448,10 +472,10 @@ export default function PipelinePage() {
               onClick={() => setSelectedLeadId(null)}
             />
             <motion.div
-              initial={{ x: '100%' }}
+              initial={{ x: "100%" }}
               animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="fixed right-0 top-0 z-50 h-full w-[380px] bg-white border-l border-gray-200 shadow-xl overflow-y-auto"
             >
               <LeadOperationPanel
@@ -463,5 +487,5 @@ export default function PipelinePage() {
         )}
       </AnimatePresence>
     </div>
-  )
+  );
 }

@@ -43,9 +43,8 @@ export async function GET(request: NextRequest) {
       groupName: p.groupName,
       isDefault: p.isDefault,
       hidden: p.hidden,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       leadCount: p.stages.reduce(
-        (s: number, st: any) => s + st._count.leads,
+        (s: number, st: { _count: { leads: number } }) => s + st._count.leads,
         0,
       ),
     }));
