@@ -12,6 +12,7 @@ import {
   LogOut,
   Settings,
   Menu,
+  User as UserIcon,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { CommandPalette } from "./command-palette";
@@ -276,6 +277,12 @@ export function Header({
                         {roleLabel}
                       </span>
                     </div>
+                    <a
+                      href="/perfil"
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+                    >
+                      <UserIcon className="h-4 w-4" /> Meu perfil
+                    </a>
                     {isAdmin && (
                       <a
                         href="/configuracoes"

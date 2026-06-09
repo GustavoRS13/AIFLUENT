@@ -162,6 +162,7 @@ model Lead {
   campaignLeads CampaignLead[]
   conversations Conversation[]
   phoneCalls    PhoneCall[]
+  tasks         Task[]
   stageOrder    Int @default(0)
 
   @@index([organizationId])
@@ -656,9 +657,12 @@ model Task {
   assignee       User?  @relation("TaskAssignee", fields: [assigneeId], references: [id])
   creatorId      String
   creator        User   @relation("TaskCreator", fields: [creatorId], references: [id])
+  leadId         String?
+  lead           Lead?  @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
   @@index([organizationId])
   @@index([assigneeId])
+  @@index([leadId])
 }
 
 // ── Transfer ────────────────────────────────────────────────────────────────
