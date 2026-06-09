@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -17,6 +17,7 @@ import { signOut, useSession } from "next-auth/react";
 import { CommandPalette } from "./command-palette";
 import { QuickCreateLead } from "@/components/leads/quick-create-lead";
 import { useRBAC } from "@/hooks/use-rbac";
+import { cn } from "@/lib/utils";
 
 const routeTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -49,6 +50,17 @@ function initials(name?: string | null): string {
   return ((parts[0]?.[0] || "") + (parts[1]?.[0] || "")).toUpperCase() || "U";
 }
 
+function relTime(iso: string): string {
+  // eslint-disable-next-line react-hooks/purity -- timestamp relativo de exibição
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "agora";
+  if (m < 60) return `há ${m} min`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `há ${h}h`;
+  return `há ${Math.floor(h / 24)}d`;
+}
+
 export function Header({
   onMobileMenuToggle,
 }: {
@@ -61,6 +73,51 @@ export function Header({
   const [notifOpen, setNotifOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [quickCreateOpen, setQuickCreateOpen] = useState(false);
+  const [notifications, setNotifications] = useState<
+    {
+      id: string;
+      type: string;
+      title: string;
+      body?: string | null;
+      link?: string | null;
+      read: boolean;
+      createdAt: string;
+    }[]
+  >([]);
+  const [unread, setUnread] = useState(0);
+
+  const loadNotifications = useCallback(async () => {
+    try {
+      const res = await fetch("/api/notifications");
+      if (!res.ok) return;
+      const d = await res.json();
+      setNotifications(d.notifications || []);
+      setUnread(d.unread || 0);
+    } catch {
+      /* silencioso */
+    }
+  }, []);
+
+  /* eslint-disable react-hooks/set-state-in-effect -- carregamento assíncrono */
+  useEffect(() => {
+    loadNotifications();
+    const t = setInterval(loadNotifications, 20000);
+    return () => clearInterval(t);
+  }, [loadNotifications]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  async function openNotifications() {
+    const willOpen = !notifOpen;
+    setNotifOpen(willOpen);
+    if (willOpen && unread > 0) {
+      setUnread(0);
+      try {
+        await fetch("/api/notifications", { method: "POST", body: "{}" });
+      } catch {
+        /* silencioso */
+      }
+    }
+  }
 
   const user = session?.user as
     | { name?: string | null; email?: string | null; role?: string }
@@ -111,10 +168,15 @@ export function Header({
           </button>
           <div className="relative">
             <button
-              onClick={() => setNotifOpen((o) => !o)}
+              onClick={openNotifications}
               className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-600"
             >
               <Bell className="h-4 w-4" />
+              {unread > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+                  {unread > 9 ? "9+" : unread}
+                </span>
+              )}
             </button>
             <AnimatePresence>
               {notifOpen && (
@@ -128,14 +190,50 @@ export function Header({
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.95 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl bg-white border border-gray-200 shadow-lg p-4"
+                    className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl bg-white border border-gray-200 shadow-lg p-2"
                   >
-                    <p className="mb-3 text-sm font-semibold text-gray-900">
+                    <p className="px-2 py-2 text-sm font-semibold text-gray-900">
                       Notificações
                     </p>
-                    <p className="py-4 text-center text-sm text-gray-400">
-                      Você não tem notificações novas.
-                    </p>
+                    {notifications.length === 0 ? (
+                      <p className="py-6 text-center text-sm text-gray-400">
+                        Você não tem notificações.
+                      </p>
+                    ) : (
+                      <div className="max-h-80 overflow-y-auto">
+                        {notifications.map((n) => (
+                          <a
+                            key={n.id}
+                            href={n.link || "#"}
+                            onClick={() => setNotifOpen(false)}
+                            className={cn(
+                              "flex items-start gap-2 rounded-lg p-2 transition-colors hover:bg-gray-50",
+                              !n.read && "bg-indigo-50/40",
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                "mt-1.5 h-2 w-2 shrink-0 rounded-full",
+                                n.read ? "bg-gray-300" : "bg-indigo-500",
+                              )}
+                            />
+                            <span className="min-w-0">
+                              <span className="block truncate text-sm text-gray-800">
+                                {n.title}
+                              </span>
+                              {n.body && (
+                                <span className="block truncate text-xs text-gray-500">
+                                  {n.body}
+                                </span>
+                              )}
+                              <span className="text-[10px] text-gray-400">
+                                {relTime(n.createdAt)}
+                              </span>
+                            </span>
+                          </a>
+                        ))}
+                      </div>
+                    )}
                   </motion.div>
                 </>
               )}

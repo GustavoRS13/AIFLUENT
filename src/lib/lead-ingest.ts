@@ -11,6 +11,8 @@
  *  - ponto de extensão para regras de distribuição futuras
  */
 
+import { notifyOwnerOrAdmins } from "./notifications";
+
 export interface IngestLeadInput {
   organizationId: string;
   source: string; // canal de origem: manual | import | whatsapp | meta_ads | form | api ...
@@ -194,6 +196,16 @@ export async function ingestLead(
 
   // ── Ponto de extensão: regras de distribuição (round-robin por time, etc.) ──
   // Aplicar atribuição automática de consultor aqui no futuro.
+
+  // Notifica admins/gestores sobre lead NOVO (não reentrada) — best-effort
+  if (!deduped) {
+    await notifyOwnerOrAdmins(prisma, orgId, null, {
+      type: "new_lead",
+      title: `Novo lead: ${input.firstName}`,
+      body: `Origem: ${source}`,
+      link: "/leads",
+    });
+  }
 
   return { lead: { id: leadId }, deduped };
 }

@@ -37,6 +37,7 @@ model Organization {
   achievements   Achievement[]
   userGoals      UserGoal[]
   transfers      Transfer[]
+  notifications  Notification[]
 }
 
 // ── User ────────────────────────────────────────────────────────────────────
@@ -74,6 +75,7 @@ model User {
   auditLogs        AuditLog[]
   userAchievements UserAchievement[]
   userGoals        UserGoal[]
+  notifications    Notification[]
 }
 
 // ── Team ────────────────────────────────────────────────────────────────────
@@ -736,5 +738,24 @@ model MetaLeadForm {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
+  @@index([organizationId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String   // new_lead | new_message | transfer | system
+  title     String
+  body      String?
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
   @@index([organizationId])
 }

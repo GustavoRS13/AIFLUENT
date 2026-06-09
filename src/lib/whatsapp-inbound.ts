@@ -1,4 +1,5 @@
 import { ingestLead } from "./lead-ingest";
+import { notifyOwnerOrAdmins } from "./notifications";
 import type { InboundMessage, StatusUpdate } from "./whatsapp-webhook";
 
 /**
@@ -121,6 +122,31 @@ export async function persistInboundMessage(
       unreadCount: { increment: 1 },
     },
   });
+
+  // 5. notifica o responsável (atribuído/consultor) ou os admins — best-effort
+  try {
+    const info = await prisma.lead.findUnique({
+      where: { id: lead.id },
+      select: { firstName: true, consultantId: true },
+    });
+    const conv = await prisma.conversation.findUnique({
+      where: { id: conversation.id },
+      select: { assigneeId: true },
+    });
+    await notifyOwnerOrAdmins(
+      prisma,
+      orgId,
+      conv?.assigneeId || info?.consultantId || null,
+      {
+        type: "new_message",
+        title: `Nova mensagem de ${info?.firstName || "contato"}`,
+        body: (msg.content || "").slice(0, 80),
+        link: "/atendimento",
+      },
+    );
+  } catch {
+    /* notificação best-effort */
+  }
 
   return { deduped: false, leadId: lead.id, conversationId: conversation.id };
 }
