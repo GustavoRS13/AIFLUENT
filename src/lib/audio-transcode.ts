@@ -27,12 +27,14 @@ function resolveFfmpeg(): string | null {
   return null;
 }
 
-// Formatos de áudio que a Cloud API do WhatsApp aceita diretamente.
-const WHATSAPP_AUDIO_OK = /^audio\/(ogg|mpeg|mp3|mp4|aac|amr|x-m4a|3gpp)$/i;
+// Só pulamos o transcode para formatos que funcionam DIRETO: ogg/opus e mp3.
+// Todo o resto (webm, e principalmente mp4 com OPUS gravado pelo Chrome) é
+// transcodificado p/ ogg/opus — pois o WhatsApp só aceita mp4 com AAC, e
+// mp4/opus dá erro 131053 "Media upload error".
+const ALREADY_OK = /^audio\/(ogg|mpeg|mp3)(;|$)/i;
 
 export function needsTranscode(mime: string): boolean {
-  // webm (Chrome) e qualquer formato fora da lista precisam virar ogg/opus.
-  return !WHATSAPP_AUDIO_OK.test(mime);
+  return !ALREADY_OK.test(mime);
 }
 
 // Transcodifica um áudio (ex.: webm/opus do Chrome) para OGG/Opus,
