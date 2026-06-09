@@ -12,11 +12,13 @@ import {
   Wifi,
   WifiOff,
   Upload,
+  FileText,
 } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { cn } from "@/lib/utils";
 import { ChatMessageBubble } from "@/components/chat/chat-message-bubble";
 import { ChatInput } from "@/components/chat/chat-input";
+import { TemplatePicker } from "@/components/chat/template-picker";
 import { useChat, type ChatMessage } from "@/hooks/use-chat";
 import { SLATimer } from "@/components/atendimento/sla-timer";
 import { LeadOperationPanel } from "@/components/atendimento/lead-operation-panel";
@@ -111,6 +113,7 @@ export default function AtendimentoPage() {
   );
   const [showPanel, setShowPanel] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
+  const [templateOpen, setTemplateOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const conversationListRef = useRef<HTMLDivElement>(null);
 
@@ -378,6 +381,51 @@ export default function AtendimentoPage() {
       files.forEach((f) => void uploadFile(f));
     },
     [selectedId, uploadFile],
+  );
+
+  // Envia um template aprovado pela conversa selecionada
+  const handleSendTemplate = useCallback(
+    async (data: {
+      templateName: string;
+      languageCode: string;
+      params: string[];
+      preview: string;
+    }) => {
+      if (!selectedId) return;
+      addMessage({
+        id: `tmp-${Date.now()}`,
+        direction: "outbound",
+        content: data.preview,
+        type: "text",
+        status: "sent",
+        aiGenerated: false,
+        createdAt: now(),
+      });
+      try {
+        const up = await fetch(`/api/conversations/${selectedId}/template`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        const r = await up.json().catch(() => ({}));
+        if (!up.ok || r?.ok === false) {
+          alert(
+            `Não consegui enviar o template${r?.error ? `: ${r.error}` : ""}.`,
+          );
+        }
+        const res = await fetch(`/api/conversations/${selectedId}`);
+        if (res.ok) {
+          const { conversation } = await res.json();
+          setAllMessages((prev) => ({
+            ...prev,
+            [selectedId]: (conversation.messages || []).map(mapApiMessage),
+          }));
+        }
+      } catch {
+        /* otimista exibido */
+      }
+    },
+    [selectedId, addMessage],
   );
 
   // Filter conversations
@@ -689,6 +737,14 @@ export default function AtendimentoPage() {
                 </div>
 
                 <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setTemplateOpen(true)}
+                    className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                    title="Enviar modelo aprovado (template)"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Modelos
+                  </button>
                   {selectedConv.phone && (
                     <a
                       href={`tel:${selectedConv.phone}`}
@@ -754,6 +810,11 @@ export default function AtendimentoPage() {
                 onAudioRecorded={handleAudioRecorded}
                 showEmoji={showEmoji}
                 onToggleEmoji={() => setShowEmoji(!showEmoji)}
+              />
+              <TemplatePicker
+                open={templateOpen}
+                onClose={() => setTemplateOpen(false)}
+                onSend={handleSendTemplate}
               />
             </>
           ) : (
