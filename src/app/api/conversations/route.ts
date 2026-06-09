@@ -18,6 +18,12 @@ export async function GET(request: Request) {
     const { prisma } = await import("@/lib/prisma");
     const where: Record<string, unknown> = { organizationId: orgId };
     if (teamId) where.teamId = teamId;
+    // Isolamento por papel: operador vê só conversas dos leads dele (ou atribuídas)
+    const userRole = (session!.user as Record<string, unknown>).role as string;
+    const userId = (session!.user as Record<string, unknown>).id as string;
+    if (userRole === "operador" && userId) {
+      where.OR = [{ assigneeId: userId }, { lead: { consultantId: userId } }];
+    }
     const conversations = await prisma.conversation.findMany({
       where,
       orderBy: { lastMessageAt: "desc" },

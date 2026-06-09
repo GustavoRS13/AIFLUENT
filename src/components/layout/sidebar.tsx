@@ -25,7 +25,7 @@ import {
   Building2,
   Target,
 } from "lucide-react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { useRBAC } from "@/hooks/use-rbac";
 import { PERMISSIONS, type Permission } from "@/lib/rbac";
@@ -89,6 +89,28 @@ function SidebarContent({
 }) {
   const pathname = usePathname();
   const { can } = useRBAC();
+  const { data: session } = useSession();
+  const sUser = session?.user as
+    | { name?: string | null; role?: string }
+    | undefined;
+  const sName = sUser?.name || "Usuário";
+  const sRole =
+    (
+      {
+        admin: "Administrador",
+        gestor: "Gestor",
+        supervisor: "Supervisor",
+        operador: "Operador",
+      } as Record<string, string>
+    )[sUser?.role || ""] || "Usuário";
+  const sInit =
+    sName
+      .trim()
+      .split(/\s+/)
+      .map((p) => p[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "U";
 
   const filteredNavigation = navigation
     .map((section) => ({
@@ -191,7 +213,7 @@ function SidebarContent({
           )}
         >
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-blue-500">
-            <span className="text-xs font-bold text-white">AI</span>
+            <span className="text-xs font-bold text-white">{sInit}</span>
           </div>
           <AnimatePresence>
             {!collapsed && (
@@ -202,9 +224,9 @@ function SidebarContent({
                 className="flex-1 min-w-0"
               >
                 <p className="truncate text-sm font-medium text-gray-900">
-                  AIFLUENT
+                  {sName}
                 </p>
-                <p className="truncate text-xs text-gray-500">Administrador</p>
+                <p className="truncate text-xs text-gray-500">{sRole}</p>
               </motion.div>
             )}
           </AnimatePresence>
