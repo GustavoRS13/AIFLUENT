@@ -38,6 +38,7 @@ function mapStages(stages: any[]): PipelineStage[] {
     order: stage.order,
     isWon: stage.isWon,
     isLost: stage.isLost,
+    total: stage._count?.leads ?? (stage.leads || []).length,
     leads: (stage.leads || []).map(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (l: any): KanbanCard => ({
@@ -230,7 +231,10 @@ export default function PipelinePage() {
         )
       : stage.leads,
   }));
-  const totalLeads = filteredStages.reduce((s, st) => s + st.leads.length, 0);
+  // Com busca: conta os carregados filtrados. Sem busca: total real do funil.
+  const totalLeads = searchQuery.trim()
+    ? filteredStages.reduce((s, st) => s + st.leads.length, 0)
+    : stages.reduce((s, st) => s + (st.total ?? st.leads.length), 0);
 
   return (
     <div className="flex h-[calc(100dvh-4rem)] -m-6">
@@ -360,7 +364,9 @@ export default function PipelinePage() {
               />
             </div>
             <span className="text-sm text-gray-500">
-              <span className="font-medium text-gray-900">{totalLeads}</span>{" "}
+              <span className="font-medium text-gray-900">
+                {totalLeads.toLocaleString("pt-BR")}
+              </span>{" "}
               oportunidades
             </span>
             <button
