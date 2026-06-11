@@ -14,10 +14,14 @@ function scheduleNext(jobId: string) {
   const base =
     process.env.APP_URL ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
-  if (!secret || !base) return;
+  if (!secret || !base) {
+    logger.info("scheduleNext SKIP", { hasSecret: !!secret, base });
+    return;
+  }
   after(async () => {
     try {
-      await fetch(`${base}/api/broadcasts/${jobId}/process`, {
+      logger.info("scheduleNext firing", { jobId, base });
+      const r = await fetch(`${base}/api/broadcasts/${jobId}/process`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${secret}`,
@@ -25,6 +29,7 @@ function scheduleNext(jobId: string) {
         },
         body: "{}",
       });
+      logger.info("scheduleNext response", { jobId, status: r.status });
     } catch {
       /* o cron-safety reanima se o encadeamento falhar */
     }
