@@ -1,65 +1,99 @@
-import { NextResponse } from 'next/server'
-import { requireAuth, checkRateLimit, requireOrgId } from '@/lib/api-auth'
-import { apiLimiter } from '@/lib/rate-limit'
-import { logger } from '@/lib/logger'
+import { NextResponse } from "next/server";
+import { requireAuth, checkRateLimit, requireOrgId } from "@/lib/api-auth";
+import { apiLimiter } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
-  const rl = checkRateLimit(request, apiLimiter); if (rl) return rl
-  const { error, session } = await requireAuth('gestor'); if (error) return error
+  const rl = checkRateLimit(request, apiLimiter);
+  if (rl) return rl;
+  const { error, session } = await requireAuth("gestor");
+  if (error) return error;
 
   try {
-    const { prisma } = await import('@/lib/prisma')
-    const { orgId, error: orgError } = requireOrgId(session)
-    if (orgError) return orgError
+    const { prisma } = await import("@/lib/prisma");
+    const { orgId, error: orgError } = requireOrgId(session);
+    if (orgError) return orgError;
 
     // Get active consultants
     const consultants = await prisma.user.findMany({
-      where: { organizationId: orgId, isActive: true, role: { not: 'admin' } },
+      where: { organizationId: orgId, isActive: true, role: { not: "admin" } },
       select: { id: true, name: true },
-    })
-    if (consultants.length === 0) return NextResponse.json({ distributed: 0, message: 'Nenhum consultor disponivel' })
+    });
+    if (consultants.length === 0)
+      return NextResponse.json({
+        distributed: 0,
+        message: "Nenhum consultor disponivel",
+      });
 
-    // Get unassigned leads
+    // Get unassigned leads — LIMITADO por chamada (evita timeout/memória em bases grandes).
+    // Para distribuir tudo, chame repetidamente até `remaining` zerar.
+    const BATCH = 500;
     const unassigned = await prisma.lead.findMany({
-      where: { organizationId: orgId, consultantId: null, status: { notIn: ['converted', 'lost'] } },
-    })
+      where: {
+        organizationId: orgId,
+        consultantId: null,
+        status: { notIn: ["converted", "lost"] },
+      },
+      select: { id: true },
+      take: BATCH,
+    });
 
     // Count current assignments per consultant
     const counts = await Promise.all(
-      consultants.map(async c => ({
+      consultants.map(async (c) => ({
         id: c.id,
         name: c.name,
-        count: await prisma.lead.count({ where: { consultantId: c.id, organizationId: orgId, status: { notIn: ['converted', 'lost'] } } }),
-      }))
-    )
+        count: await prisma.lead.count({
+          where: {
+            consultantId: c.id,
+            organizationId: orgId,
+            status: { notIn: ["converted", "lost"] },
+          },
+        }),
+      })),
+    );
 
-    let distributed = 0
+    let distributed = 0;
     for (const lead of unassigned) {
       // Assign to consultant with fewest leads (round-robin)
-      counts.sort((a, b) => a.count - b.count)
-      const target = counts[0]
+      counts.sort((a, b) => a.count - b.count);
+      const target = counts[0];
 
       await prisma.lead.update({
         where: { id: lead.id },
         data: { consultantId: target.id },
-      })
+      });
       await prisma.activity.create({
         data: {
-          type: 'custom',
+          type: "custom",
           title: `Distribuido para ${target.name}`,
-          description: 'Distribuicao automatica (round-robin)',
+          description: "Distribuicao automatica (round-robin)",
           leadId: lead.id,
         },
-      })
+      });
 
-      target.count++
-      distributed++
+      target.count++;
+      distributed++;
     }
 
-    logger.info('Auto-distribute executed', { distributed, orgId })
-    return NextResponse.json({ distributed, consultants: counts.map(c => ({ name: c.name, leads: c.count })) })
+    const remaining = await prisma.lead.count({
+      where: {
+        organizationId: orgId,
+        consultantId: null,
+        status: { notIn: ["converted", "lost"] },
+      },
+    });
+    logger.info("Auto-distribute executed", { distributed, remaining, orgId });
+    return NextResponse.json({
+      distributed,
+      remaining,
+      consultants: counts.map((c) => ({ name: c.name, leads: c.count })),
+    });
   } catch (err) {
-    logger.error('Auto-distribute error', err)
-    return NextResponse.json({ error: 'Falha na distribuicao' }, { status: 500 })
+    logger.error("Auto-distribute error", err);
+    return NextResponse.json(
+      { error: "Falha na distribuicao" },
+      { status: 500 },
+    );
   }
 }

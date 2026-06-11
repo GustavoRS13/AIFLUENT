@@ -38,6 +38,7 @@ model Organization {
   userGoals      UserGoal[]
   transfers      Transfer[]
   notifications  Notification[]
+  broadcastJobs  BroadcastJob[]
 }
 
 // ── User ────────────────────────────────────────────────────────────────────
@@ -76,6 +77,7 @@ model User {
   userAchievements UserAchievement[]
   userGoals        UserGoal[]
   notifications    Notification[]
+  broadcastJobs    BroadcastJob[]
 }
 
 // ── Team ────────────────────────────────────────────────────────────────────
@@ -768,4 +770,48 @@ model Notification {
   @@index([userId, read])
   @@index([userId, createdAt])
   @@index([organizationId])
+}
+
+// ── Disparo em massa (motor de fila persistida) ──────────────────────────────
+
+model BroadcastJob {
+  id           String    @id @default(cuid())
+  name         String
+  templateName String
+  languageCode String    @default("pt_BR")
+  params       String?   // JSON: parâmetros do template (iguais p/ todos)
+  filters      String?   // JSON: segmentação usada (auditoria/preview)
+  status       String    @default("pending") // pending|running|paused|completed|cancelled
+  dryRun       Boolean   @default(false)
+  total        Int       @default(0)
+  sent         Int       @default(0)
+  failed       Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  startedAt    DateTime?
+  completedAt  DateTime?
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdById    String
+  createdBy      User         @relation(fields: [createdById], references: [id])
+
+  recipients BroadcastRecipient[]
+
+  @@index([organizationId, status])
+}
+
+model BroadcastRecipient {
+  id         String    @id @default(cuid())
+  jobId      String
+  job        BroadcastJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  leadId     String
+  phone      String
+  status     String    @default("pending") // pending|sent|failed|skipped
+  error      String?
+  externalId String?
+  sentAt     DateTime?
+
+  @@unique([jobId, leadId]) // dedup dentro do disparo
+  @@index([jobId, status])
 }
