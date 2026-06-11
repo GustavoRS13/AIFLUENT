@@ -6,6 +6,7 @@ export interface BroadcastSegment {
   stageIds?: string[]; // etapas específicas (qualquer uma)
   pipelineId?: string; // funil inteiro (todas as etapas dele)
   consultantId?: string; // responsável
+  teamId?: string; // departamento/time
   source?: string; // origem (whatsapp|meta_ads|manual|clint|api...)
   createdAfter?: string; // ISO date
   createdBefore?: string; // ISO date
@@ -30,6 +31,9 @@ export function buildAudienceWhere(
   }
   if (seg.consultantId) {
     where.consultantId = seg.consultantId;
+  }
+  if (seg.teamId) {
+    where.teamId = seg.teamId;
   }
   if (seg.source) {
     where.source = seg.source;

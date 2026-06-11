@@ -58,10 +58,18 @@ export function BroadcastConsole() {
   const [templates, setTemplates] = useState<TemplateT[]>([]);
 
   // segmentação
+  const [consultants, setConsultants] = useState<
+    { id: string; name: string }[]
+  >([]);
+  const [departments, setDepartments] = useState<
+    { id: string; name: string }[]
+  >([]);
   const [selTags, setSelTags] = useState<string[]>([]);
   const [funnelId, setFunnelId] = useState("");
   const [stageId, setStageId] = useState("");
   const [source, setSource] = useState("");
+  const [consultantId, setConsultantId] = useState("");
+  const [teamId, setTeamId] = useState("");
   const [createdAfter, setCreatedAfter] = useState("");
   const [preview, setPreview] = useState<number | null>(null);
   const [previewing, setPreviewing] = useState(false);
@@ -104,6 +112,27 @@ export function BroadcastConsole() {
         }
       })
       .catch(() => {});
+    fetch("/api/users")
+      .then((r) => r.json())
+      .then((d) =>
+        setConsultants(
+          (d.users || d || []).map((u: { id: string; name: string }) => ({
+            id: u.id,
+            name: u.name,
+          })),
+        ),
+      )
+      .catch(() => {});
+    fetch("/api/departments")
+      .then((r) => r.json())
+      .then((d) =>
+        setDepartments(
+          (d.departments || d.teams || d || []).map(
+            (t: { id: string; name: string }) => ({ id: t.id, name: t.name }),
+          ),
+        ),
+      )
+      .catch(() => {});
     loadJobs();
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
@@ -136,9 +165,11 @@ export function BroadcastConsole() {
     if (stageId) seg.stageIds = [stageId];
     else if (funnelId) seg.pipelineId = funnelId;
     if (source) seg.source = source;
+    if (consultantId) seg.consultantId = consultantId;
+    if (teamId) seg.teamId = teamId;
     if (createdAfter) seg.createdAfter = createdAfter;
     return seg;
-  }, [selTags, stageId, funnelId, source, createdAfter]);
+  }, [selTags, stageId, funnelId, source, consultantId, teamId, createdAfter]);
 
   // preview ao mudar segmentação
   useEffect(() => {
@@ -312,6 +343,36 @@ export function BroadcastConsole() {
               {SOURCES.map((s) => (
                 <option key={s.v} value={s.v}>
                   {s.l}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-gray-500">Consultor</label>
+            <select
+              value={consultantId}
+              onChange={(e) => setConsultantId(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-gray-200 px-2 py-2 text-sm"
+            >
+              <option value="">Qualquer consultor</option>
+              {consultants.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-gray-500">Departamento / time</label>
+            <select
+              value={teamId}
+              onChange={(e) => setTeamId(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-gray-200 px-2 py-2 text-sm"
+            >
+              <option value="">Qualquer departamento</option>
+              {departments.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
                 </option>
               ))}
             </select>
