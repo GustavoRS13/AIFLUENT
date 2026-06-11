@@ -107,6 +107,54 @@ export async function POST(
     let sent = 0;
     let failed = 0;
 
+    // Dry-run: marca o lote inteiro de uma vez (prova a orquestração/escala sem Meta).
+    if (job.dryRun) {
+      const okIds = claimed
+        .filter((r) => r.phone && r.phone.length >= 10)
+        .map((r) => r.id);
+      const badIds = claimed
+        .filter((r) => !r.phone || r.phone.length < 10)
+        .map((r) => r.id);
+      if (okIds.length) {
+        await prisma.broadcastRecipient.updateMany({
+          where: { id: { in: okIds } },
+          data: { status: "sent", sentAt: new Date(), externalId: "dry-run" },
+        });
+      }
+      if (badIds.length) {
+        await prisma.broadcastRecipient.updateMany({
+          where: { id: { in: badIds } },
+          data: { status: "failed", error: "telefone inválido" },
+        });
+      }
+      sent = okIds.length;
+      failed = badIds.length;
+      const updated = await prisma.broadcastJob.update({
+        where: { id },
+        data: { sent: { increment: sent }, failed: { increment: failed } },
+        select: { sent: true, failed: true, total: true, status: true },
+      });
+      const remaining = await prisma.broadcastRecipient.count({
+        where: { jobId: id, status: { in: ["pending", "processing"] } },
+      });
+      if (remaining === 0) {
+        await prisma.broadcastJob.update({
+          where: { id },
+          data: { status: "completed", completedAt: new Date() },
+        });
+      }
+      return NextResponse.json({
+        status: remaining === 0 ? "completed" : "running",
+        processed: claimed.length,
+        sent,
+        failed,
+        remaining,
+        totalSent: updated.sent,
+        totalFailed: updated.failed,
+        total: updated.total,
+      });
+    }
+
     for (const r of claimed) {
       if (!r.phone || r.phone.length < 10) {
         await prisma.broadcastRecipient.update({
