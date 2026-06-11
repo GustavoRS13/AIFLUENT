@@ -1,60 +1,62 @@
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
+import { runBroadcastBatch } from "@/lib/broadcast-worker";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-// Cron de segurança: reanima disparos 'running' com pendentes (caso o
-// auto-encadeamento tenha parado por redeploy/falha). Autenticado por CRON_SECRET.
-export async function GET(request: NextRequest) {
+// Worker de disparos: processa INLINE (sem self-fetch) os jobs 'running' com
+// pendentes. Chamado por um agendador externo (GitHub Actions/cron-job.org) ou
+// pelo cron da Vercel. Autenticado por CRON_SECRET. Cada chamada processa ~50s.
+async function run(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
   const authz = request.headers.get("authorization");
-  if (!secret || authz !== `Bearer ${secret}`) {
+  const qpSecret = new URL(request.url).searchParams.get("secret");
+  if (!secret || (authz !== `Bearer ${secret}` && qpSecret !== secret)) {
     return NextResponse.json({ error: "não autorizado" }, { status: 401 });
   }
 
   try {
     const { prisma } = await import("@/lib/prisma");
-    const base =
-      process.env.APP_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
-
-    // jobs em andamento que ainda têm pendentes
     const running = await prisma.broadcastJob.findMany({
       where: { status: "running" },
       select: { id: true },
-      take: 20,
+      orderBy: { startedAt: "asc" },
+      take: 10,
     });
 
-    let kicked = 0;
+    const start = Date.now();
+    const results: Record<string, unknown>[] = [];
+    // divide o orçamento (~50s) entre os jobs em andamento
     for (const job of running) {
-      const pending = await prisma.broadcastRecipient.count({
-        where: { jobId: job.id, status: { in: ["pending", "processing"] } },
-      });
-      if (pending === 0) {
-        await prisma.broadcastJob.update({
-          where: { id: job.id },
-          data: { status: "completed", completedAt: new Date() },
+      if (Date.now() - start > 50000) break;
+      const budget = Math.max(
+        8000,
+        Math.floor(
+          (50000 - (Date.now() - start)) / Math.max(1, running.length),
+        ),
+      );
+      const r = await runBroadcastBatch(prisma, job.id, budget);
+      if (r)
+        results.push({
+          id: job.id,
+          processed: r.processed,
+          sent: r.totalSent,
+          remaining: r.remaining,
+          status: r.status,
         });
-        continue;
-      }
-      if (base && secret) {
-        // dispara um lote (que se auto-encadeia)
-        await fetch(`${base}/api/broadcasts/${job.id}/process`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${secret}`,
-            "Content-Type": "application/json",
-          },
-          body: "{}",
-        }).catch(() => {});
-        kicked++;
-      }
     }
 
-    return NextResponse.json({ ok: true, running: running.length, kicked });
+    return NextResponse.json({ ok: true, jobs: running.length, results });
   } catch (err) {
-    logger.error("GET /api/cron/broadcasts error", err);
+    logger.error("cron/broadcasts error", err);
     return NextResponse.json({ error: "falha" }, { status: 500 });
   }
+}
+
+export async function GET(request: NextRequest) {
+  return run(request);
+}
+export async function POST(request: NextRequest) {
+  return run(request);
 }

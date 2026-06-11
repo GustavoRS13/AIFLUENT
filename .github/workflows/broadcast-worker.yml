@@ -1,0 +1,22 @@
+name: Broadcast Worker
+
+# Worker server-side de disparos: roda na infra do GitHub (independe do
+# navegador/PC do usuário). A cada 5 min chama o endpoint que processa os
+# disparos 'running' pendentes. Também pode ser disparado manualmente.
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  drive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Drive pending broadcasts
+        run: |
+          code=$(curl -s -o /tmp/out.json -w "%{http_code}" -X POST \
+            "https://aifluent-pink.vercel.app/api/cron/broadcasts" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          echo "HTTP $code"
+          cat /tmp/out.json
+          test "$code" = "200"

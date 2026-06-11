@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 interface QuickActionsBarProps {
   phone?: string | null;
   email?: string | null;
+  leadId?: string | null;
+  onCallLogged?: () => void;
   className?: string;
 }
 
@@ -30,10 +32,26 @@ const actions = [
 export function QuickActionsBar({
   phone,
   email,
+  leadId,
+  onCallLogged,
   className,
 }: QuickActionsBarProps) {
   function handleClick(key: string) {
-    if (key === "phone" && phone) window.open(`tel:${phone}`, "_self");
+    if (key === "phone" && phone) {
+      // registra a ligação no lead e abre o discador
+      fetch("/api/calls", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phoneNumber: phone,
+          leadId,
+          direction: "outbound",
+        }),
+      })
+        .then(() => onCallLogged?.())
+        .catch(() => {});
+      window.open(`tel:${phone}`, "_self");
+    }
     if (key === "email" && email) window.open(`mailto:${email}`, "_self");
   }
 

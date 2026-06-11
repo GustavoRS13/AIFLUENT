@@ -268,6 +268,8 @@ export function LeadOperationPanel({
         <QuickActionsBar
           phone={lead.phone || lead.whatsapp}
           email={lead.email}
+          leadId={lead.id}
+          onCallLogged={fetchLead}
           className="mt-3"
         />
       </div>
