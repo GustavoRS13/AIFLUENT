@@ -55,6 +55,7 @@ const navigation: NavSection[] = [
     title: "COMUNICACAO",
     items: [
       { label: "Atendimento", href: "/atendimento", icon: MessageCircle },
+      { label: "Disparo em massa", href: "/disparo-massa", icon: Megaphone },
       { label: "Campanhas", href: "/campaigns", icon: Megaphone },
       { label: "Meta Ads", href: "/meta-ads", icon: Target },
     ],

@@ -11,6 +11,7 @@ export const PERMISSIONS = {
   "page:whatsapp": ["admin", "gestor", "supervisor", "operador"],
   "page:campaigns": ["admin"],
   "page:disparos": ["admin"],
+  "page:disparo-massa": ["admin", "gestor"],
   "page:templates": ["admin"],
   "page:meta-ads": ["admin"],
   "page:automations": ["admin"],
