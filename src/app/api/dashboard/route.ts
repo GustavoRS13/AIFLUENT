@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth, checkRateLimit, requireOrgId } from "@/lib/api-auth";
 import { apiLimiter } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import { leadVisibilityWhere } from "@/lib/lead-visibility";
 
 export async function GET(request: Request) {
   const rateLimited = checkRateLimit(request, apiLimiter);
@@ -31,16 +32,20 @@ export async function GET(request: Request) {
     };
     const campaignWhere: Record<string, unknown> = { organizationId: orgId };
 
-    // Role-based data isolation: operador sees only their own metrics
-    if (userRole === "operador" && userId) {
-      leadWhere.consultantId = userId;
+    // Isolamento por papel (admin=tudo, gestor/supervisor=time, operador=próprio).
+    const userTeamId = (session!.user as Record<string, unknown>).teamId as
+      | string
+      | undefined;
+    const vis = leadVisibilityWhere(userRole, userId, userTeamId);
+    if (vis) {
+      Object.assign(leadWhere, vis);
       dealWhere.lead = {
         ...((dealWhere.lead as Record<string, unknown>) || {}),
-        consultantId: userId,
+        ...vis,
       };
       wonDealWhere.lead = {
         ...((wonDealWhere.lead as Record<string, unknown>) || {}),
-        consultantId: userId,
+        ...vis,
       };
     }
 

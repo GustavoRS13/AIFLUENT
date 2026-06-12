@@ -18,11 +18,29 @@ export async function GET(request: Request) {
     const { prisma } = await import("@/lib/prisma");
     const where: Record<string, unknown> = { organizationId: orgId };
     if (teamId) where.teamId = teamId;
-    // Isolamento por papel: operador vê só conversas dos leads dele (ou atribuídas)
+    // Isolamento por papel (Atendimento):
+    //  - admin  → todas as conversas da empresa
+    //  - gestor/supervisor → conversas do TIME/DEPARTAMENTO deles (+ as suas)
+    //  - operador (vendedor) → só as atribuídas a ele / de leads onde é consultor
     const userRole = (session!.user as Record<string, unknown>).role as string;
     const userId = (session!.user as Record<string, unknown>).id as string;
+    const userTeamId = (session!.user as Record<string, unknown>).teamId as
+      | string
+      | undefined;
+    const ownConvos = [
+      { assigneeId: userId },
+      { lead: { consultantId: userId } },
+    ];
     if (userRole === "operador" && userId) {
-      where.OR = [{ assigneeId: userId }, { lead: { consultantId: userId } }];
+      where.OR = ownConvos;
+    } else if ((userRole === "gestor" || userRole === "supervisor") && userId) {
+      where.OR = userTeamId
+        ? [
+            { teamId: userTeamId },
+            { lead: { teamId: userTeamId } },
+            ...ownConvos,
+          ]
+        : ownConvos; // gestor sem time → vê só as dele (seguro)
     }
     const conversations = await prisma.conversation.findMany({
       where,

@@ -44,3 +44,4 @@ next-env.d.ts
 migrate_clint.cjs
 add_clint_tags.cjs
 backfill_clint_dates.cjs
+audio_e2e.cjs

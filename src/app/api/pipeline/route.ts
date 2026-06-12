@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAuth, checkRateLimit, requireOrgId } from "@/lib/api-auth";
 import { logger } from "@/lib/logger";
+import { leadVisibilityWhere } from "@/lib/lead-visibility";
 
 const moveLeadSchema = z.object({
   leadId: z.string().min(1, "leadId e obrigatorio"),
@@ -20,11 +21,13 @@ export async function GET(request: NextRequest) {
   const { orgId, error: orgError } = requireOrgId(session);
   if (orgError) return orgError;
 
-  // Isolamento por papel: operador vê só os leads vinculados a ele.
+  // Isolamento por papel (admin=tudo, gestor/supervisor=time, operador=próprio).
   const userRole = (session!.user as Record<string, unknown>).role as string;
   const userId = (session!.user as Record<string, unknown>).id as string;
-  const leadFilter =
-    userRole === "operador" && userId ? { consultantId: userId } : undefined;
+  const userTeamId = (session!.user as Record<string, unknown>).teamId as
+    | string
+    | undefined;
+  const leadFilter = leadVisibilityWhere(userRole, userId, userTeamId);
 
   // Funil específico (?pipelineId=) ou o padrão.
   const pipelineId = new URL(request.url).searchParams.get("pipelineId");

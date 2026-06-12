@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAuth, checkRateLimit, requireOrgId } from "@/lib/api-auth";
 import { logger } from "@/lib/logger";
+import { leadVisibilityWhere } from "@/lib/lead-visibility";
 
 async function getPrisma() {
   try {
@@ -64,10 +65,13 @@ export async function GET(request: NextRequest) {
 
       const where: Record<string, unknown> = { organizationId: orgId };
 
-      // Role-based data isolation: operador sees only their assigned leads
-      if (userRole === "operador" && userId) {
-        where.consultantId = userId;
-      }
+      // Isolamento por papel (admin=tudo, gestor/supervisor=time, operador=próprio).
+      // Via AND para não conflitar com o OR da busca.
+      const userTeamId = (session!.user as Record<string, unknown>).teamId as
+        | string
+        | undefined;
+      const vis = leadVisibilityWhere(userRole, userId, userTeamId);
+      if (vis) where.AND = [vis];
       if (search) {
         where.OR = [
           { firstName: { contains: search } },
