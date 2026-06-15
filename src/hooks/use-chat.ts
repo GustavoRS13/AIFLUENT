@@ -12,6 +12,7 @@ export interface ChatMessage {
   createdAt: string;
   sender?: string;
   mediaId?: string;
+  errorReason?: string; // motivo real da falha (ex.: erro/política da Meta)
 }
 
 function now() {

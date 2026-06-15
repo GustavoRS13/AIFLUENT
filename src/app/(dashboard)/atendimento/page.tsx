@@ -93,7 +93,27 @@ function mapApiMessage(m: any): ChatMessage {
     aiGenerated: !!m.aiGenerated,
     createdAt: fmtTime(m.createdAt),
     mediaId,
+    errorReason:
+      m.status === "failed"
+        ? errorReasonText(m.errorCode, m.errorTitle)
+        : undefined,
   };
+}
+
+// Traduz o erro da Meta em uma explicação curta e clara pro atendente.
+function errorReasonText(code?: string | null, title?: string | null): string {
+  switch (String(code)) {
+    case "131047":
+      return "Fora da janela de 24h — use um modelo aprovado.";
+    case "131049":
+      return "Meta limitou: modelo de MARKETING tem teto por usuário. Use um modelo UTILITY.";
+    case "131026":
+      return "Mensagem não entregue (número pode não ter WhatsApp).";
+    case "131053":
+      return "Mídia inválida para o WhatsApp.";
+    default:
+      return title || "Falha no envio (Meta).";
+  }
 }
 
 // ── Validação de anexos ──────────────────────────────────────────────────────
@@ -918,6 +938,7 @@ export default function AtendimentoPage() {
                     senderName={msg.sender}
                     type={msg.type}
                     mediaId={msg.mediaId}
+                    errorReason={msg.errorReason}
                   />
                 ))}
                 <div ref={messagesEndRef} />

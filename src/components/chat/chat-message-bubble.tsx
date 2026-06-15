@@ -13,6 +13,7 @@ export interface ChatBubbleProps {
   senderName?: string;
   type?: "text" | "image" | "audio" | "document";
   mediaId?: string;
+  errorReason?: string;
 }
 
 export function ChatMessageBubble({
@@ -24,6 +25,7 @@ export function ChatMessageBubble({
   senderName,
   type = "text",
   mediaId,
+  errorReason,
 }: ChatBubbleProps) {
   const mediaSrc = mediaId ? `/api/whatsapp/media/${mediaId}` : undefined;
   // Legenda só aparece se não for o placeholder automático
@@ -99,7 +101,10 @@ export function ChatMessageBubble({
           {direction === "outbound" &&
             status &&
             (status === "failed" ? (
-              <span className="flex items-center gap-0.5 text-[10px] text-rose-600 font-medium">
+              <span
+                className="flex items-center gap-0.5 text-[10px] text-rose-600 font-medium cursor-help"
+                title={errorReason || "Falha no envio"}
+              >
                 <AlertCircle className="w-3.5 h-3.5" /> falhou
               </span>
             ) : status === "read" ? (
