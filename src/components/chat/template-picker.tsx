@@ -129,6 +129,11 @@ export function TemplatePicker({ open, onClose, onSend }: TemplatePickerProps) {
                       className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-9 pr-3 text-sm focus:border-emerald-400 focus:outline-none"
                     />
                   </div>
+                  <p className="rounded-lg bg-amber-50 px-2 py-1.5 text-[11px] text-amber-700">
+                    💡 Para reabrir conversas fechadas, prefira modelos{" "}
+                    <b>UTILITY</b>. Os de <b>MARKETING</b> têm limite por
+                    usuário na Meta e podem não entregar.
+                  </p>
                   {templates
                     .filter((t) => {
                       const q = query.trim().toLowerCase();
@@ -138,25 +143,42 @@ export function TemplatePicker({ open, onClose, onSend }: TemplatePickerProps) {
                         bodyText(t).toLowerCase().includes(q)
                       );
                     })
-                    .map((t) => (
-                      <button
-                        key={`${t.name}-${t.language}`}
-                        onClick={() => pick(t)}
-                        className="w-full rounded-xl border border-gray-200 p-3 text-left transition-colors hover:border-emerald-300 hover:bg-emerald-50"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-gray-900">
-                            {t.name}
-                          </span>
-                          <span className="text-[10px] uppercase text-gray-400">
-                            {t.category} · {t.language}
-                          </span>
-                        </div>
-                        <p className="mt-1 line-clamp-2 text-xs text-gray-600">
-                          {bodyText(t) || "(sem corpo de texto)"}
-                        </p>
-                      </button>
-                    ))}
+                    .slice()
+                    .sort((a, b) => {
+                      // UTILITY/AUTHENTICATION primeiro (entregam sempre); MARKETING por último
+                      const rank = (c?: string) =>
+                        /market/i.test(c || "") ? 1 : 0;
+                      return rank(a.category) - rank(b.category);
+                    })
+                    .map((t) => {
+                      const isMkt = /market/i.test(t.category || "");
+                      return (
+                        <button
+                          key={`${t.name}-${t.language}`}
+                          onClick={() => pick(t)}
+                          className="w-full rounded-xl border border-gray-200 p-3 text-left transition-colors hover:border-emerald-300 hover:bg-emerald-50"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-sm font-semibold text-gray-900">
+                              {t.name}
+                            </span>
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${
+                                isMkt
+                                  ? "bg-amber-100 text-amber-700"
+                                  : "bg-emerald-100 text-emerald-700"
+                              }`}
+                            >
+                              {isMkt ? "⚠ marketing" : "✓ utility"} ·{" "}
+                              {t.language}
+                            </span>
+                          </div>
+                          <p className="mt-1 line-clamp-2 text-xs text-gray-600">
+                            {bodyText(t) || "(sem corpo de texto)"}
+                          </p>
+                        </button>
+                      );
+                    })}
                 </div>
               ) : (
                 <div className="space-y-3">
