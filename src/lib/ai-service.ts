@@ -8,6 +8,7 @@ interface AIContext {
   daysSinceContact: number | null; // null = nunca contatado
   dealValue: number;
   noteCount: number;
+  messageCount?: number; // mensagens trocadas na conversa (engajamento real)
   lastNote: string | null;
   courseInterest: string | null;
   recentActivities: string[];
@@ -171,6 +172,24 @@ function generateRuleBased(ctx: AIContext): AIResponse {
       reason: `${ctx.noteCount} nota(s) registrada(s)`,
     });
     totalScore += 5;
+  }
+
+  // Engajamento na conversa (mensagens trocadas no WhatsApp)
+  const msgs = ctx.messageCount ?? 0;
+  if (msgs >= 6) {
+    scoreExplanation.push({
+      factor: "Conversa ativa",
+      points: 15,
+      reason: `${msgs} mensagens trocadas`,
+    });
+    totalScore += 15;
+  } else if (msgs >= 1) {
+    scoreExplanation.push({
+      factor: "Conversa iniciada",
+      points: 8,
+      reason: `${msgs} mensagem(ns) trocada(s)`,
+    });
+    totalScore += 8;
   }
 
   // Course interest

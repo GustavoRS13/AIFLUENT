@@ -457,7 +457,11 @@ export async function POST(request: NextRequest) {
         deals: true,
         activities: { take: 10, orderBy: { createdAt: "desc" } },
         conversations: {
-          select: { lastMessageAt: true, lastInboundAt: true },
+          select: {
+            lastMessageAt: true,
+            lastInboundAt: true,
+            _count: { select: { messages: true } },
+          },
           orderBy: { lastMessageAt: "desc" },
           take: 1,
         },
@@ -470,6 +474,7 @@ export async function POST(request: NextRequest) {
       );
 
     const daysSinceContact = contactDays(lead); // number | null (null = nunca contatado)
+    const messageCount = lead.conversations?.[0]?._count?.messages ?? 0;
 
     const insights = await getAIInsights({
       leadName: `${lead.firstName} ${lead.lastName || ""}`.trim(),
@@ -477,6 +482,7 @@ export async function POST(request: NextRequest) {
       score: lead.aiScore,
       stage: lead.stage?.name || "Base",
       daysSinceContact,
+      messageCount,
       dealValue: lead.deals.reduce((s, d) => s + (d.value || 0), 0),
       noteCount: lead.activities.filter((a) => a.type === "note").length,
       lastNote:
