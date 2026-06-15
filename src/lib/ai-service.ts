@@ -5,7 +5,7 @@ interface AIContext {
   temperature: string;
   score: number | null;
   stage: string;
-  daysSinceContact: number;
+  daysSinceContact: number | null; // null = nunca contatado
   dealValue: number;
   noteCount: number;
   lastNote: string | null;
@@ -59,7 +59,7 @@ Regras:
 Temperatura: ${ctx.temperature}
 Score atual: ${ctx.score || "nao calculado"}
 Estagio: ${ctx.stage}
-Dias sem contato: ${ctx.daysSinceContact}
+Dias sem contato: ${ctx.daysSinceContact ?? "sem registro"}
 Valor do negocio: R$${ctx.dealValue}
 Notas: ${ctx.noteCount}
 Ultima nota: ${ctx.lastNote || "nenhuma"}
@@ -116,14 +116,14 @@ function generateRuleBased(ctx: AIContext): AIResponse {
   }
 
   // Recency
-  if (ctx.daysSinceContact <= 1) {
+  if ((ctx.daysSinceContact ?? 0) <= 1) {
     scoreExplanation.push({
       factor: "Ultimo contato",
       points: 20,
       reason: "Contato nas ultimas 24h",
     });
     totalScore += 20;
-  } else if (ctx.daysSinceContact <= 3) {
+  } else if ((ctx.daysSinceContact ?? 0) <= 3) {
     scoreExplanation.push({
       factor: "Ultimo contato",
       points: 10,
@@ -188,10 +188,10 @@ function generateRuleBased(ctx: AIContext): AIResponse {
   // Risk assessment
   let risk = "";
   let riskLevel: "low" | "medium" | "high" = "low";
-  if (ctx.daysSinceContact > 7 && ctx.temperature !== "hot") {
+  if ((ctx.daysSinceContact ?? 0) > 7 && ctx.temperature !== "hot") {
     risk = `${ctx.leadName} esta sem contato ha ${ctx.daysSinceContact} dias e pode estar considerando concorrentes.`;
     riskLevel = "high";
-  } else if (ctx.daysSinceContact > 3) {
+  } else if ((ctx.daysSinceContact ?? 0) > 3) {
     risk = `Atencao: ${ctx.daysSinceContact} dias sem interacao. Recomendo follow-up.`;
     riskLevel = "medium";
   } else {
@@ -205,7 +205,7 @@ function generateRuleBased(ctx: AIContext): AIResponse {
   if (ctx.temperature === "hot" && probability > 60) {
     suggestion = `${ctx.leadName} tem ${probability}% de probabilidade de conversao. Recomendo mover para a proxima etapa e enviar proposta.`;
     action = "move_and_propose";
-  } else if (ctx.daysSinceContact > 3 && ctx.temperature !== "cold") {
+  } else if ((ctx.daysSinceContact ?? 0) > 3 && ctx.temperature !== "cold") {
     suggestion = `${ctx.leadName} esta sem contato ha ${ctx.daysSinceContact} dias. Crie um follow-up para reengajar.`;
     action = "create_followup";
   } else if (ctx.temperature === "cold") {
@@ -232,7 +232,7 @@ function generateRuleBased(ctx: AIContext): AIResponse {
   }
 
   // Summary
-  const summary = `${ctx.leadName} — ${ctx.temperature === "hot" ? "Lead quente" : ctx.temperature === "warm" ? "Lead morno" : "Lead frio"}, estagio ${ctx.stage}, ${probability}% de probabilidade. ${ctx.daysSinceContact > 3 ? `Sem contato ha ${ctx.daysSinceContact} dias.` : "Contato recente."}`;
+  const summary = `${ctx.leadName} — ${ctx.temperature === "hot" ? "Lead quente" : ctx.temperature === "warm" ? "Lead morno" : "Lead frio"}, estagio ${ctx.stage}, ${probability}% de probabilidade. ${(ctx.daysSinceContact ?? 0) > 3 ? `Sem contato ha ${ctx.daysSinceContact} dias.` : "Contato recente."}`;
 
   return {
     suggestion,
