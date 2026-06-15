@@ -101,6 +101,14 @@ const MAX_FILE_MB = 16; // limite seguro do WhatsApp (mídia/áudio/vídeo)
 const ALLOWED_MIME =
   /^(image\/(jpeg|jpg|png|webp|gif)|application\/pdf|application\/msword|application\/vnd\.openxmlformats-officedocument\.(wordprocessingml\.document|spreadsheetml\.sheet)|application\/vnd\.ms-excel|text\/plain|audio\/.+|video\/(mp4|3gpp))$/;
 
+// Janela de 24h da Meta: aberta só se houve mensagem recebida nas últimas 24h.
+// Fora dela, só dá pra enviar TEMPLATE aprovado (texto livre é rejeitado).
+function isWindowOpen(lastInboundAt?: string | null): boolean {
+  if (!lastInboundAt) return false;
+  // eslint-disable-next-line react-hooks/purity -- janela relativa ao agora
+  return Date.now() - new Date(lastInboundAt).getTime() < 24 * 60 * 60 * 1000;
+}
+
 // ── Component ───────────────────────────────────────────────────────────────
 
 export default function AtendimentoPage() {
@@ -124,6 +132,7 @@ export default function AtendimentoPage() {
   const conversationListRef = useRef<HTMLDivElement>(null);
 
   const selectedConv = conversations.find((c) => c.id === selectedId);
+  const windowOpen = isWindowOpen(selectedConv?.lastInboundAt);
   const currentMessages = selectedId
     ? (allMessages[selectedId] ?? selectedConv?.messages ?? [])
     : [];
@@ -914,16 +923,33 @@ export default function AtendimentoPage() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input */}
-              <ChatInput
-                value={input}
-                onChange={setInput}
-                onSend={handleSend}
-                onFileUpload={handleFileUpload}
-                onAudioRecorded={handleAudioRecorded}
-                showEmoji={showEmoji}
-                onToggleEmoji={() => setShowEmoji(!showEmoji)}
-              />
+              {/* Input — janela aberta: texto livre; fechada: só modelo (regra 24h Meta) */}
+              {windowOpen ? (
+                <ChatInput
+                  value={input}
+                  onChange={setInput}
+                  onSend={handleSend}
+                  onFileUpload={handleFileUpload}
+                  onAudioRecorded={handleAudioRecorded}
+                  showEmoji={showEmoji}
+                  onToggleEmoji={() => setShowEmoji(!showEmoji)}
+                />
+              ) : (
+                <div className="border-t border-gray-200 bg-gray-50/60 px-6 py-5 text-center">
+                  <p className="mx-auto max-w-md text-sm text-gray-600">
+                    A conversa com este contato está{" "}
+                    <b>fora da janela de 24h</b> da Meta. Você só pode enviar
+                    mensagens usando <b>modelos aprovados</b>.
+                  </p>
+                  <button
+                    onClick={() => setTemplateOpen(true)}
+                    className="mt-3 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-500"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Selecionar modelo de mensagem
+                  </button>
+                </div>
+              )}
               <TemplatePicker
                 open={templateOpen}
                 onClose={() => setTemplateOpen(false)}
