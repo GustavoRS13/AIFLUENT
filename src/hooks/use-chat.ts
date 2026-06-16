@@ -10,6 +10,7 @@ export interface ChatMessage {
   status: "sent" | "delivered" | "read" | "failed";
   aiGenerated: boolean;
   createdAt: string;
+  sentAt?: string; // ISO completo (p/ separadores de dia: Hoje/Ontem/data)
   sender?: string;
   mediaId?: string;
   errorReason?: string; // motivo real da falha (ex.: erro/política da Meta)

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, Fragment } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -92,6 +92,7 @@ function mapApiMessage(m: any): ChatMessage {
       : "sent",
     aiGenerated: !!m.aiGenerated,
     createdAt: fmtTime(m.createdAt),
+    sentAt: m.createdAt as string,
     mediaId,
     errorReason:
       m.status === "failed"
@@ -127,6 +128,21 @@ function isWindowOpen(lastInboundAt?: string | null): boolean {
   if (!lastInboundAt) return false;
   // eslint-disable-next-line react-hooks/purity -- janela relativa ao agora
   return Date.now() - new Date(lastInboundAt).getTime() < 24 * 60 * 60 * 1000;
+}
+
+// Rótulo do separador de dia: Hoje / Ontem / DD/MM/AAAA.
+function dayLabel(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  // eslint-disable-next-line react-hooks/purity -- comparação com o dia atual
+  const now = new Date();
+  const startOf = (x: Date) =>
+    new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diff = Math.round((startOf(now) - startOf(d)) / 86400000);
+  if (diff === 0) return "Hoje";
+  if (diff === 1) return "Ontem";
+  return d.toLocaleDateString("pt-BR");
 }
 
 // ── Component ───────────────────────────────────────────────────────────────
@@ -927,20 +943,34 @@ export default function AtendimentoPage() {
                     </button>
                   </div>
                 )}
-                {currentMessages.map((msg) => (
-                  <ChatMessageBubble
-                    key={msg.id}
-                    direction={msg.direction}
-                    content={msg.content}
-                    timestamp={msg.createdAt}
-                    status={msg.status}
-                    aiGenerated={msg.aiGenerated}
-                    senderName={msg.sender}
-                    type={msg.type}
-                    mediaId={msg.mediaId}
-                    errorReason={msg.errorReason}
-                  />
-                ))}
+                {currentMessages.map((msg, i) => {
+                  const label = dayLabel(msg.sentAt);
+                  const showSep =
+                    !!label &&
+                    label !== dayLabel(currentMessages[i - 1]?.sentAt);
+                  return (
+                    <Fragment key={msg.id}>
+                      {showSep && (
+                        <div className="my-2 flex justify-center">
+                          <span className="rounded-full bg-gray-200/80 px-3 py-0.5 text-[11px] font-medium text-gray-600">
+                            {label}
+                          </span>
+                        </div>
+                      )}
+                      <ChatMessageBubble
+                        direction={msg.direction}
+                        content={msg.content}
+                        timestamp={msg.createdAt}
+                        status={msg.status}
+                        aiGenerated={msg.aiGenerated}
+                        senderName={msg.sender}
+                        type={msg.type}
+                        mediaId={msg.mediaId}
+                        errorReason={msg.errorReason}
+                      />
+                    </Fragment>
+                  );
+                })}
                 <div ref={messagesEndRef} />
               </div>
 
