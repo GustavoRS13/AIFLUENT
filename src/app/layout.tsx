@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title: "AIFLUENT | CRM Inteligente",
   description:
     "Plataforma CRM inteligente com IA para gestao de leads, pipeline de vendas, campanhas de WhatsApp e automacao comercial.",
-  icons: { icon: "/favicon.ico" },
+  // favicon vem de src/app/icon.png (logo AIFLUENT) — convenção do App Router
 };
 
 export default function RootLayout({

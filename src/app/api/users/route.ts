@@ -162,6 +162,30 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // E-mail de boas-vindas (best-effort — não falha a criação)
+    try {
+      const { sendWelcomeEmail } = await import("@/lib/email-service");
+      const res = await sendWelcomeEmail({
+        to: user.email,
+        name: user.name,
+        role: user.role,
+        tempPassword: data.password,
+      });
+      if ("error" in res) {
+        logger.warn("welcome_email_skipped", {
+          email: user.email,
+          reason: res.error,
+        });
+      } else {
+        logger.info("welcome_email_sent", { email: user.email });
+      }
+    } catch (e) {
+      logger.warn("welcome_email_error", {
+        email: user.email,
+        error: String(e),
+      });
+    }
+
     return NextResponse.json(user, { status: 201 });
   } catch (err) {
     logger.error("POST /api/users error", err);
