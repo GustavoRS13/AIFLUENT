@@ -78,7 +78,7 @@ export function BroadcastConsole() {
   const [name, setName] = useState("");
   const [templateName, setTemplateName] = useState("");
   const [language, setLanguage] = useState("pt_BR");
-  const [dryRun, setDryRun] = useState(true);
+  const [dryRun, setDryRun] = useState(false);
   const [creating, setCreating] = useState(false);
 
   // job em execução

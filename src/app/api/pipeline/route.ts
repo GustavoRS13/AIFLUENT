@@ -107,10 +107,28 @@ export async function PATCH(request: NextRequest) {
         { status: 404 },
       );
 
+    // A etapa de destino é de "ganho"? (isWon)
+    const stage = await prisma.pipelineStage.findUnique({
+      where: { id: stageId },
+      select: { isWon: true },
+    });
+
     await prisma.lead.update({
       where: { id: leadId },
-      data: { stageId, stageOrder: newOrder },
+      data: {
+        stageId,
+        stageOrder: newOrder,
+        ...(stage?.isWon
+          ? { status: "converted", convertedAt: new Date() }
+          : {}),
+      },
     });
+
+    // Automação: movido para etapa GANHA → transfere ao departamento Educacional
+    if (stage?.isWon) {
+      const { transferWonLeadToEducational } = await import("@/lib/lead-won");
+      await transferWonLeadToEducational(prisma, leadId, orgId);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

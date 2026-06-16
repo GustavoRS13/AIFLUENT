@@ -82,6 +82,12 @@ export async function PATCH(
       },
     });
 
+    // Automação: lead GANHO → transfere para o departamento Educacional
+    if (parsed.data.status === "converted") {
+      const { transferWonLeadToEducational } = await import("@/lib/lead-won");
+      await transferWonLeadToEducational(prisma, id, existing.organizationId);
+    }
+
     // Audit log
     try {
       await prisma.auditLog.create({
