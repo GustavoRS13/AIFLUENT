@@ -27,15 +27,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "code ausente" }, { status: 400 });
     }
 
-    // 1) troca o code do Embedded Signup por um token de integração (business)
-    const tokenRes = await fetch(
-      `${GRAPH}/oauth/access_token?client_id=${appId}&client_secret=${appSecret}&code=${encodeURIComponent(code)}`,
-    ).then((r) => r.json());
-    const bizToken = tokenRes?.access_token;
+    // 1) troca o code por token — tenta os segredos de app disponíveis
+    const secrets = [
+      process.env.WHATSAPP_APP_SECRET,
+      process.env.META_APP_SECRET,
+    ].filter(Boolean) as string[];
+    let bizToken = "";
+    const attempts: unknown[] = [];
+    for (const sec of secrets) {
+      const res = await fetch(
+        `${GRAPH}/oauth/access_token?client_id=${appId}&client_secret=${sec}&code=${encodeURIComponent(code)}`,
+      )
+        .then((r) => r.json())
+        .catch((e) => ({ error: String(e) }));
+      attempts.push(res?.error || "ok");
+      if (res?.access_token) {
+        bizToken = res.access_token;
+        break;
+      }
+    }
     if (!bizToken) {
-      logger.error("embedded_signup_token_fail", tokenRes);
+      logger.error("embedded_signup_token_fail", { attempts });
       return NextResponse.json(
-        { error: "Falha ao trocar o code por token", detail: tokenRes },
+        { error: "Falha ao trocar o code por token", detail: attempts },
         { status: 400 },
       );
     }
