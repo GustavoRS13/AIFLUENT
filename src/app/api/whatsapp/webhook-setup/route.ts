@@ -29,22 +29,34 @@ export async function POST() {
       headers: auth,
     }).then((r) => r.json());
 
-    // (re)inscreve o app no WABA com override do callback (campo messages)
+    // 1) inscrição simples (app passa a receber o campo "messages" no webhook do app)
     const sub = await fetch(`${GRAPH}/${waba}/subscribed_apps`, {
       method: "POST",
-      headers: { ...auth, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        override_callback_uri: callback,
-        verify_token: verify,
-      }),
+      headers: auth,
     }).then((r) => r.json());
+
+    // 2) tenta forçar o callback pro nosso endpoint (best-effort; pode falhar se
+    //    o app já entrega no webhook configurado no painel — que é o nosso)
+    let override: unknown = null;
+    if (verify) {
+      override = await fetch(`${GRAPH}/${waba}/subscribed_apps`, {
+        method: "POST",
+        headers: { ...auth, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          override_callback_uri: callback,
+          verify_token: verify,
+        }),
+      })
+        .then((r) => r.json())
+        .catch((e) => ({ error: String(e) }));
+    }
 
     const after = await fetch(`${GRAPH}/${waba}/subscribed_apps`, {
       headers: auth,
     }).then((r) => r.json());
 
-    logger.info("whatsapp_webhook_resubscribe", { callback, sub });
-    return NextResponse.json({ callback, before, sub, after });
+    logger.info("whatsapp_webhook_resubscribe", { callback, sub, override });
+    return NextResponse.json({ callback, before, sub, override, after });
   } catch (e) {
     logger.error("whatsapp_webhook_resubscribe_error", e);
     return NextResponse.json(
