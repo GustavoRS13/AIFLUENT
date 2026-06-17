@@ -198,7 +198,7 @@ export async function runBroadcastBatch(
               leadId: r.leadId,
               channel: "whatsapp",
             },
-            select: { id: true },
+            select: { id: true, lastInboundAt: true },
           });
           if (!conv) {
             // Conversa de disparo nasce OCULTA (status "broadcast"); só aparece
@@ -211,7 +211,7 @@ export async function runBroadcastBatch(
                 status: "broadcast",
                 lastMessageAt: new Date(),
               },
-              select: { id: true },
+              select: { id: true, lastInboundAt: true },
             });
           }
           const comp =
@@ -239,7 +239,12 @@ export async function runBroadcastBatch(
           });
           await prisma.conversation.update({
             where: { id: conv.id },
-            data: { lastMessageAt: new Date() },
+            data: {
+              lastMessageAt: new Date(),
+              // re-oculta a conversa de disparo se o lead NUNCA respondeu;
+              // se já tem inbound, é atendimento real → mantém visível.
+              ...(conv.lastInboundAt ? {} : { status: "broadcast" }),
+            },
           });
           await prisma.broadcastRecipient.update({
             where: { id: r.id },

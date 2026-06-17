@@ -17,8 +17,10 @@ export async function GET(request: Request) {
     const teamId = url.searchParams.get("teamId") || "";
     const { prisma } = await import("@/lib/prisma");
     const where: Record<string, unknown> = { organizationId: orgId };
-    // Conversas de disparo ficam ocultas até o lead responder (status != broadcast)
-    where.status = { not: "broadcast" };
+    // Atendimento mostra só conversas onde o LEAD respondeu (enviou ao menos 1
+    // mensagem). Disparos sem resposta não poluem o inbox; ao responder, o
+    // webhook seta lastInboundAt e a conversa aparece automaticamente.
+    where.lastInboundAt = { not: null };
     if (teamId) where.teamId = teamId;
     // Isolamento por papel (Atendimento):
     //  - admin  → todas as conversas da empresa
