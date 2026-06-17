@@ -39,7 +39,16 @@ export async function POST() {
           .catch((e) => ({ error: String(e) }))
       : { skipped: "sem META_APP_ID" };
 
-    // 1) garante inscrição simples (campo messages) com token de usuário
+    // 0) RESET: remove a inscrição atual (limpa override/roteamento herdado do
+    //    Kommo) antes de re-inscrever limpo.
+    const reset = await fetch(`${GRAPH}/${waba}/subscribed_apps`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${userToken}` },
+    })
+      .then(j)
+      .catch((e) => ({ error: String(e) }));
+
+    // 1) re-inscreve limpo (campo messages) com token de usuário
     const sub = await fetch(`${GRAPH}/${waba}/subscribed_apps`, {
       method: "POST",
       headers: { Authorization: `Bearer ${userToken}` },
@@ -77,6 +86,7 @@ export async function POST() {
     return NextResponse.json({
       callback,
       appWebhook: appSubs,
+      reset,
       subscribe: sub,
       override: overrideUser,
       after,
