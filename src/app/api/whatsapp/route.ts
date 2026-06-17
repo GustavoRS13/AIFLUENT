@@ -34,10 +34,17 @@ export async function POST(request: NextRequest) {
 
   // Case 1: webhook da Meta (inbound + status) — multi-tenant
   if (body.object === "whatsapp_business_account") {
-    const appSecret = process.env.WHATSAPP_APP_SECRET || "";
-    if (appSecret) {
+    // A Meta assina com o segredo do APP que entrega (MSI). Aceita qualquer um
+    // dos segredos configurados (MSI/WA_ES, WHATSAPP, META).
+    const secrets = [
+      process.env.WA_ES_APP_SECRET,
+      process.env.WHATSAPP_APP_SECRET,
+      process.env.META_APP_SECRET,
+    ].filter(Boolean) as string[];
+    if (secrets.length) {
       const sig = request.headers.get("x-hub-signature-256");
-      if (!verifySignature(raw, sig, appSecret)) {
+      const valid = secrets.some((s) => verifySignature(raw, sig, s));
+      if (!valid) {
         logger.warn("[WhatsApp Webhook] assinatura invalida");
         return NextResponse.json(
           { error: "Invalid signature" },
@@ -46,7 +53,7 @@ export async function POST(request: NextRequest) {
       }
     } else {
       logger.warn(
-        "[WhatsApp Webhook] WHATSAPP_APP_SECRET ausente — assinatura nao verificada",
+        "[WhatsApp Webhook] sem app secret — assinatura nao verificada",
       );
     }
 
