@@ -13,6 +13,7 @@ export const PERMISSIONS = {
   "page:disparos": ["admin"],
   "page:disparo-massa": ["admin", "gestor"],
   "page:distribuir-leads": ["admin", "gestor"],
+  "page:conectar-whatsapp": ["admin"],
   "page:templates": ["admin"],
   "page:meta-ads": ["admin"],
   "page:automations": ["admin"],
