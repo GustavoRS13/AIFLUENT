@@ -7,6 +7,29 @@ import { whatsapp } from "@/lib/whatsapp";
 const BATCH_REAL = 20;
 const BATCH_DRY = 500;
 
+// Tokens de personalização aceitos no valor das variáveis do template.
+const MERGE_RE =
+  /\{\{?\s*(nome_completo|nomecompleto|fullname|nome|primeiro_nome|primeiro|first_name|firstname)\s*\}?\}/i;
+
+// Substitui os tokens pelo nome real do lead. Fallback "aluno(a)" quando vazio.
+function fillParams(
+  params: string[],
+  lead?: { firstName?: string | null; lastName?: string | null },
+): string[] {
+  const first = (lead?.firstName || "").trim() || "aluno(a)";
+  const full =
+    [lead?.firstName, lead?.lastName].filter(Boolean).join(" ").trim() || first;
+  return params.map((p) =>
+    p
+      // nome_completo PRIMEIRO (contém "nome")
+      .replace(/\{\{?\s*(nome_completo|nomecompleto|fullname)\s*\}?\}/gi, full)
+      .replace(
+        /\{\{?\s*(nome|primeiro_nome|primeiro|first_name|firstname)\s*\}?\}/gi,
+        first,
+      ),
+  );
+}
+
 interface Claimed {
   id: string;
   leadId: string;
@@ -71,14 +94,21 @@ export async function runBroadcastBatch(
   const senderId = job.createdById as string;
   const batch = job.dryRun ? BATCH_DRY : BATCH_REAL;
   const langParams = job.params ? (JSON.parse(job.params) as string[]) : null;
-  const components = langParams?.length
-    ? [
-        {
-          type: "body",
-          parameters: langParams.map((t) => ({ type: "text", text: t })),
-        },
-      ]
-    : undefined;
+  const buildComponents = (vals: string[] | null | undefined) =>
+    vals?.length
+      ? [
+          {
+            type: "body",
+            parameters: vals.map((t) => ({ type: "text", text: t })),
+          },
+        ]
+      : undefined;
+  // Personalização: se algum parâmetro usa {nome}/{primeiro_nome}, montamos os
+  // componentes POR destinatário (com o nome real do lead). Senão, é estático.
+  const personalized = !!langParams?.some((p) => MERGE_RE.test(p));
+  const staticComponents = personalized
+    ? undefined
+    : buildComponents(langParams);
 
   const start = Date.now();
   let aggProcessed = 0;
@@ -108,6 +138,23 @@ export async function runBroadcastBatch(
       batch,
     );
     if (claimed.length === 0) break;
+
+    // Nomes dos leads (só quando há personalização) para montar {nome} por contato
+    const leadMap = new Map<
+      string,
+      { firstName?: string | null; lastName?: string | null }
+    >();
+    if (personalized) {
+      const ids = [...new Set(claimed.map((r) => r.leadId).filter(Boolean))];
+      if (ids.length) {
+        const leads = await prisma.lead.findMany({
+          where: { id: { in: ids } },
+          select: { id: true, firstName: true, lastName: true },
+        });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        leads.forEach((l: any) => leadMap.set(l.id, l));
+      }
+    }
 
     let sent = 0;
     let failed = 0;
@@ -162,11 +209,15 @@ export async function runBroadcastBatch(
               select: { id: true },
             });
           }
+          const comp =
+            personalized && langParams
+              ? buildComponents(fillParams(langParams, leadMap.get(r.leadId)))
+              : staticComponents;
           const res = await whatsapp.sendTemplateMessage(
             r.phone,
             job.templateName,
             job.languageCode,
-            components,
+            comp,
           );
           const ok = "messageId" in res;
           await prisma.conversationMessage.create({

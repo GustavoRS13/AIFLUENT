@@ -25,9 +25,13 @@ interface Funnel {
   name: string;
   groupName: string | null;
 }
+interface TemplateButtonT {
+  text?: string;
+}
 interface TemplateComponentT {
   type?: string;
   text?: string;
+  buttons?: TemplateButtonT[];
 }
 interface TemplateT {
   name: string;
@@ -41,11 +45,27 @@ function templateBody(t?: TemplateT): string {
   const b = t?.components?.find((c) => (c.type || "").toUpperCase() === "BODY");
   return b?.text || "";
 }
+function templateButtons(t?: TemplateT): string[] {
+  const b = t?.components?.find(
+    (c) => (c.type || "").toUpperCase() === "BUTTONS",
+  );
+  return (b?.buttons || []).map((x) => x.text || "").filter(Boolean);
+}
 function countVars(text: string): number {
   const m = text.match(/\{\{\s*\d+\s*\}\}/g);
   if (!m) return 0;
-  // maior índice usado (ex.: {{1}} {{3}} → 3)
   return Math.max(...m.map((x) => parseInt(x.replace(/[^\d]/g, ""), 10)));
+}
+// token de personalização ({nome}, {primeiro_nome}...) no valor de uma variável
+const MERGE_UI_RE = /\{\{?\s*(nome|primeiro|first)/i;
+// monta o texto do preview substituindo {{n}} pelo valor (nome → exemplo "Maria")
+function fillPreview(body: string, params: string[]): string {
+  let t = body;
+  params.forEach((p, i) => {
+    const val = !p.trim() ? `{{${i + 1}}}` : MERGE_UI_RE.test(p) ? "Maria" : p;
+    t = t.replace(new RegExp(`\\{\\{\\s*${i + 1}\\s*\\}\\}`, "g"), val);
+  });
+  return t;
 }
 interface JobRow {
   id: string;
@@ -309,7 +329,7 @@ export function BroadcastConsole() {
       : 0;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
+    <div className="mx-auto max-w-5xl space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Disparo em massa</h1>
         <p className="text-gray-500">
@@ -449,67 +469,119 @@ export function BroadcastConsole() {
       </div>
 
       {/* MENSAGEM */}
-      <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5">
+      <div className="rounded-2xl border border-gray-200 bg-white p-5">
         <h2 className="flex items-center gap-2 text-sm font-bold text-gray-900">
           <Send className="h-4 w-4" /> 2. Modelo
         </h2>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Nome do disparo (opcional)"
-          className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-        />
-        <select
-          value={templateName}
-          onChange={(e) => {
-            setTemplateName(e.target.value);
-            const t = templates.find((x) => x.name === e.target.value);
-            if (t) setLanguage(t.language || "pt_BR");
-            setParams(Array(countVars(templateBody(t))).fill(""));
-          }}
-          className="w-full rounded-lg border border-gray-200 px-2 py-2 text-sm"
-        >
-          {templates.length === 0 && (
-            <option value="">Nenhum modelo aprovado</option>
-          )}
-          {templates.map((t) => (
-            <option key={`${t.name}-${t.language}`} value={t.name}>
-              {t.name} ({t.language})
-            </option>
-          ))}
-        </select>
+        <div className="mt-3 grid gap-5 lg:grid-cols-[1fr_300px]">
+          {/* ESQUERDA: formulário */}
+          <div className="space-y-3">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Nome do disparo (opcional)"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+            />
+            <select
+              value={templateName}
+              onChange={(e) => {
+                setTemplateName(e.target.value);
+                const t = templates.find((x) => x.name === e.target.value);
+                if (t) setLanguage(t.language || "pt_BR");
+                setParams(Array(countVars(templateBody(t))).fill(""));
+              }}
+              className="w-full rounded-lg border border-gray-200 px-2 py-2 text-sm"
+            >
+              {templates.length === 0 && (
+                <option value="">Nenhum modelo aprovado</option>
+              )}
+              {templates.map((t) => (
+                <option key={`${t.name}-${t.language}`} value={t.name}>
+                  {t.name} ({t.language})
+                </option>
+              ))}
+            </select>
 
-        {/* Preview do corpo do template */}
-        {templateBody(templates.find((x) => x.name === templateName)) && (
-          <div className="whitespace-pre-wrap rounded-lg bg-gray-50 p-3 text-xs text-gray-600">
-            {templateBody(templates.find((x) => x.name === templateName))}
-          </div>
-        )}
-
-        {/* Campos das variáveis do template ({{1}}, {{2}}...) */}
-        {params.length > 0 && (
-          <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
-            <p className="text-xs font-medium text-amber-700">
-              Este modelo tem {params.length} variável(is). Preencha o valor
-              (igual para todos os contatos):
-            </p>
-            {params.map((p, i) => (
-              <div key={i}>
-                <label className="text-[11px] text-gray-500">{`Variável {{${i + 1}}}`}</label>
-                <input
-                  value={p}
-                  onChange={(e) =>
-                    setParams((arr) =>
-                      arr.map((v, j) => (j === i ? e.target.value : v)),
-                    )
-                  }
-                  placeholder={`Valor para {{${i + 1}}}`}
-                  className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-                />
+            {/* Variáveis do template ({{1}}...) */}
+            {params.length > 0 && (
+              <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                <p className="text-xs font-medium text-amber-700">
+                  Este modelo tem {params.length} variável(is). Digite um valor
+                  fixo ou use{" "}
+                  <code className="rounded bg-white px-1">{"{nome}"}</code> para
+                  o primeiro nome de cada lead.
+                </p>
+                {params.map((p, i) => (
+                  <div key={i}>
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] text-gray-500">{`Variável {{${i + 1}}}`}</label>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setParams((arr) =>
+                            arr.map((v, j) =>
+                              j === i ? (v ? v + " {nome}" : "{nome}") : v,
+                            ),
+                          )
+                        }
+                        className="text-[11px] font-medium text-indigo-600 hover:underline"
+                      >
+                        + Nome do lead
+                      </button>
+                    </div>
+                    <input
+                      value={p}
+                      onChange={(e) =>
+                        setParams((arr) =>
+                          arr.map((v, j) => (j === i ? e.target.value : v)),
+                        )
+                      }
+                      placeholder={`Valor para {{${i + 1}}}`}
+                      className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        )}
+
+          {/* DIREITA: preview do WhatsApp */}
+          <div className="rounded-2xl bg-[#e5ddd5] p-3">
+            <p className="mb-2 text-center text-[11px] font-medium text-gray-500">
+              Pré-visualização
+            </p>
+            <div className="rounded-lg bg-white p-3 shadow-sm">
+              <p className="whitespace-pre-wrap text-sm text-gray-800">
+                {templateBody(templates.find((x) => x.name === templateName))
+                  ? fillPreview(
+                      templateBody(
+                        templates.find((x) => x.name === templateName),
+                      ),
+                      params,
+                    )
+                  : "Selecione um modelo…"}
+              </p>
+              <div className="mt-1 text-right text-[10px] text-gray-400">
+                agora ✓✓
+              </div>
+              {templateButtons(templates.find((x) => x.name === templateName))
+                .length > 0 && (
+                <div className="mt-2 space-y-1 border-t border-gray-100 pt-2">
+                  {templateButtons(
+                    templates.find((x) => x.name === templateName),
+                  ).map((b, i) => (
+                    <div
+                      key={i}
+                      className="rounded-md py-1.5 text-center text-sm font-medium text-[#00a5f4]"
+                    >
+                      {b}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* DISPARAR */}
