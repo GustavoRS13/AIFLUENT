@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { usePipelineStore, type PipelineStage } from "@/stores/pipeline-store";
 import { KanbanBoard } from "@/components/pipeline/kanban-board";
+import { BulkMoveModal } from "@/components/pipeline/bulk-move-modal";
 import { LeadOperationPanel } from "@/components/atendimento/lead-operation-panel";
 import type { KanbanCard, LeadSource, LeadTemperature } from "@/types";
 
@@ -86,6 +87,11 @@ export default function PipelinePage() {
   const [newOpen, setNewOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newGroup, setNewGroup] = useState("");
+  const [moveStage, setMoveStage] = useState<{
+    id: string;
+    name: string;
+    total: number;
+  } | null>(null);
 
   const loadFunnels = useCallback(async () => {
     try {
@@ -402,6 +408,15 @@ export default function PipelinePage() {
                 onRenameStage={renameStage}
                 onUpdateStageColor={updateStageColor}
                 onDeleteStage={deleteStage}
+                onMoveLeads={(stageId) => {
+                  const st = stages.find((s) => s.id === stageId);
+                  if (st)
+                    setMoveStage({
+                      id: st.id,
+                      name: st.name,
+                      total: st.total ?? st.leads.length,
+                    });
+                }}
               />
             </motion.div>
           )}
@@ -464,6 +479,19 @@ export default function PipelinePage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Mover leads em massa */}
+      {moveStage && (
+        <BulkMoveModal
+          sourceStage={moveStage}
+          sourceFunnelName={selectedFunnel?.name}
+          onClose={() => setMoveStage(null)}
+          onDone={() => {
+            if (selectedId) loadBoard(selectedId);
+            loadFunnels();
+          }}
+        />
       )}
 
       {/* Slide-over do lead */}

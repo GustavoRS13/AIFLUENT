@@ -7,7 +7,14 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { motion, AnimatePresence } from "framer-motion";
-import { MoreHorizontal, Plus, Pencil, Palette, Trash2 } from "lucide-react";
+import {
+  MoreHorizontal,
+  Plus,
+  Pencil,
+  Palette,
+  Trash2,
+  ArrowRightLeft,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { KanbanCard } from "./kanban-card";
 import type { PipelineStage } from "@/stores/pipeline-store";
@@ -33,6 +40,7 @@ interface KanbanColumnProps {
   onRenameStage?: (stageId: string, name: string) => void;
   onUpdateStageColor?: (stageId: string, color: string) => void;
   onDeleteStage?: (stageId: string) => void;
+  onMoveLeads?: (stageId: string) => void;
 }
 
 export function KanbanColumn({
@@ -42,6 +50,7 @@ export function KanbanColumn({
   onRenameStage,
   onUpdateStageColor,
   onDeleteStage,
+  onMoveLeads,
 }: KanbanColumnProps) {
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState(stage.name);
@@ -211,6 +220,16 @@ export function KanbanColumn({
                       </motion.div>
                     )}
                   </AnimatePresence>
+                  <button
+                    onClick={() => {
+                      onMoveLeads?.(stage.id);
+                      setMenuOpen(false);
+                    }}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <ArrowRightLeft className="w-3.5 h-3.5" /> Mover leads em
+                    massa
+                  </button>
                   <div className="border-t border-gray-100 mt-1 pt-1">
                     <button
                       onClick={() => {
