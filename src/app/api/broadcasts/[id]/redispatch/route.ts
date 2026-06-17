@@ -46,12 +46,16 @@ export async function POST(
     // leads que falharam (status real da mensagem) nesse disparo
     const failedMsgs = await prisma.conversationMessage.findMany({
       where: { metadata: { contains: id }, status: "failed" },
-      select: { leadId: true },
+      select: { conversation: { select: { leadId: true } } },
     });
     const leadIds = [
       ...new Set(
-        (failedMsgs as Array<{ leadId: string | null }>)
-          .map((m) => m.leadId)
+        (
+          failedMsgs as Array<{
+            conversation: { leadId: string | null } | null;
+          }>
+        )
+          .map((m) => m.conversation?.leadId)
           .filter(Boolean) as string[],
       ),
     ];

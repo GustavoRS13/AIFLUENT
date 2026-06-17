@@ -29,7 +29,7 @@ export async function GET(
   // mensagens desse disparo (metadata guarda o jobId)
   const msgs = await prisma.conversationMessage.findMany({
     where: { metadata: { contains: id } },
-    select: { status: true, errorCode: true, errorTitle: true, leadId: true },
+    select: { status: true, errorCode: true, errorTitle: true },
   });
 
   const counts = { accepted: 0, delivered: 0, read: 0, sent: 0, failed: 0 };
@@ -38,7 +38,6 @@ export async function GET(
     status: string;
     errorCode: string | null;
     errorTitle: string | null;
-    leadId: string | null;
   }>) {
     if (m.status === "delivered") counts.delivered++;
     else if (m.status === "read") counts.read++;
