@@ -27,23 +27,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "code ausente" }, { status: 400 });
     }
 
-    // 1) troca o code por token — tenta os segredos de app disponíveis
-    const secrets = [
-      process.env.WA_ES_APP_SECRET, // segredo do app MSI (config do Embedded Signup)
-      process.env.WHATSAPP_APP_SECRET,
-      process.env.META_APP_SECRET,
-    ].filter(Boolean) as string[];
+    // 1) troca o code por token. Segredo do app MSI + várias formas de
+    //    redirect_uri (o popup do JS SDK pode usar diferentes valores).
+    const sec =
+      process.env.WA_ES_APP_SECRET ||
+      process.env.WHATSAPP_APP_SECRET ||
+      process.env.META_APP_SECRET ||
+      "";
+    const base = `${GRAPH}/oauth/access_token?client_id=${appId}&client_secret=${sec}&code=${encodeURIComponent(code)}`;
+    const variants = [
+      base, // sem redirect_uri
+      `${base}&redirect_uri=`, // redirect_uri vazio
+      `${base}&redirect_uri=${encodeURIComponent("https://crm.aifluent.com.br/conectar-whatsapp")}`,
+      `${base}&redirect_uri=${encodeURIComponent("https://crm.aifluent.com.br/")}`,
+    ];
     let bizToken = "";
     const attempts: unknown[] = [];
-    for (const sec of secrets) {
-      // redirect_uri VAZIO: o popup do JS SDK usa redirect_uri em branco; a troca
-      // precisa bater exatamente com isso.
-      const res = await fetch(
-        `${GRAPH}/oauth/access_token?client_id=${appId}&client_secret=${sec}&redirect_uri=&code=${encodeURIComponent(code)}`,
-      )
+    for (const url of variants) {
+      const res = await fetch(url)
         .then((r) => r.json())
         .catch((e) => ({ error: String(e) }));
-      attempts.push(res?.error || "ok");
+      attempts.push(res?.error?.message || "ok");
       if (res?.access_token) {
         bizToken = res.access_token;
         break;
