@@ -25,10 +25,27 @@ interface Funnel {
   name: string;
   groupName: string | null;
 }
+interface TemplateComponentT {
+  type?: string;
+  text?: string;
+}
 interface TemplateT {
   name: string;
   language: string;
   category?: string;
+  components?: TemplateComponentT[];
+}
+
+// Texto do corpo (BODY) do template + contagem de variáveis {{n}}.
+function templateBody(t?: TemplateT): string {
+  const b = t?.components?.find((c) => (c.type || "").toUpperCase() === "BODY");
+  return b?.text || "";
+}
+function countVars(text: string): number {
+  const m = text.match(/\{\{\s*\d+\s*\}\}/g);
+  if (!m) return 0;
+  // maior índice usado (ex.: {{1}} {{3}} → 3)
+  return Math.max(...m.map((x) => parseInt(x.replace(/[^\d]/g, ""), 10)));
 }
 interface JobRow {
   id: string;
@@ -78,6 +95,7 @@ export function BroadcastConsole() {
   const [name, setName] = useState("");
   const [templateName, setTemplateName] = useState("");
   const [language, setLanguage] = useState("pt_BR");
+  const [params, setParams] = useState<string[]>([]);
   const [dryRun, setDryRun] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -109,6 +127,7 @@ export function BroadcastConsole() {
         if (t[0]) {
           setTemplateName(t[0].name);
           setLanguage(t[0].language || "pt_BR");
+          setParams(Array(countVars(templateBody(t[0]))).fill(""));
         }
       })
       .catch(() => {});
@@ -227,6 +246,12 @@ export function BroadcastConsole() {
 
   async function startBroadcast() {
     if (!templateName || !preview) return;
+    if (params.some((p) => !p.trim())) {
+      alert(
+        "Este modelo tem variáveis. Preencha todos os campos de variável antes de disparar.",
+      );
+      return;
+    }
     setCreating(true);
     try {
       const res = await fetch("/api/broadcasts", {
@@ -236,6 +261,7 @@ export function BroadcastConsole() {
           name: name.trim() || `Disparo ${new Date().toLocaleString("pt-BR")}`,
           templateName,
           languageCode: language,
+          params: params.length ? params : undefined,
           dryRun,
           segment: segment(),
         }),
@@ -439,6 +465,7 @@ export function BroadcastConsole() {
             setTemplateName(e.target.value);
             const t = templates.find((x) => x.name === e.target.value);
             if (t) setLanguage(t.language || "pt_BR");
+            setParams(Array(countVars(templateBody(t))).fill(""));
           }}
           className="w-full rounded-lg border border-gray-200 px-2 py-2 text-sm"
         >
@@ -451,6 +478,38 @@ export function BroadcastConsole() {
             </option>
           ))}
         </select>
+
+        {/* Preview do corpo do template */}
+        {templateBody(templates.find((x) => x.name === templateName)) && (
+          <div className="whitespace-pre-wrap rounded-lg bg-gray-50 p-3 text-xs text-gray-600">
+            {templateBody(templates.find((x) => x.name === templateName))}
+          </div>
+        )}
+
+        {/* Campos das variáveis do template ({{1}}, {{2}}...) */}
+        {params.length > 0 && (
+          <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+            <p className="text-xs font-medium text-amber-700">
+              Este modelo tem {params.length} variável(is). Preencha o valor
+              (igual para todos os contatos):
+            </p>
+            {params.map((p, i) => (
+              <div key={i}>
+                <label className="text-[11px] text-gray-500">{`Variável {{${i + 1}}}`}</label>
+                <input
+                  value={p}
+                  onChange={(e) =>
+                    setParams((arr) =>
+                      arr.map((v, j) => (j === i ? e.target.value : v)),
+                    )
+                  }
+                  placeholder={`Valor para {{${i + 1}}}`}
+                  className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* DISPARAR */}

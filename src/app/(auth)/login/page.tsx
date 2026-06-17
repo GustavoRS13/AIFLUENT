@@ -1,48 +1,50 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
     try {
-      const result = await signIn('credentials', {
+      const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
-      })
+      });
 
       if (result?.error) {
-        if (result.error === 'Configuration') {
-          setError('Erro de configuracao do servidor. Verifique AUTH_SECRET.')
-        } else if (result.error === 'CredentialsSignin') {
-          setError('Email ou senha incorretos.')
+        if (result.error === "Configuration") {
+          setError("Erro de configuracao do servidor. Verifique AUTH_SECRET.");
+        } else if (result.error === "CredentialsSignin") {
+          setError("Email ou senha incorretos.");
         } else {
-          setError(`Erro: ${result.error}`)
+          setError(`Erro: ${result.error}`);
         }
-        setLoading(false)
-        return
+        setLoading(false);
+        return;
       }
 
-      router.push('/dashboard')
-      router.refresh()
+      router.push("/dashboard");
+      router.refresh();
     } catch (err) {
-      setError(`Erro ao conectar: ${err instanceof Error ? err.message : 'Tente novamente'}`)
-      setLoading(false)
+      setError(
+        `Erro ao conectar: ${err instanceof Error ? err.message : "Tente novamente"}`,
+      );
+      setLoading(false);
     }
   }
 
@@ -56,7 +58,7 @@ export default function LoginPage() {
             x: [0, 30, -20, 0],
             y: [0, -20, 30, 0],
           }}
-          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
           className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-purple-600/15 blur-3xl"
@@ -64,14 +66,14 @@ export default function LoginPage() {
             x: [0, -30, 20, 0],
             y: [0, 20, -30, 0],
           }}
-          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
           className="absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-indigo-500/10 blur-3xl"
           animate={{
             scale: [1, 1.2, 1],
           }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
 
@@ -79,19 +81,21 @@ export default function LoginPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
         className="relative z-10 w-full max-w-sm mx-4"
       >
         <div className="glass-card rounded-2xl p-8">
           {/* Brand */}
           <div className="mb-8 text-center">
-            <img src="/logo.png" alt="AIFLUENT" className="mx-auto mb-4 h-14 w-14 rounded-2xl object-contain" />
+            <img
+              src="/logo.png"
+              alt="AIFLUENT"
+              className="mx-auto mb-4 h-14 w-14 rounded-2xl object-contain"
+            />
             <h1 className="gradient-text text-2xl font-bold tracking-tight">
               AIFLUENT
             </h1>
-            <p className="mt-1 text-sm text-gray-400">
-              CRM Inteligente
-            </p>
+            <p className="mt-1 text-sm text-gray-400">CRM Inteligente</p>
           </div>
 
           {/* Error message */}
@@ -165,10 +169,10 @@ export default function LoginPage() {
               type="submit"
               disabled={loading}
               className={cn(
-                'flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-indigo-600 to-indigo-500 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all',
+                "flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-indigo-600 to-indigo-500 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all",
                 loading
-                  ? 'cursor-not-allowed opacity-80'
-                  : 'hover:from-indigo-500 hover:to-indigo-400 hover:shadow-indigo-500/30'
+                  ? "cursor-not-allowed opacity-80"
+                  : "hover:from-indigo-500 hover:to-indigo-400 hover:shadow-indigo-500/30",
               )}
             >
               {loading ? (
@@ -192,7 +196,7 @@ export default function LoginPage() {
           </div>
 
           <p className="mt-4 text-center text-xs text-gray-400">
-            Ainda nao tem conta?{' '}
+            Ainda nao tem conta?{" "}
             <a
               href="#"
               className="font-medium text-indigo-400 transition-colors hover:text-indigo-300"
@@ -200,9 +204,8 @@ export default function LoginPage() {
               Fale com vendas
             </a>
           </p>
-
         </div>
       </motion.div>
     </div>
-  )
+  );
 }
