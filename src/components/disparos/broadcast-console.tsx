@@ -228,6 +228,23 @@ export function BroadcastConsole() {
     return () => clearTimeout(t);
   }, [segment]);
 
+  // Poll de progresso ao vivo — a barra anda mesmo durante o lote (ou se o cron
+  // server-side estiver processando), sem depender só do loop do navegador.
+  useEffect(() => {
+    if (!job?.id || ["completed", "cancelled", "paused"].includes(job.status))
+      return;
+    const id = setInterval(() => {
+      fetch(`/api/broadcasts/${job.id}`)
+        .then((r) => r.json())
+        .then((p) => {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          if (p?.id) setJob(p);
+        })
+        .catch(() => {});
+    }, 2500);
+    return () => clearInterval(id);
+  }, [job?.id, job?.status]);
+
   async function loadJobs() {
     const d = await fetch("/api/broadcasts")
       .then((r) => r.json())

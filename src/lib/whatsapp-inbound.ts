@@ -120,6 +120,8 @@ export async function persistInboundMessage(
       lastMessageAt: inboundNow,
       lastInboundAt: inboundNow,
       unreadCount: { increment: 1 },
+      // lead respondeu → "desoculta" conversa de disparo (vira atendimento ativo)
+      status: "open",
     },
   });
 

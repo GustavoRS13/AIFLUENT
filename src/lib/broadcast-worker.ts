@@ -179,14 +179,14 @@ export async function runBroadcastBatch(
       sent = okIds.length;
       failed = badIds.length;
     } else {
-      for (const r of claimed) {
+      // Envio de UM destinatário (retorna true se enviado)
+      const sendOne = async (r: Claimed): Promise<boolean> => {
         if (!r.phone || r.phone.length < 10) {
           await prisma.broadcastRecipient.update({
             where: { id: r.id },
             data: { status: "failed", error: "telefone inválido" },
           });
-          failed++;
-          continue;
+          return false;
         }
         try {
           let conv = await prisma.conversation.findFirst({
@@ -198,12 +198,14 @@ export async function runBroadcastBatch(
             select: { id: true },
           });
           if (!conv) {
+            // Conversa de disparo nasce OCULTA (status "broadcast"); só aparece
+            // no Atendimento quando o lead responder (inbound vira "open").
             conv = await prisma.conversation.create({
               data: {
                 organizationId: orgId,
                 leadId: r.leadId,
                 channel: "whatsapp",
-                status: "open",
+                status: "broadcast",
                 lastMessageAt: new Date(),
               },
               select: { id: true },
@@ -249,8 +251,7 @@ export async function runBroadcastBatch(
               sentAt: ok ? new Date() : undefined,
             },
           });
-          if (ok) sent++;
-          else failed++;
+          return ok;
         } catch (e) {
           await prisma.broadcastRecipient.update({
             where: { id: r.id },
@@ -259,9 +260,25 @@ export async function runBroadcastBatch(
               error: e instanceof Error ? e.message.slice(0, 200) : String(e),
             },
           });
-          failed++;
+          return false;
         }
-      }
+      };
+
+      // Envia o lote com concorrência limitada (acelera ~8x sem estourar limites)
+      const CONCURRENCY = 8;
+      let cursor = 0;
+      const workers = Array.from(
+        { length: Math.min(CONCURRENCY, claimed.length) },
+        async () => {
+          while (cursor < claimed.length) {
+            const r = claimed[cursor++];
+            const ok = await sendOne(r);
+            if (ok) sent++;
+            else failed++;
+          }
+        },
+      );
+      await Promise.all(workers);
     }
 
     await prisma.broadcastJob.update({

@@ -17,6 +17,8 @@ export async function GET(request: Request) {
     const teamId = url.searchParams.get("teamId") || "";
     const { prisma } = await import("@/lib/prisma");
     const where: Record<string, unknown> = { organizationId: orgId };
+    // Conversas de disparo ficam ocultas até o lead responder (status != broadcast)
+    where.status = { not: "broadcast" };
     if (teamId) where.teamId = teamId;
     // Isolamento por papel (Atendimento):
     //  - admin  → todas as conversas da empresa
