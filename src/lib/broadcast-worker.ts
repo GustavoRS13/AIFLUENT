@@ -127,10 +127,13 @@ export async function runBroadcastBatch(
     }
 
     const claimed: Claimed[] = await prisma.$queryRawUnsafe(
-      `UPDATE "BroadcastRecipient" SET status='processing'
+      `UPDATE "BroadcastRecipient" SET status='processing', "updatedAt"=now()
        WHERE id IN (
          SELECT id FROM "BroadcastRecipient"
-         WHERE "jobId"=$1 AND status='pending'
+         WHERE "jobId"=$1 AND (
+           status='pending'
+           OR (status='processing' AND "updatedAt" < now() - interval '3 minutes')
+         )
          ORDER BY id LIMIT $2
          FOR UPDATE SKIP LOCKED
        ) RETURNING id, "leadId", phone`,
@@ -281,9 +284,15 @@ export async function runBroadcastBatch(
       await Promise.all(workers);
     }
 
+    // Reconcilia o contador do job com a verdade (contagem real dos
+    // destinatários) — evita drift quando navegador + cron rodam juntos.
+    const [sentCount, failedCount] = await Promise.all([
+      prisma.broadcastRecipient.count({ where: { jobId, status: "sent" } }),
+      prisma.broadcastRecipient.count({ where: { jobId, status: "failed" } }),
+    ]);
     await prisma.broadcastJob.update({
       where: { id: jobId },
-      data: { sent: { increment: sent }, failed: { increment: failed } },
+      data: { sent: sentCount, failed: failedCount },
     });
     aggSent += sent;
     aggFailed += failed;

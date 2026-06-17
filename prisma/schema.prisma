@@ -811,6 +811,7 @@ model BroadcastRecipient {
   error      String?
   externalId String?
   sentAt     DateTime?
+  updatedAt  DateTime  @updatedAt @default(now()) // reclamar "processing" preso
 
   @@unique([jobId, leadId]) // dedup dentro do disparo
   @@index([jobId, status])
