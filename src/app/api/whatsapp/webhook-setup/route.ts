@@ -56,21 +56,35 @@ export async function POST() {
       .then(j)
       .catch((e) => ({ error: String(e) }));
 
+    // espera a inscrição propagar antes de forçar o override
+    await new Promise((r) => setTimeout(r, 8000));
+
     // 2) força o override do callback (retoma o controle do Kommo).
-    //    Tenta com token de usuário e, se falhar, com token de app.
-    const overrideUser = await fetch(`${GRAPH}/${waba}/subscribed_apps`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        override_callback_uri: callback,
-        verify_token: verify,
-      }),
-    })
-      .then(j)
-      .catch((e) => ({ error: String(e) }));
+    const doOverride = (tokenInBody?: string) =>
+      fetch(`${GRAPH}/${waba}/subscribed_apps`, {
+        method: "POST",
+        headers: tokenInBody
+          ? { "Content-Type": "application/json" }
+          : {
+              Authorization: `Bearer ${userToken}`,
+              "Content-Type": "application/json",
+            },
+        body: JSON.stringify({
+          override_callback_uri: callback,
+          verify_token: verify,
+          ...(tokenInBody ? { access_token: tokenInBody } : {}),
+        }),
+      })
+        .then(j)
+        .catch((e) => ({ error: String(e) }));
+
+    let overrideUser = await doOverride();
+    // fallback: tenta com token de APP (app_id|app_secret)
+    if (overrideUser?.error && appToken !== userToken) {
+      await new Promise((r) => setTimeout(r, 3000));
+      const overrideApp = await doOverride(appToken);
+      overrideUser = { withUserToken: overrideUser, withAppToken: overrideApp };
+    }
 
     const after = await fetch(
       `${GRAPH}/${waba}/subscribed_apps?access_token=${encodeURIComponent(userToken)}`,
