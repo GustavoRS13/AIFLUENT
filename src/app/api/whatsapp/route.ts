@@ -59,6 +59,20 @@ export async function POST(request: NextRequest) {
 
     try {
       const parsed = parseWebhook(body);
+      // FILTRO CRÍTICO: o app pode estar inscrito numa WABA com vários números
+      // (ex.: o número do Clint). Só processamos as mensagens do NOSSO número.
+      const ourPhoneId = process.env.WHATSAPP_PHONE_NUMBER_ID || "";
+      if (
+        ourPhoneId &&
+        parsed.phoneNumberId &&
+        parsed.phoneNumberId !== ourPhoneId
+      ) {
+        logger.info("[WhatsApp Webhook] ignorado (outro numero)", {
+          recebidoEm: parsed.phoneNumberId,
+          nosso: ourPhoneId,
+        });
+        return NextResponse.json({ status: "ignored" }, { status: 200 });
+      }
       if (parsed.messages.length || parsed.statuses.length) {
         const { prisma } = await import("@/lib/prisma");
         const orgId = await resolveOrgForPhoneNumber(
