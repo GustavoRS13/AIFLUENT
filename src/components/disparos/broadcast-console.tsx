@@ -130,6 +130,53 @@ export function BroadcastConsole() {
   } | null>(null);
   const runningRef = useRef(false);
   const [jobs, setJobs] = useState<JobRow[]>([]);
+  // detalhe/inteligência de um disparo
+  const [detailJob, setDetailJob] = useState<JobRow | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [detail, setDetail] = useState<any>(null);
+  const [redispatching, setRedispatching] = useState(false);
+
+  const openDetail = useCallback(async (j: JobRow) => {
+    setDetailJob(j);
+    setDetail(null);
+    const d = await fetch(`/api/broadcasts/${j.id}/detail`)
+      .then((r) => r.json())
+      .catch(() => null);
+    setDetail(d);
+  }, []);
+
+  async function redispatchFailures() {
+    if (!detailJob || !templateName) return;
+    if (
+      !confirm(
+        `Re-disparar para os que falharam usando o modelo "${templateName}"?`,
+      )
+    )
+      return;
+    setRedispatching(true);
+    try {
+      const res = await fetch(`/api/broadcasts/${detailJob.id}/redispatch`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          templateName,
+          languageCode: language,
+          params: params.length ? params : undefined,
+        }),
+      });
+      const d = await res.json();
+      if (res.ok && d.jobId) {
+        setDetailJob(null);
+        loadJobs();
+        driveJob(d.jobId);
+        alert(`Re-disparo criado para ${d.total} leads que falharam!`);
+      } else {
+        alert(d.error || "Falha ao re-disparar");
+      }
+    } finally {
+      setRedispatching(false);
+    }
+  }
 
   /* eslint-disable react-hooks/set-state-in-effect -- carregamento inicial */
   useEffect(() => {
@@ -707,10 +754,14 @@ export function BroadcastConsole() {
                 key={j.id}
                 className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs hover:bg-gray-50"
               >
-                <span className="flex-1 truncate font-medium text-gray-800">
+                <button
+                  onClick={() => openDetail(j)}
+                  className="flex-1 truncate text-left font-medium text-gray-800 hover:text-indigo-600 hover:underline"
+                  title="Ver detalhes (entregues, lidos, falhas)"
+                >
                   {j.dryRun && "🧪 "}
                   {j.name}
-                </span>
+                </button>
                 <span className="text-gray-400">{j.templateName}</span>
                 <span className="text-emerald-600">{j.sent}✓</span>
                 {j.failed > 0 && (
@@ -742,6 +793,104 @@ export function BroadcastConsole() {
                 </button>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Modal de detalhe / inteligência do disparo */}
+      {detailJob && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-5 shadow-xl">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-base font-bold text-gray-900">
+                {detailJob.name}
+              </h2>
+              <button
+                onClick={() => setDetailJob(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {!detail ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-lg bg-emerald-50 p-3 text-center">
+                    <div className="text-2xl font-bold text-emerald-600">
+                      {detail.entregues ?? 0}
+                    </div>
+                    <div className="text-xs text-emerald-700">Entregues</div>
+                  </div>
+                  <div className="rounded-lg bg-sky-50 p-3 text-center">
+                    <div className="text-2xl font-bold text-sky-600">
+                      {detail.lidos ?? 0}
+                    </div>
+                    <div className="text-xs text-sky-700">Lidos</div>
+                  </div>
+                  <div className="rounded-lg bg-amber-50 p-3 text-center">
+                    <div className="text-2xl font-bold text-amber-600">
+                      {detail.aguardando ?? 0}
+                    </div>
+                    <div className="text-xs text-amber-700">Aguardando</div>
+                  </div>
+                  <div className="rounded-lg bg-rose-50 p-3 text-center">
+                    <div className="text-2xl font-bold text-rose-600">
+                      {detail.falhas ?? 0}
+                    </div>
+                    <div className="text-xs text-rose-700">Falhas</div>
+                  </div>
+                </div>
+                <p className="mt-2 text-center text-xs text-gray-400">
+                  Total: {detail.total} · dados reais (status da Meta)
+                </p>
+
+                {detail.errors?.length > 0 && (
+                  <div className="mt-3 space-y-1 rounded-lg bg-gray-50 p-3">
+                    <p className="text-xs font-medium text-gray-600">
+                      Motivos das falhas:
+                    </p>
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {detail.errors.map((e: any) => (
+                      <div
+                        key={e.code}
+                        className="flex justify-between text-xs text-gray-600"
+                      >
+                        <span>{e.title}</span>
+                        <span className="font-semibold text-rose-500">
+                          {e.count}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {detail.falhas > 0 && (
+                  <div className="mt-4 rounded-lg border border-indigo-200 bg-indigo-50 p-3">
+                    <p className="text-xs text-indigo-700">
+                      Re-disparar para os <b>{detail.falhas}</b> que falharam,
+                      usando o modelo selecionado acima (
+                      <b>{templateName || "nenhum"}</b>). Dica: escolha um{" "}
+                      <b>UTILITY</b> pra entregar melhor.
+                    </p>
+                    <button
+                      onClick={redispatchFailures}
+                      disabled={redispatching || !templateName}
+                      className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+                    >
+                      {redispatching ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : null}
+                      Re-disparar {detail.falhas} falhas
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       )}
