@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
 
     // 1) troca o code por token — tenta os segredos de app disponíveis
     const secrets = [
+      process.env.WA_ES_APP_SECRET, // segredo do app MSI (config do Embedded Signup)
       process.env.WHATSAPP_APP_SECRET,
       process.env.META_APP_SECRET,
     ].filter(Boolean) as string[];
