@@ -6,57 +6,78 @@ export const runtime = "nodejs";
 
 const GRAPH = "https://graph.facebook.com/v21.0";
 
-// Diagnostica e RE-INSCREVE o webhook do WhatsApp (subscribed_apps do WABA),
-// forçando o callback pro nosso endpoint. Admin-only. Corrige inbound parado.
+// Diagnostica e RE-INSCREVE o webhook do WhatsApp, forçando o callback pro nosso
+// endpoint (retoma o controle de outro BSP como o Kommo). Admin-only.
 export async function POST() {
   const { error } = await requireAuth("admin");
   if (error) return error;
 
-  const token = process.env.WHATSAPP_ACCESS_TOKEN || "";
+  const userToken = process.env.WHATSAPP_ACCESS_TOKEN || "";
   const waba = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID || "";
   const verify = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || "";
+  const appId = process.env.META_APP_ID || "";
+  const appSecret =
+    process.env.META_APP_SECRET || process.env.WHATSAPP_APP_SECRET || "";
+  const appToken = appId && appSecret ? `${appId}|${appSecret}` : userToken;
   const callback = "https://crm.aifluent.com.br/api/whatsapp";
-  if (!token || !waba) {
+
+  if (!userToken || !waba) {
     return NextResponse.json(
       { error: "WHATSAPP_ACCESS_TOKEN/BUSINESS_ACCOUNT_ID ausentes" },
       { status: 400 },
     );
   }
 
-  const auth = { Authorization: `Bearer ${token}` };
+  const j = (r: Response) => r.json();
   try {
-    const before = await fetch(`${GRAPH}/${waba}/subscribed_apps`, {
-      headers: auth,
-    }).then((r) => r.json());
+    // Config do webhook DO APP (callback_url + campos inscritos)
+    const appSubs = appId
+      ? await fetch(
+          `${GRAPH}/${appId}/subscriptions?access_token=${encodeURIComponent(appToken)}`,
+        )
+          .then(j)
+          .catch((e) => ({ error: String(e) }))
+      : { skipped: "sem META_APP_ID" };
 
-    // 1) inscrição simples (app passa a receber o campo "messages" no webhook do app)
+    // 1) garante inscrição simples (campo messages) com token de usuário
     const sub = await fetch(`${GRAPH}/${waba}/subscribed_apps`, {
       method: "POST",
-      headers: auth,
-    }).then((r) => r.json());
+      headers: { Authorization: `Bearer ${userToken}` },
+    })
+      .then(j)
+      .catch((e) => ({ error: String(e) }));
 
-    // 2) tenta forçar o callback pro nosso endpoint (best-effort; pode falhar se
-    //    o app já entrega no webhook configurado no painel — que é o nosso)
-    let override: unknown = null;
-    if (verify) {
-      override = await fetch(`${GRAPH}/${waba}/subscribed_apps`, {
-        method: "POST",
-        headers: { ...auth, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          override_callback_uri: callback,
-          verify_token: verify,
-        }),
-      })
-        .then((r) => r.json())
-        .catch((e) => ({ error: String(e) }));
-    }
+    // 2) força o override do callback com o TOKEN DE APP (retoma do Kommo)
+    const overrideUser = await fetch(`${GRAPH}/${waba}/subscribed_apps`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        override_callback_uri: callback,
+        verify_token: verify,
+        access_token: appToken,
+      }),
+    })
+      .then(j)
+      .catch((e) => ({ error: String(e) }));
 
-    const after = await fetch(`${GRAPH}/${waba}/subscribed_apps`, {
-      headers: auth,
-    }).then((r) => r.json());
+    const after = await fetch(
+      `${GRAPH}/${waba}/subscribed_apps?access_token=${encodeURIComponent(userToken)}`,
+    )
+      .then(j)
+      .catch((e) => ({ error: String(e) }));
 
-    logger.info("whatsapp_webhook_resubscribe", { callback, sub, override });
-    return NextResponse.json({ callback, before, sub, override, after });
+    logger.info("whatsapp_webhook_resubscribe", {
+      callback,
+      sub,
+      overrideUser,
+    });
+    return NextResponse.json({
+      callback,
+      appWebhook: appSubs,
+      subscribe: sub,
+      override: overrideUser,
+      after,
+    });
   } catch (e) {
     logger.error("whatsapp_webhook_resubscribe_error", e);
     return NextResponse.json(
