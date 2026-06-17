@@ -93,7 +93,8 @@ export default function ConectarWhatsAppPage() {
         setStatus("✅ Conectado! O WhatsApp já está vinculado ao AIFLUENT.");
       } else {
         setStatus(
-          "⚠️ Resposta: " + JSON.stringify(d.sub || d.error || d).slice(0, 300),
+          "⚠️ " +
+            JSON.stringify(d.detail || d.sub || d.error || d).slice(0, 500),
         );
       }
     } catch (e) {
