@@ -162,6 +162,14 @@ export async function persistStatusUpdate(
   prisma: any,
   st: StatusUpdate,
 ): Promise<void> {
+  // pega o status anterior + metadata (p/ refletir falhas de disparo no contador)
+  const msgs = await prisma.conversationMessage
+    .findMany({
+      where: { externalId: st.externalId },
+      select: { id: true, status: true, metadata: true },
+    })
+    .catch(() => []);
+
   await prisma.conversationMessage
     .updateMany({
       where: { externalId: st.externalId },
@@ -172,4 +180,28 @@ export async function persistStatusUpdate(
       },
     })
     .catch(() => {});
+
+  // Se uma mensagem de DISPARO falhou (ex.: 131049 limite de marketing), move 1
+  // de "enviado" para "falhou" no contador do job — relatório fica verdadeiro.
+  if (st.status === "failed") {
+    for (const m of msgs as Array<{
+      status: string;
+      metadata: string | null;
+    }>) {
+      if (m.status === "failed") continue; // já contabilizado
+      try {
+        const meta = JSON.parse(m.metadata || "{}");
+        if (meta.broadcast && meta.jobId) {
+          await prisma.broadcastJob
+            .update({
+              where: { id: meta.jobId },
+              data: { failed: { increment: 1 }, sent: { decrement: 1 } },
+            })
+            .catch(() => {});
+        }
+      } catch {
+        /* metadata inválido */
+      }
+    }
+  }
 }
