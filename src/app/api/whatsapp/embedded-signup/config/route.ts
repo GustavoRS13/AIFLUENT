@@ -7,8 +7,10 @@ export const runtime = "nodejs";
 export async function GET() {
   const { error } = await requireAuth("admin");
   if (error) return error;
+  // App MSI (onde a config de WhatsApp Embedded Signup foi criada) — NÃO usar o
+  // META_APP_ID (que é o app AIFLUENT, de Ads/Login, sem essa config).
   return NextResponse.json({
-    appId: process.env.META_APP_ID || "1295702451981433",
+    appId: "1295702451981433",
     configId: "2444856826035632",
   });
 }

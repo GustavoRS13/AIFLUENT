@@ -12,9 +12,11 @@ export async function POST(request: NextRequest) {
   const { error } = await requireAuth("admin");
   if (error) return error;
 
-  const appId = process.env.META_APP_ID || "";
+  // App MSI (o que controla o WhatsApp) — o code do Embedded Signup foi emitido
+  // por ele, então a troca tem que usar as credenciais DELE.
+  const appId = "1295702451981433";
   const appSecret =
-    process.env.META_APP_SECRET || process.env.WHATSAPP_APP_SECRET || "";
+    process.env.WHATSAPP_APP_SECRET || process.env.META_APP_SECRET || "";
   const envWaba = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID || "";
 
   try {
