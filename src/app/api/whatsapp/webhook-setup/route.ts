@@ -15,10 +15,14 @@ export async function POST() {
   const userToken = process.env.WHATSAPP_ACCESS_TOKEN || "";
   const waba = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID || "";
   const verify = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || "";
-  const appId = process.env.META_APP_ID || "";
+  // App MSI (o que controla o WhatsApp) — token de app = appId|appSecret
+  const appId = "1295702451981433";
   const appSecret =
-    process.env.META_APP_SECRET || process.env.WHATSAPP_APP_SECRET || "";
-  const appToken = appId && appSecret ? `${appId}|${appSecret}` : userToken;
+    process.env.WA_ES_APP_SECRET ||
+    process.env.WHATSAPP_APP_SECRET ||
+    process.env.META_APP_SECRET ||
+    "";
+  const appToken = `${appId}|${appSecret}`;
   const callback = "https://crm.aifluent.com.br/api/whatsapp";
 
   if (!userToken || !waba) {
