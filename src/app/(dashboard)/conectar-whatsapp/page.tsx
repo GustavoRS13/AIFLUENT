@@ -30,6 +30,19 @@ export default function ConectarWhatsAppPage() {
         setConfigId(d.configId);
       });
 
+    // resultado do fluxo de redirecionamento (?es=ok|warn|err & msg=...)
+    const sp = new URLSearchParams(window.location.search);
+    const es = sp.get("es");
+    if (es) {
+      const msg = sp.get("msg") || "";
+      setStatus(
+        // eslint-disable-line react-hooks/set-state-in-effect
+        es === "ok"
+          ? "✅ Conectado! WhatsApp vinculado ao AIFLUENT."
+          : "⚠️ " + decodeURIComponent(msg),
+      );
+    }
+
     const onMsg = (e: MessageEvent) => {
       if (!e.origin.endsWith("facebook.com") || typeof e.data !== "string")
         return;
@@ -148,17 +161,22 @@ export default function ConectarWhatsAppPage() {
           <li>Confirme. Pronto — as respostas voltam a chegar.</li>
         </ol>
 
+        {/* Modo redirecionamento (recomendado — sem popup, redirect_uri controlado) */}
+        <a
+          href="/api/whatsapp/es/start"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-500"
+        >
+          <MessageCircle className="h-4 w-4" />
+          Conectar WhatsApp
+        </a>
+
         <button
           onClick={connect}
           disabled={!ready || busy}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-xs font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
         >
-          {busy ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <MessageCircle className="h-4 w-4" />
-          )}
-          {ready ? "Conectar WhatsApp" : "Carregando…"}
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+          Tentar via popup (alternativo)
         </button>
 
         {status && (
