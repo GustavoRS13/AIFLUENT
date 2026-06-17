@@ -36,8 +36,10 @@ export async function POST(request: NextRequest) {
     let bizToken = "";
     const attempts: unknown[] = [];
     for (const sec of secrets) {
+      // redirect_uri VAZIO: o popup do JS SDK usa redirect_uri em branco; a troca
+      // precisa bater exatamente com isso.
       const res = await fetch(
-        `${GRAPH}/oauth/access_token?client_id=${appId}&client_secret=${sec}&code=${encodeURIComponent(code)}`,
+        `${GRAPH}/oauth/access_token?client_id=${appId}&client_secret=${sec}&redirect_uri=&code=${encodeURIComponent(code)}`,
       )
         .then((r) => r.json())
         .catch((e) => ({ error: String(e) }));
