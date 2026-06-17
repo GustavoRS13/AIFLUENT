@@ -60,6 +60,27 @@ export async function POST() {
       .then(j)
       .catch((e) => ({ error: String(e) }));
 
+    // 1b) GARANTE o webhook DO APP MSI apontando pro nosso endpoint (campo
+    //     messages). Se MSI estava sem callback, é por isso que nada chegava.
+    const appWebhookBefore = await fetch(
+      `${GRAPH}/${appId}/subscriptions?access_token=${encodeURIComponent(appToken)}`,
+    )
+      .then(j)
+      .catch((e) => ({ error: String(e) }));
+    const appWebhookSet = await fetch(`${GRAPH}/${appId}/subscriptions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        object: "whatsapp_business_account",
+        callback_url: callback,
+        verify_token: verify,
+        fields: "messages,message_template_status_update,messaging_handovers",
+        access_token: appToken,
+      }),
+    })
+      .then(j)
+      .catch((e) => ({ error: String(e) }));
+
     // espera a inscrição propagar antes de forçar o override
     await new Promise((r) => setTimeout(r, 8000));
 
@@ -106,6 +127,8 @@ export async function POST() {
       appWebhook: appSubs,
       reset,
       subscribe: sub,
+      appWebhookBefore,
+      appWebhookSet,
       override: overrideUser,
       after,
     });
