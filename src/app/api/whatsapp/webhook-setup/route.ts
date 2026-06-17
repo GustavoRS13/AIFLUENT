@@ -47,14 +47,17 @@ export async function POST() {
       .then(j)
       .catch((e) => ({ error: String(e) }));
 
-    // 2) força o override do callback com o TOKEN DE APP (retoma do Kommo)
+    // 2) força o override do callback (retoma o controle do Kommo).
+    //    Tenta com token de usuário e, se falhar, com token de app.
     const overrideUser = await fetch(`${GRAPH}/${waba}/subscribed_apps`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         override_callback_uri: callback,
         verify_token: verify,
-        access_token: appToken,
       }),
     })
       .then(j)
