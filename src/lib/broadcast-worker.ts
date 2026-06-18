@@ -11,14 +11,33 @@ const BATCH_DRY = 500;
 const MERGE_RE =
   /\{\{?\s*(nome_completo|nomecompleto|fullname|nome|primeiro_nome|primeiro|first_name|firstname)\s*\}?\}/i;
 
+// Capitaliza: "ELOIZA BERNARDES" -> "Eloiza Bernardes" (bases do Clint vêm em CAPS).
+// Mantém conectores comuns em minúsculo (da, de, do, dos, e).
+function titleCase(s: string): string {
+  const small = new Set(["da", "de", "do", "das", "dos", "e", "di", "du"]);
+  return s
+    .toLowerCase()
+    .split(/\s+/)
+    .map((w, i) =>
+      i > 0 && small.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1),
+    )
+    .join(" ")
+    .trim();
+}
+
 // Substitui os tokens pelo nome real do lead. Fallback "aluno(a)" quando vazio.
 function fillParams(
   params: string[],
   lead?: { firstName?: string | null; lastName?: string | null },
 ): string[] {
-  const first = (lead?.firstName || "").trim() || "aluno(a)";
+  // {nome} = só o PRIMEIRO nome, capitalizado (ex.: "Eloiza"), não o nome inteiro.
+  const raw = (lead?.firstName || "").trim();
+  const firstWord = raw.split(/\s+/)[0] || "";
+  const first = firstWord ? titleCase(firstWord) : "aluno(a)";
   const full =
-    [lead?.firstName, lead?.lastName].filter(Boolean).join(" ").trim() || first;
+    titleCase(
+      [lead?.firstName, lead?.lastName].filter(Boolean).join(" ").trim(),
+    ) || first;
   return params.map((p) =>
     p
       // nome_completo PRIMEIRO (contém "nome")
