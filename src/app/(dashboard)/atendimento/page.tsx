@@ -469,9 +469,16 @@ export default function AtendimentoPage() {
       setIsDragging(false);
       if (!selectedId) return;
       const files = Array.from(e.dataTransfer.files || []);
+      if (!files.length) return;
+      // Confirma antes de enviar (evita envio acidental/duplicado ao arrastar)
+      const nomes = files.map((f) => `• ${f.name}`).join("\n");
+      const ok = window.confirm(
+        `Enviar ${files.length} arquivo(s) para ${selectedConv?.name || "o cliente"}?\n\n${nomes}`,
+      );
+      if (!ok) return;
       files.forEach((f) => void uploadFile(f));
     },
-    [selectedId, uploadFile],
+    [selectedId, selectedConv?.name, uploadFile],
   );
 
   // Envia um template aprovado pela conversa selecionada
