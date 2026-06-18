@@ -40,7 +40,40 @@ export async function GET(request: NextRequest) {
         createdBy: { select: { name: true } },
       },
     });
-    return NextResponse.json({ jobs });
+
+    // Stats REAIS por disparo (status confirmado pelos webhooks da Meta), não só
+    // o "aceito" no envio. Em dry-run não há mensagens; usa o contador do job.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const withStats = await Promise.all(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (jobs as any[]).map(async (j) => {
+        if (j.dryRun) {
+          return {
+            ...j,
+            entregues: j.sent,
+            lidos: 0,
+            falhas: j.failed,
+            aguardando: 0,
+          };
+        }
+        const grouped = await prisma.conversationMessage.groupBy({
+          by: ["status"],
+          where: { metadata: { contains: j.id } },
+          _count: { _all: true },
+        });
+        const c: Record<string, number> = {};
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (grouped as any[]).forEach((g) => (c[g.status] = g._count._all));
+        return {
+          ...j,
+          entregues: c.delivered || 0,
+          lidos: c.read || 0,
+          falhas: c.failed || 0,
+          aguardando: c.sent || 0,
+        };
+      }),
+    );
+    return NextResponse.json({ jobs: withStats });
   } catch (err) {
     logger.error("GET /api/broadcasts error", err);
     return NextResponse.json({ jobs: [] }, { status: 500 });

@@ -76,6 +76,10 @@ interface JobRow {
   total: number;
   sent: number;
   failed: number;
+  entregues?: number;
+  lidos?: number;
+  falhas?: number;
+  aguardando?: number;
   createdAt: string;
 }
 
@@ -763,9 +767,22 @@ export function BroadcastConsole() {
                   {j.name}
                 </button>
                 <span className="text-gray-400">{j.templateName}</span>
-                <span className="text-emerald-600">{j.sent}✓</span>
-                {j.failed > 0 && (
-                  <span className="text-rose-500">{j.failed}✗</span>
+                {/* Entregue (delivered+read) · aguardando · falhas — número REAL */}
+                <span className="text-emerald-600" title="Entregues (+ lidos)">
+                  {(j.entregues ?? 0) + (j.lidos ?? 0)}✓
+                </span>
+                {(j.aguardando ?? 0) > 0 && (
+                  <span
+                    className="text-amber-500"
+                    title="Aguardando confirmação"
+                  >
+                    {j.aguardando}⏳
+                  </span>
+                )}
+                {(j.falhas ?? j.failed) > 0 && (
+                  <span className="text-rose-500" title="Falhas">
+                    {j.falhas ?? j.failed}✗
+                  </span>
                 )}
                 <span className="text-gray-400">/{j.total}</span>
                 <span
