@@ -1,94 +1,110 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, Loader2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Stage {
-  id: string
-  name: string
-  color: string
+  id: string;
+  name: string;
+  color: string;
 }
 
 interface StageSelectorProps {
-  currentStageId: string | null
-  leadId: string
-  onStageChange?: (stageId: string) => void
-  className?: string
+  currentStageId: string | null;
+  leadId: string;
+  onStageChange?: (stageId: string) => void;
+  className?: string;
 }
 
-export function StageSelector({ currentStageId, leadId, onStageChange, className }: StageSelectorProps) {
-  const [stages, setStages] = useState<Stage[]>([])
-  const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [selected, setSelected] = useState(currentStageId)
-  const ref = useRef<HTMLDivElement>(null)
+export function StageSelector({
+  currentStageId,
+  leadId,
+  onStageChange,
+  className,
+}: StageSelectorProps) {
+  const [stages, setStages] = useState<Stage[]>([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState(currentStageId);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function fetchStages() {
       try {
-        const res = await fetch('/api/pipeline')
-        if (!res.ok) throw new Error()
-        const data = await res.json()
+        // Carrega os estágios do FUNIL do lead (resolvido pelo estágio atual),
+        // não do funil padrão — assim aparecem os estágios que você adicionou.
+        const url = currentStageId
+          ? `/api/pipeline?stageId=${encodeURIComponent(currentStageId)}`
+          : "/api/pipeline";
+        const res = await fetch(url);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
         if (data?.stages) {
-          setStages(data.stages.map((s: Record<string, unknown>) => ({
-            id: s.id as string,
-            name: s.name as string,
-            color: (s.color as string) || '#6b7280',
-          })))
+          setStages(
+            data.stages.map((s: Record<string, unknown>) => ({
+              id: s.id as string,
+              name: s.name as string,
+              color: (s.color as string) || "#6b7280",
+            })),
+          );
         }
       } catch {
         // Fallback stages
         setStages([
-          { id: 'novo', name: 'Novo', color: '#3b82f6' },
-          { id: 'contato', name: 'Contato', color: '#f59e0b' },
-          { id: 'qualificado', name: 'Qualificado', color: '#8b5cf6' },
-          { id: 'proposta', name: 'Proposta', color: '#ec4899' },
-          { id: 'fechado', name: 'Fechado', color: '#10b981' },
-        ])
+          { id: "novo", name: "Novo", color: "#3b82f6" },
+          { id: "contato", name: "Contato", color: "#f59e0b" },
+          { id: "qualificado", name: "Qualificado", color: "#8b5cf6" },
+          { id: "proposta", name: "Proposta", color: "#ec4899" },
+          { id: "fechado", name: "Fechado", color: "#10b981" },
+        ]);
       }
     }
-    fetchStages()
-  }, [])
+    fetchStages();
+  }, [currentStageId]);
 
   useEffect(() => {
-    setSelected(currentStageId)
-  }, [currentStageId])
+    setSelected(currentStageId);
+  }, [currentStageId]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  const currentStage = stages.find((s) => s.id === selected)
+  const currentStage = stages.find((s) => s.id === selected);
 
   async function handleSelect(stageId: string) {
-    if (stageId === selected) { setOpen(false); return }
-    setLoading(true)
+    if (stageId === selected) {
+      setOpen(false);
+      return;
+    }
+    setLoading(true);
     try {
       const res = await fetch(`/api/leads/${leadId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stageId }),
-      })
+      });
       if (res.ok) {
-        setSelected(stageId)
-        onStageChange?.(stageId)
+        setSelected(stageId);
+        onStageChange?.(stageId);
       }
     } catch {
       // silently fail
     } finally {
-      setLoading(false)
-      setOpen(false)
+      setLoading(false);
+      setOpen(false);
     }
   }
 
   return (
-    <div ref={ref} className={cn('relative', className)}>
+    <div ref={ref} className={cn("relative", className)}>
       <button
         onClick={() => setOpen((o) => !o)}
         disabled={loading}
@@ -100,9 +116,11 @@ export function StageSelector({ currentStageId, leadId, onStageChange, className
           <>
             <span
               className="h-2.5 w-2.5 rounded-full shrink-0"
-              style={{ backgroundColor: currentStage?.color || '#6b7280' }}
+              style={{ backgroundColor: currentStage?.color || "#6b7280" }}
             />
-            <span className="truncate max-w-[120px]">{currentStage?.name || 'Sem estagio'}</span>
+            <span className="truncate max-w-[120px]">
+              {currentStage?.name || "Sem estagio"}
+            </span>
           </>
         )}
         <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
@@ -122,8 +140,10 @@ export function StageSelector({ currentStageId, leadId, onStageChange, className
                 key={stage.id}
                 onClick={() => handleSelect(stage.id)}
                 className={cn(
-                  'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-gray-50',
-                  stage.id === selected ? 'bg-sky-50 text-sky-700 font-medium' : 'text-gray-700'
+                  "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-gray-50",
+                  stage.id === selected
+                    ? "bg-sky-50 text-sky-700 font-medium"
+                    : "text-gray-700",
                 )}
               >
                 <span
@@ -137,5 +157,5 @@ export function StageSelector({ currentStageId, leadId, onStageChange, className
         )}
       </AnimatePresence>
     </div>
-  )
+  );
 }

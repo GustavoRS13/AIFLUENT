@@ -29,8 +29,18 @@ export async function GET(request: NextRequest) {
     | undefined;
   const leadFilter = leadVisibilityWhere(userRole, userId, userTeamId);
 
-  // Funil específico (?pipelineId=) ou o padrão.
-  const pipelineId = new URL(request.url).searchParams.get("pipelineId");
+  // Funil específico (?pipelineId=), o funil de um estágio (?stageId=) ou o padrão.
+  const sp = new URL(request.url).searchParams;
+  let pipelineId = sp.get("pipelineId");
+  const stageId = sp.get("stageId");
+  // Resolve o funil a partir do estágio (ex.: selector de estágio do lead).
+  if (!pipelineId && stageId) {
+    const st = await prisma.pipelineStage.findFirst({
+      where: { id: stageId, pipeline: { organizationId: orgId } },
+      select: { pipelineId: true },
+    });
+    if (st?.pipelineId) pipelineId = st.pipelineId;
+  }
 
   try {
     const pipeline = await prisma.pipeline.findFirst({
