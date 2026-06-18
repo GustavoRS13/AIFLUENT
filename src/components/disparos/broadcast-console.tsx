@@ -149,12 +149,13 @@ export function BroadcastConsole() {
     setDetail(d);
   }, []);
 
-  async function redispatchFailures() {
+  async function redispatchFailures(includePending = false) {
     if (!detailJob || !templateName) return;
+    const alvo = includePending
+      ? "não entregues (falhas + aguardando)"
+      : "que falharam";
     if (
-      !confirm(
-        `Re-disparar para os que falharam usando o modelo "${templateName}"?`,
-      )
+      !confirm(`Re-disparar para os ${alvo} usando o modelo "${templateName}"?`)
     )
       return;
     setRedispatching(true);
@@ -166,6 +167,7 @@ export function BroadcastConsole() {
           templateName,
           languageCode: language,
           params: params.length ? params : undefined,
+          includePending,
         }),
       });
       const d = await res.json();
@@ -173,7 +175,7 @@ export function BroadcastConsole() {
         setDetailJob(null);
         loadJobs();
         driveJob(d.jobId);
-        alert(`Re-disparo criado para ${d.total} leads que falharam!`);
+        alert(`Re-disparo criado para ${d.total} leads!`);
       } else {
         alert(d.error || "Falha ao re-disparar");
       }
@@ -886,24 +888,38 @@ export function BroadcastConsole() {
                   </div>
                 )}
 
-                {detail.falhas > 0 && (
-                  <div className="mt-4 rounded-lg border border-indigo-200 bg-indigo-50 p-3">
+                {(detail.falhas > 0 || detail.aguardando > 0) && (
+                  <div className="mt-4 space-y-2 rounded-lg border border-indigo-200 bg-indigo-50 p-3">
                     <p className="text-xs text-indigo-700">
-                      Re-disparar para os <b>{detail.falhas}</b> que falharam,
-                      usando o modelo selecionado acima (
+                      Reenviar usando o modelo selecionado em “2. Modelo” (
                       <b>{templateName || "nenhum"}</b>). Dica: escolha um{" "}
                       <b>UTILITY</b> pra entregar melhor.
                     </p>
-                    <button
-                      onClick={redispatchFailures}
-                      disabled={redispatching || !templateName}
-                      className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
-                    >
-                      {redispatching ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : null}
-                      Re-disparar {detail.falhas} falhas
-                    </button>
+                    {detail.falhas > 0 && (
+                      <button
+                        onClick={() => redispatchFailures(false)}
+                        disabled={redispatching || !templateName}
+                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-50"
+                      >
+                        {redispatching ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : null}
+                        Re-disparar {detail.falhas} falhas
+                      </button>
+                    )}
+                    {detail.falhas + detail.aguardando > 0 && (
+                      <button
+                        onClick={() => redispatchFailures(true)}
+                        disabled={redispatching || !templateName}
+                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+                      >
+                        {redispatching ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : null}
+                        Re-disparar {detail.falhas + detail.aguardando} não
+                        entregues (falhas + aguardando)
+                      </button>
+                    )}
                   </div>
                 )}
               </>

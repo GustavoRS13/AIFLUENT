@@ -43,9 +43,12 @@ export async function POST(
         { status: 404 },
       );
 
-    // leads que falharam (status real da mensagem) nesse disparo
+    // Quais reenviar: só falhas, ou também os "aguardando" (não confirmados).
+    // includePending=true → falhas + sent (não entregues/lidos).
+    const includePending = body.includePending === true;
+    const statusSet = includePending ? ["failed", "sent"] : ["failed"];
     const failedMsgs = await prisma.conversationMessage.findMany({
-      where: { metadata: { contains: id }, status: "failed" },
+      where: { metadata: { contains: id }, status: { in: statusSet } },
       select: { conversation: { select: { leadId: true } } },
     });
     const leadIds = [
