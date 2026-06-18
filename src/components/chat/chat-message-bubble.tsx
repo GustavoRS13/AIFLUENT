@@ -1,7 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Bot, Check, CheckCheck, FileText, AlertCircle } from "lucide-react";
+import {
+  Bot,
+  Check,
+  CheckCheck,
+  FileText,
+  AlertCircle,
+  Reply,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface ChatBubbleProps {
@@ -14,6 +21,7 @@ export interface ChatBubbleProps {
   type?: "text" | "image" | "audio" | "document";
   mediaId?: string;
   errorReason?: string;
+  onReply?: () => void;
 }
 
 export function ChatMessageBubble({
@@ -26,6 +34,7 @@ export function ChatMessageBubble({
   type = "text",
   mediaId,
   errorReason,
+  onReply,
 }: ChatBubbleProps) {
   const mediaSrc = mediaId ? `/api/whatsapp/media/${mediaId}` : undefined;
   // Legenda só aparece se não for o placeholder automático
@@ -37,10 +46,19 @@ export function ChatMessageBubble({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        "flex",
+        "group flex items-center gap-1.5",
         direction === "outbound" ? "justify-end" : "justify-start",
       )}
     >
+      {onReply && direction === "outbound" && (
+        <button
+          onClick={onReply}
+          title="Responder"
+          className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 transition-opacity"
+        >
+          <Reply className="h-4 w-4" />
+        </button>
+      )}
       <div
         className={cn(
           "max-w-[70%] rounded-lg px-3 py-2 shadow-sm",
@@ -116,6 +134,15 @@ export function ChatMessageBubble({
             ))}
         </div>
       </div>
+      {onReply && direction === "inbound" && (
+        <button
+          onClick={onReply}
+          title="Responder"
+          className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 transition-opacity"
+        >
+          <Reply className="h-4 w-4" />
+        </button>
+      )}
     </motion.div>
   );
 }

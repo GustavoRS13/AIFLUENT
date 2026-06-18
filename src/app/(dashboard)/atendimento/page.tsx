@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback, Fragment } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  X,
   Search,
   ArrowLeft,
   MessageCircle,
@@ -93,6 +94,7 @@ function mapApiMessage(m: any): ChatMessage {
     aiGenerated: !!m.aiGenerated,
     createdAt: fmtTime(m.createdAt),
     sentAt: m.createdAt as string,
+    wamid: (m.externalId as string) || undefined,
     mediaId,
     errorReason:
       m.status === "failed"
@@ -174,6 +176,8 @@ export default function AtendimentoPage() {
     : [];
 
   const { input, setInput, showEmoji, setShowEmoji } = useChat([]);
+  // mensagem sendo respondida (citação), igual o WhatsApp
+  const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
 
   // Fetch conversations from API
   const fetchConversations = useCallback(async () => {
@@ -330,8 +334,10 @@ export default function AtendimentoPage() {
   const handleSend = useCallback(async () => {
     const content = input.trim();
     if (!content || !selectedId) return;
+    const replyTo = replyingTo?.wamid;
     setInput("");
     setShowEmoji(false);
+    setReplyingTo(null);
     // Exibe otimista enquanto envia
     addMessage({
       id: `tmp-${Date.now()}`,
@@ -347,7 +353,7 @@ export default function AtendimentoPage() {
       await fetch("/api/conversations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationId: selectedId, content }),
+        body: JSON.stringify({ conversationId: selectedId, content, replyTo }),
       });
       // Recarrega do servidor (mensagem real + status de entrega)
       const res = await fetch(`/api/conversations/${selectedId}`);
@@ -361,7 +367,7 @@ export default function AtendimentoPage() {
     } catch {
       /* otimista já exibido */
     }
-  }, [input, selectedId, addMessage, setInput, setShowEmoji]);
+  }, [input, selectedId, replyingTo, addMessage, setInput, setShowEmoji]);
 
   // Envio unificado de arquivo (botão de anexo, imagem, áudio gravado e drag&drop).
   // Valida tipo e tamanho, exibe otimista, envia pela mesma rota e recarrega.
@@ -967,6 +973,9 @@ export default function AtendimentoPage() {
                         type={msg.type}
                         mediaId={msg.mediaId}
                         errorReason={msg.errorReason}
+                        onReply={
+                          msg.wamid ? () => setReplyingTo(msg) : undefined
+                        }
                       />
                     </Fragment>
                   );
@@ -976,15 +985,38 @@ export default function AtendimentoPage() {
 
               {/* Input — janela aberta: texto livre; fechada: só modelo (regra 24h Meta) */}
               {windowOpen ? (
-                <ChatInput
-                  value={input}
-                  onChange={setInput}
-                  onSend={handleSend}
-                  onFileUpload={handleFileUpload}
-                  onAudioRecorded={handleAudioRecorded}
-                  showEmoji={showEmoji}
-                  onToggleEmoji={() => setShowEmoji(!showEmoji)}
-                />
+                <div>
+                  {replyingTo && (
+                    <div className="mx-3 mb-1 flex items-start gap-2 rounded-lg border-l-4 border-emerald-500 bg-gray-50 px-3 py-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-medium text-emerald-700">
+                          Respondendo{" "}
+                          {replyingTo.direction === "inbound"
+                            ? "ao cliente"
+                            : "à sua mensagem"}
+                        </p>
+                        <p className="truncate text-xs text-gray-500">
+                          {replyingTo.content}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setReplyingTo(null)}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                  <ChatInput
+                    value={input}
+                    onChange={setInput}
+                    onSend={handleSend}
+                    onFileUpload={handleFileUpload}
+                    onAudioRecorded={handleAudioRecorded}
+                    showEmoji={showEmoji}
+                    onToggleEmoji={() => setShowEmoji(!showEmoji)}
+                  />
+                </div>
               ) : (
                 <div className="border-t border-gray-200 bg-gray-50/60 px-6 py-5 text-center">
                   <p className="mx-auto max-w-md text-sm text-gray-600">

@@ -74,6 +74,7 @@ const sendMessageSchema = z.object({
   conversationId: z.string(),
   content: z.string().min(1),
   contentType: z.string().default("text"),
+  replyTo: z.string().optional(), // wamid da mensagem citada (responder)
 });
 
 export async function POST(request: NextRequest) {
@@ -124,7 +125,11 @@ export async function POST(request: NextRequest) {
     if (conversation.channel === "whatsapp" && whatsapp.isConfigured) {
       const to = conversation.lead?.whatsapp || conversation.lead?.phone;
       if (to) {
-        const result = await whatsapp.sendTextMessage(to, parsed.data.content);
+        const result = await whatsapp.sendTextMessage(
+          to,
+          parsed.data.content,
+          parsed.data.replyTo,
+        );
         if ("messageId" in result && result.messageId) {
           externalId = result.messageId;
         } else {

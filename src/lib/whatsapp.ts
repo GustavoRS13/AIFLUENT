@@ -65,6 +65,7 @@ export class WhatsAppService {
   async sendTextMessage(
     to: string,
     text: string,
+    replyToWamid?: string,
   ): Promise<{ messageId: string } | { error: string }> {
     if (!this.isConfigured)
       return {
@@ -85,6 +86,8 @@ export class WhatsAppService {
             recipient_type: "individual",
             to,
             type: "text",
+            // citação (responder mensagem específica), igual o WhatsApp normal
+            ...(replyToWamid ? { context: { message_id: replyToWamid } } : {}),
             text: { preview_url: false, body: text },
           }),
         },
