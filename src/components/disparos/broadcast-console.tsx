@@ -565,11 +565,27 @@ export function BroadcastConsole() {
               {templates.length === 0 && (
                 <option value="">Nenhum modelo aprovado</option>
               )}
-              {templates.map((t) => (
-                <option key={`${t.name}-${t.language}`} value={t.name}>
-                  {t.name} ({t.language})
-                </option>
-              ))}
+              {[...templates]
+                // UTILITY primeiro (melhor entrega), depois o resto
+                .sort((a, b) => {
+                  const rank = (c?: string) =>
+                    (c || "").toUpperCase() === "UTILITY" ? 0 : 1;
+                  return rank(a.category) - rank(b.category);
+                })
+                .map((t) => {
+                  const cat = (t.category || "").toUpperCase();
+                  const tag =
+                    cat === "UTILITY"
+                      ? "🟢 UTILITY"
+                      : cat === "MARKETING"
+                        ? "🟡 MARKETING"
+                        : cat || "—";
+                  return (
+                    <option key={`${t.name}-${t.language}`} value={t.name}>
+                      {tag} · {t.name} ({t.language})
+                    </option>
+                  );
+                })}
             </select>
 
             {/* Variáveis do template ({{1}}...) */}
