@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { usePipelineStore, type PipelineStage } from "@/stores/pipeline-store";
 import { KanbanBoard } from "@/components/pipeline/kanban-board";
 import { BulkMoveModal } from "@/components/pipeline/bulk-move-modal";
+import { PipelineChatDrawer } from "@/components/pipeline/pipeline-chat-drawer";
 import { LeadOperationPanel } from "@/components/atendimento/lead-operation-panel";
 import type { KanbanCard, LeadSource, LeadTemperature } from "@/types";
 
@@ -84,6 +85,10 @@ export default function PipelinePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [menuId, setMenuId] = useState<string | null>(null);
+  // drawer de atendimento aberto a partir do card (botão de conversa)
+  const [chatLead, setChatLead] = useState<{ id: string; name: string } | null>(
+    null,
+  );
   const [newOpen, setNewOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newGroup, setNewGroup] = useState("");
@@ -140,6 +145,16 @@ export default function PipelinePage() {
     if (selectedId) loadBoard(selectedId);
   }, [selectedId, loadBoard]);
   /* eslint-enable react-hooks/set-state-in-effect */
+
+  // Abre o drawer de atendimento quando o card dispara o evento.
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      const d = (e as CustomEvent).detail as { id: string; name: string };
+      if (d?.id) setChatLead({ id: d.id, name: d.name });
+    };
+    window.addEventListener("pipeline:open-chat", onOpen);
+    return () => window.removeEventListener("pipeline:open-chat", onOpen);
+  }, []);
 
   const handleMoveLead = useCallback(
     async (leadId: string, stageId: string, newOrder: number) => {
@@ -520,6 +535,18 @@ export default function PipelinePage() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Drawer de atendimento (conversar com o lead sem sair do pipeline) */}
+      {chatLead && (
+        <PipelineChatDrawer
+          leadId={chatLead.id}
+          leadName={chatLead.name}
+          onClose={() => setChatLead(null)}
+          onChanged={() => {
+            if (selectedId) loadBoard(selectedId);
+          }}
+        />
+      )}
     </div>
   );
 }

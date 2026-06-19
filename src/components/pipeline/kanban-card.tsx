@@ -2,7 +2,6 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useRouter } from "next/navigation";
 import { MessageCircle, Phone, Mail, Clock } from "lucide-react";
 import { cn, generateColor } from "@/lib/utils";
 import type { KanbanCard as KanbanCardType } from "@/types";
@@ -34,7 +33,6 @@ export function KanbanCard({
   onClick,
   isDragOverlay = false,
 }: KanbanCardProps) {
-  const router = useRouter();
   const {
     attributes,
     listeners,
@@ -135,11 +133,16 @@ export function KanbanCard({
         <div className="flex items-center gap-0.5">
           <span
             className="p-1 rounded text-emerald-500 cursor-pointer transition-colors hover:bg-emerald-50"
-            title="Abrir atendimento no CRM"
+            title="Conversar (abre o atendimento aqui no pipeline)"
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => {
               e.stopPropagation();
-              router.push(`/atendimento?leadId=${card.id}`);
+              // abre o drawer de atendimento no próprio pipeline (sem trocar de tela)
+              window.dispatchEvent(
+                new CustomEvent("pipeline:open-chat", {
+                  detail: { id: card.id, name: card.name },
+                }),
+              );
             }}
           >
             <MessageCircle className="w-3.5 h-3.5" />
