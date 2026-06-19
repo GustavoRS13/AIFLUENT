@@ -74,14 +74,6 @@ export async function ingestLead(
     orConds.push({ phone: { contains: phoneDigits.slice(-8) } });
   if (email) orConds.push({ email });
 
-  let existing: { id: string } | null = null;
-  if (orConds.length) {
-    existing = await prisma.lead.findFirst({
-      where: { organizationId: orgId, OR: orConds },
-      select: { id: true },
-    });
-  }
-
   const tagNames = (input.tags && input.tags.length ? input.tags : [source])
     .map((t) => t.trim())
     .filter(Boolean);
@@ -104,68 +96,70 @@ export async function ingestLead(
     }
   }
 
-  let leadId: string;
-  const deduped = !!existing;
+  // Find-or-create SERIALIZADO por telefone (advisory lock) — sob concorrência
+  // de webhooks (várias msgs juntas) isto evita criar leads duplicados.
+  const dedupeKey = `${orgId}:${waDigits.slice(-8) || phoneDigits.slice(-8) || email || input.firstName || ""}`;
+  const { leadId, deduped } = await prisma.$transaction(
+    async (tx: typeof prisma) => {
+      await tx.$executeRawUnsafe(
+        `SELECT pg_advisory_xact_lock(hashtext($1)::bigint)`,
+        dedupeKey,
+      );
+      let ex: { id: string } | null = null;
+      if (orConds.length) {
+        ex = await tx.lead.findFirst({
+          where: { organizationId: orgId, OR: orConds },
+          select: { id: true },
+        });
+      }
+      if (ex) return { leadId: ex.id, deduped: true };
+      const lead = await tx.lead.create({
+        data: {
+          firstName: input.firstName,
+          lastName: input.lastName,
+          email,
+          phone: input.phone,
+          whatsapp: input.whatsapp,
+          company: input.company,
+          jobTitle: input.jobTitle,
+          source,
+          sourceDetail: input.sourceDetail,
+          temperature: input.temperature || "warm",
+          courseInterest: input.courseInterest,
+          languageLevel: input.languageLevel,
+          notes: input.notes,
+          city: input.city,
+          state: input.state,
+          stageId,
+          metaAdId: input.metaAdId,
+          fbLeadId: input.fbLeadId,
+          utmSource: input.utmSource,
+          utmMedium: input.utmMedium,
+          utmCampaign: input.utmCampaign,
+          organizationId: orgId,
+          createdById: input.createdById,
+        },
+        select: { id: true },
+      });
+      return { leadId: lead.id, deduped: false };
+    },
+  );
 
-  if (existing) {
-    leadId = existing.id;
-    await prisma.activity
-      .create({
-        data: {
-          type: "lead_source",
-          title: `Re-entrada via ${source}`,
-          description: `Lead recebido novamente pelo canal ${input.channel || source}`,
-          leadId,
-          metadata: input.attribution
-            ? JSON.stringify(input.attribution)
-            : undefined,
-        },
-      })
-      .catch(() => {});
-  } else {
-    const lead = await prisma.lead.create({
+  await prisma.activity
+    .create({
       data: {
-        firstName: input.firstName,
-        lastName: input.lastName,
-        email,
-        phone: input.phone,
-        whatsapp: input.whatsapp,
-        company: input.company,
-        jobTitle: input.jobTitle,
-        source,
-        sourceDetail: input.sourceDetail,
-        temperature: input.temperature || "warm",
-        courseInterest: input.courseInterest,
-        languageLevel: input.languageLevel,
-        notes: input.notes,
-        city: input.city,
-        state: input.state,
-        stageId,
-        metaAdId: input.metaAdId,
-        fbLeadId: input.fbLeadId,
-        utmSource: input.utmSource,
-        utmMedium: input.utmMedium,
-        utmCampaign: input.utmCampaign,
-        organizationId: orgId,
-        createdById: input.createdById,
+        type: "lead_source",
+        title: deduped ? `Re-entrada via ${source}` : `Origem: ${source}`,
+        description: deduped
+          ? `Lead recebido novamente pelo canal ${input.channel || source}`
+          : `Lead capturado pelo canal ${input.channel || source}`,
+        leadId,
+        metadata: input.attribution
+          ? JSON.stringify(input.attribution)
+          : undefined,
       },
-      select: { id: true },
-    });
-    leadId = lead.id;
-    await prisma.activity
-      .create({
-        data: {
-          type: "lead_source",
-          title: `Origem: ${source}`,
-          description: `Lead capturado pelo canal ${input.channel || source}`,
-          leadId,
-          metadata: input.attribution
-            ? JSON.stringify(input.attribution)
-            : undefined,
-        },
-      })
-      .catch(() => {});
-  }
+    })
+    .catch(() => {});
 
   // ── Tag obrigatória: garante >= 1 (sem duplicar a relação) ──
   for (const name of effectiveTags) {
