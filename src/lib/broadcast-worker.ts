@@ -291,8 +291,12 @@ export async function runBroadcastBatch(
         }
       };
 
-      // Envia o lote com concorrência limitada (acelera ~8x sem estourar limites)
-      const CONCURRENCY = 8;
+      // Envio em RITMO CONTROLADO (gota-a-gota) — protege a reputação do número
+      // durante o aquecimento. Rajada de marketing derruba qualidade e dispara
+      // mais 131049; envio espaçado imita comportamento orgânico.
+      const CONCURRENCY = 3;
+      const GAP_MS = 300; // ~10 envios/seg no total (3 paralelos x ~1/300ms)
+      const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
       let cursor = 0;
       const workers = Array.from(
         { length: Math.min(CONCURRENCY, claimed.length) },
@@ -302,6 +306,7 @@ export async function runBroadcastBatch(
             const ok = await sendOne(r);
             if (ok) sent++;
             else failed++;
+            await sleep(GAP_MS);
           }
         },
       );
