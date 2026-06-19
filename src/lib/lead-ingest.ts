@@ -107,8 +107,11 @@ export async function ingestLead(
       );
       let ex: { id: string } | null = null;
       if (orConds.length) {
+        // SEMPRE o lead mais antigo (determinístico) — mesmo havendo duplicados
+        // da migração, todas as mensagens consolidam no MESMO lead/conversa.
         ex = await tx.lead.findFirst({
           where: { organizationId: orgId, OR: orConds },
+          orderBy: [{ createdAt: "asc" }, { id: "asc" }],
           select: { id: true },
         });
       }
