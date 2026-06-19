@@ -15,12 +15,14 @@ export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const teamId = url.searchParams.get("teamId") || "";
+    const q = (url.searchParams.get("q") || "").trim();
     const { prisma } = await import("@/lib/prisma");
     const where: Record<string, unknown> = { organizationId: orgId };
     // Atendimento mostra só conversas onde o LEAD respondeu (enviou ao menos 1
     // mensagem). Disparos sem resposta não poluem o inbox; ao responder, o
     // webhook seta lastInboundAt e a conversa aparece automaticamente.
-    where.lastInboundAt = { not: null };
+    // Ao BUSCAR (q), não exige lastInboundAt — acha por texto de qualquer msg.
+    if (!q) where.lastInboundAt = { not: null };
     if (teamId) where.teamId = teamId;
     // Isolamento por papel (Atendimento):
     //  - admin  → todas as conversas da empresa
@@ -35,10 +37,11 @@ export async function GET(request: Request) {
       { assigneeId: userId },
       { lead: { consultantId: userId } },
     ];
+    let visibilityOR: Record<string, unknown>[] | null = null;
     if (userRole === "operador" && userId) {
-      where.OR = ownConvos;
+      visibilityOR = ownConvos;
     } else if ((userRole === "gestor" || userRole === "supervisor") && userId) {
-      where.OR = userTeamId
+      visibilityOR = userTeamId
         ? [
             { teamId: userTeamId },
             { lead: { teamId: userTeamId } },
@@ -46,6 +49,25 @@ export async function GET(request: Request) {
           ]
         : ownConvos; // gestor sem time → vê só as dele (seguro)
     }
+    // Busca por NOME, telefone ou CONTEÚDO de qualquer mensagem (igual WhatsApp)
+    const searchOR = q
+      ? [
+          { lead: { firstName: { contains: q, mode: "insensitive" } } },
+          { lead: { lastName: { contains: q, mode: "insensitive" } } },
+          { lead: { phone: { contains: q.replace(/\D/g, "") || q } } },
+          { lead: { whatsapp: { contains: q.replace(/\D/g, "") || q } } },
+          {
+            messages: {
+              some: { content: { contains: q, mode: "insensitive" } },
+            },
+          },
+        ]
+      : null;
+    // Combina visibilidade (OR) + busca (OR) via AND quando ambos existem.
+    const ands: Record<string, unknown>[] = [];
+    if (visibilityOR) ands.push({ OR: visibilityOR });
+    if (searchOR) ands.push({ OR: searchOR });
+    if (ands.length) where.AND = ands;
     const conversations = await prisma.conversation.findMany({
       where,
       orderBy: { lastMessageAt: "desc" },

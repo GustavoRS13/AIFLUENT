@@ -179,10 +179,14 @@ export default function AtendimentoPage() {
   // mensagem sendo respondida (citação), igual o WhatsApp
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
 
-  // Fetch conversations from API
-  const fetchConversations = useCallback(async () => {
+  // Fetch conversations from API (q = busca por nome/telefone/conteúdo de msg)
+  const fetchConversations = useCallback(async (q?: string) => {
     try {
-      const res = await fetch("/api/conversations");
+      const res = await fetch(
+        q
+          ? `/api/conversations?q=${encodeURIComponent(q)}`
+          : "/api/conversations",
+      );
       if (!res.ok) throw new Error();
       const data = await res.json();
       const items = data.conversations || [];
@@ -229,10 +233,15 @@ export default function AtendimentoPage() {
 
   // Carrega a lista no mount + atualiza a cada 6s
   useEffect(() => {
-    fetchConversations();
-    const t = setInterval(fetchConversations, 6000);
-    return () => clearInterval(t);
-  }, [fetchConversations]);
+    const run = () => fetchConversations(searchTerm || undefined);
+    // busca com debounce; sem busca carrega na hora. Poll a cada 6s mantém vivo.
+    const debounce = setTimeout(run, searchTerm ? 350 : 0);
+    const interval = setInterval(run, 6000);
+    return () => {
+      clearTimeout(debounce);
+      clearInterval(interval);
+    };
+  }, [fetchConversations, searchTerm]);
 
   // Abre/cria a conversa do lead vindo do pipeline (?leadId=)
   const [leadParamDone, setLeadParamDone] = useState(false);
@@ -586,17 +595,14 @@ export default function AtendimentoPage() {
 
   // Filter conversations
   const filteredConversations = conversations.filter((c) => {
-    const matchesSearch =
-      !searchTerm ||
-      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (c.phone || "").includes(searchTerm);
-
+    // A busca (nome/telefone/conteúdo de mensagem) é feita no SERVIDOR via ?q=.
+    // Aqui só aplicamos o filtro de aba (Todos / Não lidos / Meus).
     const matchesFilter =
       filterTab === "todos" ||
       (filterTab === "nao_lidos" && c.unreadCount > 0) ||
       filterTab === "meus"; // TODO: filter by current user assignment
 
-    return matchesSearch && matchesFilter;
+    return matchesFilter;
   });
 
   const totalUnread = conversations.reduce((s, c) => s + c.unreadCount, 0);
