@@ -1,9 +1,17 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { X, Loader2, ExternalLink, ChevronLeft, Search } from "lucide-react";
+import {
+  X,
+  Loader2,
+  ExternalLink,
+  ChevronLeft,
+  Search,
+  FileText,
+} from "lucide-react";
 import { ChatMessageBubble } from "@/components/chat/chat-message-bubble";
 import { ChatInput } from "@/components/chat/chat-input";
+import { TemplatePicker } from "@/components/chat/template-picker";
 import { StageSelector } from "@/components/atendimento/stage-selector";
 import { ConversationTransferButton } from "@/components/atendimento/conversation-transfer-button";
 import type { ChatMessage } from "@/hooks/use-chat";
@@ -80,6 +88,7 @@ export function PipelineChatDrawer({
   const [conversations, setConversations] = useState<ConvRow[]>([]);
   const [listLoading, setListLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [templateOpen, setTemplateOpen] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
 
   const loadMessages = useCallback(async (convId: string) => {
@@ -189,6 +198,22 @@ export function PipelineChatDrawer({
     },
     [uploadFile],
   );
+
+  async function sendTemplate(data: {
+    templateName: string;
+    languageCode: string;
+    params: string[];
+    preview: string;
+  }) {
+    if (!conversationId) return;
+    setTemplateOpen(false);
+    await fetch(`/api/conversations/${conversationId}/template`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).catch(() => {});
+    await loadMessages(conversationId);
+  }
 
   async function send() {
     const content = input.trim();
@@ -374,20 +399,30 @@ export function PipelineChatDrawer({
                 onToggleEmoji={() => {}}
               />
             ) : (
-              <div className="border-t border-gray-100 bg-amber-50 px-4 py-3 text-center text-xs text-amber-700">
-                Janela de 24h fechada. Para enviar um modelo aprovado, abra no{" "}
-                <a
-                  href={`/atendimento?leadId=${current.leadId}`}
-                  className="font-semibold underline"
+              <div className="border-t border-gray-100 bg-amber-50 px-4 py-3 text-center">
+                <p className="mb-2 text-xs text-amber-700">
+                  Janela de 24h fechada — só dá pra enviar um{" "}
+                  <b>modelo aprovado</b>.
+                </p>
+                <button
+                  onClick={() => setTemplateOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
                 >
-                  Atendimento
-                </a>
-                .
+                  <FileText className="h-4 w-4" />
+                  Selecionar modelo de mensagem
+                </button>
               </div>
             )}
           </>
         )}
       </div>
+
+      {/* Seletor de modelo (janela fechada) — enviar template sem sair do drawer */}
+      <TemplatePicker
+        open={templateOpen}
+        onClose={() => setTemplateOpen(false)}
+        onSend={sendTemplate}
+      />
     </div>
   );
 }
