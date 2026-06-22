@@ -125,9 +125,31 @@ export async function runBroadcastBatch(
   // Personalização: se algum parâmetro usa {nome}/{primeiro_nome}, montamos os
   // componentes POR destinatário (com o nome real do lead). Senão, é estático.
   const personalized = !!langParams?.some((p) => MERGE_RE.test(p));
-  const staticComponents = personalized
-    ? undefined
-    : buildComponents(langParams);
+
+  // Corpo do template (texto real) — pra salvar a MENSAGEM enviada, não só o nome.
+  let templateBody = "";
+  try {
+    const tpls = await whatsapp.listTemplates();
+    const list = "templates" in tpls ? tpls.templates : [];
+    const t = list.find(
+      (x) => x.name === job.templateName && x.language === job.languageCode,
+    );
+    const bodyComp = (t?.components || []).find(
+      (c) => String(c.type || "").toUpperCase() === "BODY",
+    );
+    templateBody = (bodyComp as { text?: string })?.text || "";
+  } catch {
+    /* segue com fallback */
+  }
+  // Renderiza o corpo trocando {{1}}, {{2}}... pelos valores do destinatário.
+  const renderBody = (vals: string[] | null | undefined): string => {
+    if (!templateBody) return `[disparo] ${job.templateName}`;
+    let out = templateBody;
+    (vals || []).forEach((v, i) => {
+      out = out.replace(new RegExp(`\\{\\{\\s*${i + 1}\\s*\\}\\}`, "g"), v);
+    });
+    return out;
+  };
 
   const start = Date.now();
   let aggProcessed = 0;
@@ -233,10 +255,11 @@ export async function runBroadcastBatch(
               select: { id: true, lastInboundAt: true },
             });
           }
-          const comp =
+          const vals =
             personalized && langParams
-              ? buildComponents(fillParams(langParams, leadMap.get(r.leadId)))
-              : staticComponents;
+              ? fillParams(langParams, leadMap.get(r.leadId))
+              : langParams;
+          const comp = buildComponents(vals);
           const res = await whatsapp.sendTemplateMessage(
             r.phone,
             job.templateName,
@@ -248,7 +271,8 @@ export async function runBroadcastBatch(
             data: {
               conversationId: conv.id,
               direction: "outbound",
-              content: `[disparo] ${job.templateName}`,
+              // mensagem REAL enviada (template renderizado com o nome)
+              content: renderBody(vals),
               contentType: "text",
               status: ok ? "sent" : "failed",
               externalId: ok ? res.messageId : undefined,
