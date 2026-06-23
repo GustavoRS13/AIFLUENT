@@ -207,11 +207,32 @@ export function PipelineChatDrawer({
   }) {
     if (!conversationId) return;
     setTemplateOpen(false);
-    await fetch(`/api/conversations/${conversationId}/template`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    }).catch(() => {});
+    // otimista: mostra a mensagem na hora
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `tmp-${prev.length}`,
+        direction: "outbound",
+        content: data.preview,
+        type: "text",
+        status: "sent",
+        aiGenerated: false,
+        createdAt: fmtTime(new Date().toISOString()),
+      },
+    ]);
+    try {
+      const res = await fetch(`/api/conversations/${conversationId}/template`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const r = await res.json().catch(() => ({}));
+      if (!res.ok || r?.ok === false) {
+        alert(`Não consegui enviar o modelo${r?.error ? `: ${r.error}` : "."}`);
+      }
+    } catch {
+      alert("Não consegui enviar o modelo. Tente novamente.");
+    }
     await loadMessages(conversationId);
   }
 
@@ -246,7 +267,11 @@ export function PipelineChatDrawer({
   return (
     <div
       className="fixed inset-0 z-50 flex justify-end bg-black/30"
-      onClick={onClose}
+      onClick={(e) => {
+        // fecha SÓ ao clicar no fundo (não em cliques que sobem de modais filhos,
+        // ex.: o seletor de modelos) — evita o drawer sumir ao mandar template
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div
         className="flex h-full w-full max-w-md flex-col bg-white shadow-2xl"
