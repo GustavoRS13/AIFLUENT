@@ -100,9 +100,36 @@ export function parseWebhook(body: Record<string, any>): ParsedInbound {
           m.interactive?.list_reply?.title ||
           "[interactive]";
         contentType = "text";
+      } else if (type === "reaction") {
+        content = m.reaction?.emoji || "[reação]";
+        contentType = "text";
+      } else if (type === "contacts") {
+        const nome = m.contacts?.[0]?.name?.formatted_name || "";
+        content = `[contato] ${nome}`.trim();
+        contentType = "text";
+      } else if (type === "order") {
+        content = "[pedido recebido]";
+        contentType = "text";
+      } else if (type === "unsupported") {
+        // A Meta não entrega o conteúdo deste tipo (ex.: enquete, view-once,
+        // figurinha especial). Mostra algo claro pro atendente em vez de "[unsupported]".
+        const reason = m.errors?.[0]?.title || "";
+        content = reason
+          ? `⚠️ Mensagem não exibível (${reason}). Peça pro cliente reenviar como texto.`
+          : "⚠️ O cliente enviou uma mensagem que o WhatsApp não entrega por aqui. Peça pra reenviar como texto.";
+        contentType = "text";
       } else {
         content = `[${type}]`;
         contentType = type;
+      }
+
+      // Clique em anúncio (Click-to-WhatsApp): anexa a origem do anúncio.
+      if (m.referral?.source_id || m.referral?.headline) {
+        const ref = m.referral;
+        content =
+          `📣 Veio de um anúncio${ref.headline ? `: "${ref.headline}"` : ""}` +
+          (content && !content.startsWith("⚠️") ? `\n${content}` : "");
+        if (contentType === "unsupported") contentType = "text";
       }
 
       result.messages.push({
