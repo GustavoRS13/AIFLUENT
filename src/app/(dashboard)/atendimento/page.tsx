@@ -41,12 +41,13 @@ interface Conversation {
   lastMessageAt: string;
   lastInboundAt?: string | null;
   unreadCount: number;
+  awaitingReply?: boolean;
   channel: ConversationChannel;
   assignee?: string;
   messages: ChatMessage[];
 }
 
-type FilterTab = "meus" | "todos" | "nao_lidos";
+type FilterTab = "meus" | "todos" | "nao_lidos" | "nao_respondidos";
 
 // ── Channel helpers ─────────────────────────────────────────────────────────
 
@@ -220,6 +221,8 @@ export default function AtendimentoPage() {
                 new Date().toISOString()) as string,
               lastInboundAt: (c.lastInboundAt as string | null) ?? null,
               unreadCount: (c.unreadCount as number) || 0,
+              // última msg é do CLIENTE → aguardando resposta do time
+              awaitingReply: (lastMsg?.direction as string) === "inbound",
               channel: (c.channel as ConversationChannel) || "whatsapp",
               assignee: (c.assignee as Record<string, unknown>)?.name as
                 | string
@@ -610,10 +613,13 @@ export default function AtendimentoPage() {
     const matchesFilter =
       filterTab === "todos" ||
       (filterTab === "nao_lidos" && c.unreadCount > 0) ||
+      (filterTab === "nao_respondidos" && c.awaitingReply) ||
       filterTab === "meus"; // TODO: filter by current user assignment
 
     return matchesFilter;
   });
+
+  const naoRespondidos = conversations.filter((c) => c.awaitingReply).length;
 
   const totalUnread = conversations.reduce((s, c) => s + c.unreadCount, 0);
 
@@ -676,7 +682,11 @@ export default function AtendimentoPage() {
                   { key: "todos", label: "Todos" },
                   {
                     key: "nao_lidos",
-                    label: `Nao lidos${totalUnread > 0 ? ` (${totalUnread})` : ""}`,
+                    label: `Não lidos${totalUnread > 0 ? ` (${totalUnread})` : ""}`,
+                  },
+                  {
+                    key: "nao_respondidos",
+                    label: `Não respondidos${naoRespondidos > 0 ? ` (${naoRespondidos})` : ""}`,
                   },
                 ] as const
               ).map((tab) => (
@@ -684,7 +694,7 @@ export default function AtendimentoPage() {
                   key={tab.key}
                   onClick={() => setFilterTab(tab.key)}
                   className={cn(
-                    "flex-1 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors",
+                    "flex-1 rounded-lg px-2 py-1.5 text-[11px] font-medium leading-tight transition-colors",
                     filterTab === tab.key
                       ? "bg-sky-50 text-sky-600 border border-sky-200"
                       : "text-gray-500 hover:bg-gray-50 border border-transparent",
