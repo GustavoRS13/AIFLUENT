@@ -396,6 +396,29 @@ export default function AtendimentoPage() {
     }
   }, [input, selectedId, replyingTo, addMessage, setInput, setShowEmoji]);
 
+  // Exclui a mensagem do CRM (não apaga no WhatsApp do cliente).
+  const handleDeleteMessage = useCallback(
+    async (msgId: string) => {
+      if (!selectedId) return;
+      if (
+        !confirm(
+          "Excluir esta mensagem do histórico? (não apaga no WhatsApp do cliente)",
+        )
+      )
+        return;
+      // remove da tela na hora
+      setAllMessages((prev) => ({
+        ...prev,
+        [selectedId]: (prev[selectedId] ?? []).filter((m) => m.id !== msgId),
+      }));
+      if (msgId.startsWith("tmp-")) return; // otimista, não está no banco
+      await fetch(`/api/conversations/messages/${msgId}`, {
+        method: "DELETE",
+      }).catch(() => {});
+    },
+    [selectedId],
+  );
+
   // Envio unificado de arquivo (botão de anexo, imagem, áudio gravado e drag&drop).
   // Valida tipo e tamanho, exibe otimista, envia pela mesma rota e recarrega.
   const uploadFile = useCallback(
@@ -1018,6 +1041,7 @@ export default function AtendimentoPage() {
                         onReply={
                           msg.wamid ? () => setReplyingTo(msg) : undefined
                         }
+                        onDelete={() => handleDeleteMessage(msg.id)}
                       />
                     </Fragment>
                   );

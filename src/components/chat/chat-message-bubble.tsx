@@ -8,6 +8,7 @@ import {
   FileText,
   AlertCircle,
   Reply,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ export interface ChatBubbleProps {
   mediaId?: string;
   errorReason?: string;
   onReply?: () => void;
+  onDelete?: () => void;
 }
 
 export function ChatMessageBubble({
@@ -35,6 +37,7 @@ export function ChatMessageBubble({
   mediaId,
   errorReason,
   onReply,
+  onDelete,
 }: ChatBubbleProps) {
   const mediaSrc = mediaId ? `/api/whatsapp/media/${mediaId}` : undefined;
   // Legenda só aparece se não for o placeholder automático
@@ -50,14 +53,27 @@ export function ChatMessageBubble({
         direction === "outbound" ? "justify-end" : "justify-start",
       )}
     >
-      {onReply && direction === "outbound" && (
-        <button
-          onClick={onReply}
-          title="Responder"
-          className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 transition-opacity"
-        >
-          <Reply className="h-4 w-4" />
-        </button>
+      {(onReply || onDelete) && direction === "outbound" && (
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {onReply && (
+            <button
+              onClick={onReply}
+              title="Responder"
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <Reply className="h-4 w-4" />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={onDelete}
+              title="Excluir mensagem (do CRM)"
+              className="text-gray-400 hover:text-rose-500"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       )}
       <div
         className={cn(
@@ -134,14 +150,27 @@ export function ChatMessageBubble({
             ))}
         </div>
       </div>
-      {onReply && direction === "inbound" && (
-        <button
-          onClick={onReply}
-          title="Responder"
-          className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 transition-opacity"
-        >
-          <Reply className="h-4 w-4" />
-        </button>
+      {(onReply || onDelete) && direction === "inbound" && (
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {onReply && (
+            <button
+              onClick={onReply}
+              title="Responder"
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <Reply className="h-4 w-4" />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={onDelete}
+              title="Excluir mensagem (do CRM)"
+              className="text-gray-400 hover:text-rose-500"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       )}
     </motion.div>
   );
