@@ -20,6 +20,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { cn } from "@/lib/utils";
 import { ChatMessageBubble } from "@/components/chat/chat-message-bubble";
 import { ChatInput } from "@/components/chat/chat-input";
+import { FileUploadModal } from "@/components/chat/file-upload-modal";
 import { TemplatePicker } from "@/components/chat/template-picker";
 import { useChat, type ChatMessage } from "@/hooks/use-chat";
 import { SLATimer } from "@/components/atendimento/sla-timer";
@@ -181,6 +182,8 @@ export default function AtendimentoPage() {
   const { input, setInput, showEmoji, setShowEmoji } = useChat([]);
   // mensagem sendo respondida (citação), igual o WhatsApp
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
+  // arquivos aguardando confirmação no modal de envio (drag&drop / anexo)
+  const [pendingFiles, setPendingFiles] = useState<File[] | null>(null);
 
   // Fetch conversations from API (q = busca por nome/telefone/conteúdo de msg)
   const fetchConversations = useCallback(async (q?: string) => {
@@ -393,8 +396,9 @@ export default function AtendimentoPage() {
   // Envio unificado de arquivo (botão de anexo, imagem, áudio gravado e drag&drop).
   // Valida tipo e tamanho, exibe otimista, envia pela mesma rota e recarrega.
   const uploadFile = useCallback(
-    async (file: File) => {
+    async (file: File, caption?: string) => {
       if (!selectedId) return;
+      nearBottomRef.current = true;
       const mime = file.type || "";
       if (!ALLOWED_MIME.test(mime)) {
         alert(
@@ -432,6 +436,7 @@ export default function AtendimentoPage() {
       try {
         const fd = new FormData();
         fd.append("file", file);
+        if (caption) fd.append("caption", caption);
         const up = await fetch(`/api/conversations/${selectedId}/media`, {
           method: "POST",
           body: fd,
@@ -457,12 +462,10 @@ export default function AtendimentoPage() {
     [selectedId, addMessage],
   );
 
-  const handleFileUpload = useCallback(
-    (file: File) => {
-      void uploadFile(file);
-    },
-    [uploadFile],
-  );
+  const handleFileUpload = useCallback((file: File) => {
+    // abre o modal de envio (preview + legenda), em vez de enviar direto
+    setPendingFiles([file]);
+  }, []);
 
   // Envia o áudio gravado (Blob) como mídia real pelo WhatsApp
   const handleAudioRecorded = useCallback(
@@ -491,15 +494,10 @@ export default function AtendimentoPage() {
       if (!selectedId) return;
       const files = Array.from(e.dataTransfer.files || []);
       if (!files.length) return;
-      // Confirma antes de enviar (evita envio acidental/duplicado ao arrastar)
-      const nomes = files.map((f) => `• ${f.name}`).join("\n");
-      const ok = window.confirm(
-        `Enviar ${files.length} arquivo(s) para ${selectedConv?.name || "o cliente"}?\n\n${nomes}`,
-      );
-      if (!ok) return;
-      files.forEach((f) => void uploadFile(f));
+      // abre o modal de envio (preview + legenda + adicionar mais)
+      setPendingFiles(files);
     },
-    [selectedId, selectedConv?.name, uploadFile],
+    [selectedId],
   );
 
   // Envia um template aprovado pela conversa selecionada
@@ -1072,6 +1070,18 @@ export default function AtendimentoPage() {
                 onClose={() => setTemplateOpen(false)}
                 onSend={handleSendTemplate}
               />
+              {pendingFiles && pendingFiles.length > 0 && (
+                <FileUploadModal
+                  initialFiles={pendingFiles}
+                  onClose={() => setPendingFiles(null)}
+                  onSend={async (files, caption) => {
+                    // legenda vai no 1º arquivo (WhatsApp: caption por mídia)
+                    for (let i = 0; i < files.length; i++) {
+                      await uploadFile(files[i], i === 0 ? caption : undefined);
+                    }
+                  }}
+                />
+              )}
             </>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center px-6">
