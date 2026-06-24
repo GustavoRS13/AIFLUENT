@@ -6,8 +6,44 @@ import {
   buildAudienceWhere,
   type BroadcastSegment,
 } from "@/lib/broadcast-segment";
+import { whatsapp } from "@/lib/whatsapp";
 
 export const runtime = "nodejs";
+
+const GRAPH = "https://graph.facebook.com/v21.0";
+
+// Protege o número: se a qualidade caiu (RED/YELLOW), bloqueia disparo de
+// MARKETING (que afunda mais). UTILITY entrega e ajuda a recuperar — libera.
+// Retorna uma mensagem de erro (string) se deve bloquear; senão null.
+async function blockMarketingIfDegraded(
+  templateName: string,
+  languageCode: string,
+): Promise<string | null> {
+  try {
+    const tpls = await whatsapp.listTemplates();
+    const list = "templates" in tpls ? tpls.templates : [];
+    const tpl = list.find(
+      (t) => t.name === templateName && t.language === languageCode,
+    );
+    const cat = String(tpl?.category || "").toUpperCase();
+    if (cat !== "MARKETING") return null; // UTILITY/outros sempre liberados
+    const pid = process.env.WHATSAPP_PHONE_NUMBER_ID || "";
+    const token = process.env.WHATSAPP_ACCESS_TOKEN || "";
+    if (!pid || !token) return null;
+    const q = await fetch(
+      `${GRAPH}/${pid}?fields=quality_rating&access_token=${encodeURIComponent(token)}`,
+    )
+      .then((r) => r.json())
+      .catch(() => null);
+    const quality = String(q?.quality_rating || "").toUpperCase();
+    if (quality === "RED" || quality === "YELLOW") {
+      return `🚫 Disparo de MARKETING bloqueado: o número está com qualidade ${quality} (em recuperação). Marketing agora pioraria. Use um modelo UTILITY (entrega ~90% e recupera o número).`;
+    }
+    return null;
+  } catch {
+    return null; // em dúvida, não bloqueia (evita travar operação por erro de API)
+  }
+}
 
 const MAX_AUDIENCE = 5000; // teto de snapshot por disparo (proteção de memória)
 
@@ -103,6 +139,12 @@ export async function POST(request: NextRequest) {
         { error: "templateName obrigatório" },
         { status: 400 },
       );
+    }
+
+    // Trava de proteção do número (não vale em dry-run)
+    if (!dryRun) {
+      const block = await blockMarketingIfDegraded(templateName, languageCode);
+      if (block) return NextResponse.json({ error: block }, { status: 400 });
     }
 
     const { prisma } = await import("@/lib/prisma");
