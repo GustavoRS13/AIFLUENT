@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import {
   X,
   Loader2,
@@ -38,6 +38,21 @@ function fmtTime(iso?: string): string {
   const d = new Date(iso);
   if (isNaN(d.getTime())) return "";
   return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+}
+
+// Separador de dia: Hoje / Ontem / DD/MM/AAAA
+function dayLabel(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  // eslint-disable-next-line react-hooks/purity -- comparação com o dia atual
+  const now = new Date();
+  const startOf = (x: Date) =>
+    new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diff = Math.round((startOf(now) - startOf(d)) / 86400000);
+  if (diff === 0) return "Hoje";
+  if (diff === 1) return "Ontem";
+  return d.toLocaleDateString("pt-BR");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -397,18 +412,31 @@ export function PipelineChatDrawer({
                   Nenhuma mensagem ainda.
                 </p>
               ) : (
-                messages.map((m) => (
-                  <ChatMessageBubble
-                    key={m.id}
-                    direction={m.direction}
-                    content={m.content}
-                    timestamp={m.createdAt}
-                    status={m.status}
-                    aiGenerated={m.aiGenerated}
-                    type={m.type}
-                    mediaId={m.mediaId}
-                  />
-                ))
+                messages.map((m, i) => {
+                  const label = dayLabel(m.sentAt);
+                  const showDay =
+                    !!label && label !== dayLabel(messages[i - 1]?.sentAt);
+                  return (
+                    <Fragment key={m.id}>
+                      {showDay && (
+                        <div className="flex justify-center py-1">
+                          <span className="rounded-full bg-gray-200/80 px-3 py-0.5 text-[11px] text-gray-600">
+                            {label}
+                          </span>
+                        </div>
+                      )}
+                      <ChatMessageBubble
+                        direction={m.direction}
+                        content={m.content}
+                        timestamp={m.createdAt}
+                        status={m.status}
+                        aiGenerated={m.aiGenerated}
+                        type={m.type}
+                        mediaId={m.mediaId}
+                      />
+                    </Fragment>
+                  );
+                })
               )}
               <div ref={endRef} />
             </div>
