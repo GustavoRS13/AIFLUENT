@@ -167,6 +167,9 @@ export default function AtendimentoPage() {
   const [newPhone, setNewPhone] = useState("");
   const [creatingConv, setCreatingConv] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesBoxRef = useRef<HTMLDivElement>(null);
+  // true = usuário está no fim da conversa (pode auto-descer). false = subiu p/ ler.
+  const nearBottomRef = useRef(true);
   const conversationListRef = useRef<HTMLDivElement>(null);
 
   const selectedConv = conversations.find((c) => c.id === selectedId);
@@ -303,10 +306,18 @@ export default function AtendimentoPage() {
   }, [selectedId]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  // Scroll to bottom when messages change
+  // Desce só se o usuário ESTÁ no fim (senão respeita a leitura de msgs antigas).
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (nearBottomRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [currentMessages]);
+
+  // Ao TROCAR de conversa, sempre vai pro fim (e reseta o "near bottom").
+  useEffect(() => {
+    nearBottomRef.current = true;
+    messagesEndRef.current?.scrollIntoView();
+  }, [selectedId]);
 
   // Rede de segurança: limpa o overlay de drag se o arraste for cancelado
   // fora da área (ex.: screenshot, soltar fora, sair da janela).
@@ -347,6 +358,7 @@ export default function AtendimentoPage() {
     setInput("");
     setShowEmoji(false);
     setReplyingTo(null);
+    nearBottomRef.current = true; // ao enviar, desce p/ mostrar sua mensagem
     // Exibe otimista enquanto envia
     addMessage({
       id: `tmp-${Date.now()}`,
@@ -942,7 +954,16 @@ export default function AtendimentoPage() {
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50">
+              <div
+                ref={messagesBoxRef}
+                onScroll={(e) => {
+                  const el = e.currentTarget;
+                  // "no fim" = a menos de 120px do final
+                  nearBottomRef.current =
+                    el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+                }}
+                className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50"
+              >
                 {currentMessages.length === 0 && (
                   <div className="flex flex-col items-center justify-center h-full text-center px-6">
                     <MessageCircle className="h-12 w-12 text-gray-200 mb-3" />
