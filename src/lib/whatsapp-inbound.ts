@@ -1,5 +1,6 @@
 import { ingestLead } from "./lead-ingest";
 import { notifyOwnerOrAdmins } from "./notifications";
+import { isOptOutMessage, STOP_TAG } from "./lead-optout";
 import type { InboundMessage, StatusUpdate } from "./whatsapp-webhook";
 
 /**
@@ -124,6 +125,59 @@ export async function persistInboundMessage(
       status: "open",
     },
   });
+
+  // 4b. OPT-OUT automático: cliente pediu pra parar ("parar mensagem", "sair",
+  //     "não quero mais"...) → tag de parar + move pro kanban "Parar Mensagem".
+  //     A tag tira o lead de TODOS os disparos (filtro central) + do Atendimento.
+  if (isOptOutMessage(msg.content)) {
+    try {
+      let tag = await prisma.tag.findFirst({
+        where: { name: STOP_TAG, organizationId: orgId },
+        select: { id: true },
+      });
+      if (!tag) {
+        tag = await prisma.tag.create({
+          data: { name: STOP_TAG, color: "#ef4444", organizationId: orgId },
+          select: { id: true },
+        });
+      }
+      const rel = await prisma.leadTag.findFirst({
+        where: { leadId: lead.id, tagId: tag.id },
+        select: { id: true },
+      });
+      if (!rel)
+        await prisma.leadTag.create({
+          data: { leadId: lead.id, tagId: tag.id },
+        });
+      // move pro kanban "Parar Mensagem" (se existir)
+      const stop = await prisma.pipelineStage.findFirst({
+        where: {
+          pipeline: {
+            organizationId: orgId,
+            name: { contains: "Parar Mensagem" },
+          },
+        },
+        select: { id: true },
+      });
+      if (stop)
+        await prisma.lead.update({
+          where: { id: lead.id },
+          data: { stageId: stop.id },
+        });
+      await prisma.activity
+        .create({
+          data: {
+            type: "optout",
+            title: "Opt-out automático (pediu pra parar)",
+            description: (msg.content || "").slice(0, 200),
+            leadId: lead.id,
+          },
+        })
+        .catch(() => {});
+    } catch {
+      /* opt-out best-effort */
+    }
+  }
 
   // 5. notifica o responsável (atribuído/consultor) ou os admins — best-effort
   try {

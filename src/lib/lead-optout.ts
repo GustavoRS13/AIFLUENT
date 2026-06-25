@@ -10,6 +10,19 @@ export const OPTOUT_TAGS = [
   "número inválido",
 ];
 
+// Tag aplicada automaticamente quando o cliente pede pra parar.
+export const STOP_TAG = "PARAR ENVIO MSG";
+
+// Detecta intenção de opt-out na mensagem do cliente ("parar mensagem", "sair",
+// "não quero mais", "descadastrar", "pare de mandar", "stop", etc.).
+export function isOptOutMessage(text?: string | null): boolean {
+  const t = (text || "").toLowerCase().trim();
+  if (!t) return false;
+  return /(par[ae]r?\s*(de)?\s*(mandar|enviar|receber|mensag|msg|disparar)|pare(m)?\s+de\s+(mandar|enviar|me)|n[ãa]o\s+quero\s+(mais|receber)|n[ãa]o\s+envi[ae]|descadastr|sair\s+da\s+lista|quero\s+sair|me\s+(tir[ae]|remov[ae]?|exclu)|remover\s+(da\s+lista|meu)|n[ãa]o\s+perturb|cancelar\s+(inscri|envio|recebimento)|\bstop\b|sem\s+mais\s+mensag|n[ãa]o\s+tenho\s+interesse)/i.test(
+    t,
+  );
+}
+
 // Fragmento Prisma (nível Lead) p/ quem PODE receber mensagem.
 // Combine com AND no where do Lead, ou use como `where.lead = canMessageLeadWhere()`.
 export function canMessageLeadWhere(): Record<string, unknown> {
