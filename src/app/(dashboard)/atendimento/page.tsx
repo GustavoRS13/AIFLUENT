@@ -194,13 +194,6 @@ export default function AtendimentoPage() {
   useEffect(() => {
     if (foundConv) lastSelectedConvRef.current = foundConv;
   }, [foundConv]);
-  // fecha o menu "..." ao clicar em qualquer lugar
-  useEffect(() => {
-    if (!menuConvId) return;
-    const close = () => setMenuConvId(null);
-    window.addEventListener("click", close);
-    return () => window.removeEventListener("click", close);
-  }, [menuConvId]);
   // mensagem sendo respondida (citação), igual o WhatsApp
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
   // arquivos aguardando confirmação no modal de envio (drag&drop / anexo)
@@ -223,6 +216,14 @@ export default function AtendimentoPage() {
       () => {},
     );
   }, []);
+
+  // fecha o menu "..." ao clicar em qualquer lugar
+  useEffect(() => {
+    if (!menuConvId) return;
+    const close = () => setMenuConvId(null);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, [menuConvId]);
 
   // Fetch conversations from API (q = busca por nome/telefone/conteúdo de msg)
   const fetchConversations = useCallback(async (q?: string, limit = 200) => {
