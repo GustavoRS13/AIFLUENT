@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
       organizationId: orgId,
       channel: "whatsapp",
       lastInboundAt: { gt: since }, // janela aberta
+      lead: { status: { not: "lost" } }, // nunca lead PERDIDO
     },
     select: {
       id: true,

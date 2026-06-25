@@ -70,7 +70,11 @@ export async function POST(
     }
 
     const leads = await prisma.lead.findMany({
-      where: { id: { in: leadIds }, organizationId: orgId },
+      where: {
+        id: { in: leadIds },
+        organizationId: orgId,
+        status: { not: "lost" }, // nunca re-dispara pra lead PERDIDO
+      },
       select: { id: true, whatsapp: true, phone: true },
     });
     const recipients = leads

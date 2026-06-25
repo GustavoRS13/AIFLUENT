@@ -21,6 +21,9 @@ export function buildAudienceWhere(
   if (opts.requireWhatsapp !== false) {
     where.whatsapp = { not: null }; // só quem tem WhatsApp (disparos)
   }
+  // NUNCA dispara pra lead PERDIDO (status 'lost' ou em etapa marcada como perdida)
+  where.status = { not: "lost" };
+  where.NOT = { stage: { isLost: true } };
 
   if (seg.tags?.length) {
     where.tags = { some: { tag: { name: { in: seg.tags } } } };
