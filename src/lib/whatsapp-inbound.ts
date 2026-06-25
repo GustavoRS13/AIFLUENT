@@ -183,7 +183,11 @@ export async function persistInboundMessage(
   try {
     const info = await prisma.lead.findUnique({
       where: { id: lead.id },
-      select: { firstName: true, consultantId: true },
+      select: {
+        firstName: true,
+        consultantId: true,
+        stage: { select: { pipeline: { select: { groupName: true } } } },
+      },
     });
     const conv = await prisma.conversation.findUnique({
       where: { id: conversation.id },
@@ -199,6 +203,7 @@ export async function persistInboundMessage(
         body: (msg.content || "").slice(0, 80),
         link: "/atendimento",
       },
+      info?.stage?.pipeline?.groupName || null,
     );
   } catch {
     /* notificação best-effort */

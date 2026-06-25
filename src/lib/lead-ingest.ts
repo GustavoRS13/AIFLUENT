@@ -196,12 +196,28 @@ export async function ingestLead(
 
   // Notifica admins/gestores sobre lead NOVO (não reentrada) — best-effort
   if (!deduped) {
-    await notifyOwnerOrAdmins(prisma, orgId, null, {
-      type: "new_lead",
-      title: `Novo lead: ${input.firstName}`,
-      body: `Origem: ${source}`,
-      link: "/leads",
-    });
+    let leadGroup: string | null = null;
+    if (stageId) {
+      const st = await prisma.pipelineStage
+        .findUnique({
+          where: { id: stageId },
+          select: { pipeline: { select: { groupName: true } } },
+        })
+        .catch(() => null);
+      leadGroup = st?.pipeline?.groupName || null;
+    }
+    await notifyOwnerOrAdmins(
+      prisma,
+      orgId,
+      null,
+      {
+        type: "new_lead",
+        title: `Novo lead: ${input.firstName}`,
+        body: `Origem: ${source}`,
+        link: "/leads",
+      },
+      leadGroup,
+    );
   }
 
   return { lead: { id: leadId }, deduped };
