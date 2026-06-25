@@ -4,6 +4,7 @@ import { apiLimiter } from "@/lib/rate-limit";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
 import { whatsapp } from "@/lib/whatsapp";
+import { canMessageLeadWhere } from "@/lib/lead-optout";
 
 export async function GET(request: Request) {
   const rl = checkRateLimit(request, apiLimiter);
@@ -18,6 +19,8 @@ export async function GET(request: Request) {
     const q = (url.searchParams.get("q") || "").trim();
     const { prisma } = await import("@/lib/prisma");
     const where: Record<string, unknown> = { organizationId: orgId };
+    // Lead PERDIDO / OPT-OUT sai do Atendimento (e dos "Não respondidos").
+    where.lead = canMessageLeadWhere();
     // Atendimento mostra só conversas onde o LEAD respondeu (enviou ao menos 1
     // mensagem). Disparos sem resposta não poluem o inbox; ao responder, o
     // webhook seta lastInboundAt e a conversa aparece automaticamente.

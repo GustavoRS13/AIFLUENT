@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, requireOrgId } from "@/lib/api-auth";
 import { whatsapp } from "@/lib/whatsapp";
+import { canMessageLeadWhere } from "@/lib/lead-optout";
 import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
       organizationId: orgId,
       channel: "whatsapp",
       lastInboundAt: { gt: since }, // janela aberta
-      lead: { status: { not: "lost" } }, // nunca lead PERDIDO
+      lead: canMessageLeadWhere(), // nunca PERDIDO / opt-out
     },
     select: {
       id: true,

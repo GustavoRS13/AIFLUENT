@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runBroadcastBatch } from "@/lib/broadcast-worker";
+import { canMessageSql } from "@/lib/lead-optout";
 import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
@@ -81,11 +82,8 @@ export async function GET(request: NextRequest) {
      FROM "Lead" l
      WHERE l.whatsapp IS NOT NULL
        AND l."organizationId" = $2
-       AND l.status <> 'lost'
-       AND NOT EXISTS (SELECT 1 FROM "PipelineStage" s WHERE s.id=l."stageId" AND s."isLost"=true)
+       AND ${canMessageSql("l")}
        AND length(regexp_replace(coalesce(l.whatsapp,l.phone,''),'\\D','','g')) >= 10
-       AND NOT EXISTS (SELECT 1 FROM "LeadTag" lt JOIN "Tag" t ON t.id=lt."tagId"
-                       WHERE lt."leadId"=l.id AND t.name='número inválido')
        AND NOT EXISTS (SELECT 1 FROM "Conversation" c JOIN "ConversationMessage" m
                        ON m."conversationId"=c.id
                        WHERE c."leadId"=l.id AND m.metadata LIKE '%broadcast%')

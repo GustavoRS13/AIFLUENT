@@ -1,5 +1,6 @@
 // Constrói o filtro Prisma de audiência a partir de uma segmentação.
 // Todas as categorias são combinadas com AND (ex.: tag VIP E etapa X E consultor Y).
+import { canMessageLeadWhere } from "./lead-optout";
 
 export interface BroadcastSegment {
   tags?: string[]; // nomes de tag (qualquer uma)
@@ -21,9 +22,8 @@ export function buildAudienceWhere(
   if (opts.requireWhatsapp !== false) {
     where.whatsapp = { not: null }; // só quem tem WhatsApp (disparos)
   }
-  // NUNCA dispara pra lead PERDIDO (status 'lost' ou em etapa marcada como perdida)
-  where.status = { not: "lost" };
-  where.NOT = { stage: { isLost: true } };
+  // NUNCA dispara pra PERDIDO / OPT-OUT ("não quero mais mensagem"). Filtro central.
+  Object.assign(where, canMessageLeadWhere());
 
   if (seg.tags?.length) {
     where.tags = { some: { tag: { name: { in: seg.tags } } } };

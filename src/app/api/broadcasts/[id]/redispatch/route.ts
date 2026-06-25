@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, requireOrgId } from "@/lib/api-auth";
+import { canMessageLeadWhere } from "@/lib/lead-optout";
 import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
@@ -73,7 +74,7 @@ export async function POST(
       where: {
         id: { in: leadIds },
         organizationId: orgId,
-        status: { not: "lost" }, // nunca re-dispara pra lead PERDIDO
+        ...canMessageLeadWhere(), // nunca re-dispara pra PERDIDO / opt-out
       },
       select: { id: true, whatsapp: true, phone: true },
     });
