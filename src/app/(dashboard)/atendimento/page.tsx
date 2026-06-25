@@ -779,14 +779,12 @@ export default function AtendimentoPage() {
               <div className="flex flex-col items-center justify-center py-12 text-center px-4">
                 <MessageCircle className="w-12 h-12 text-gray-300 mb-3" />
                 <h3 className="text-sm font-medium text-gray-900 mb-1">
-                  Nenhuma conversa
+                  Nenhuma conversa ainda
                 </h3>
-                <p className="text-xs text-gray-500 mb-4">
-                  Conecte o WhatsApp Business para receber conversas
+                <p className="text-xs text-gray-500">
+                  As conversas aparecem aqui quando os seus leads responderem no
+                  WhatsApp.
                 </p>
-                <button className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white text-xs font-medium rounded-lg transition-colors">
-                  Conectar WhatsApp
-                </button>
               </div>
             )}
             {!loading &&
