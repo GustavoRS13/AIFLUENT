@@ -74,7 +74,7 @@ export async function GET(request: Request) {
     const conversations = await prisma.conversation.findMany({
       where,
       orderBy: { lastMessageAt: "desc" },
-      take: 50,
+      take: 200,
       include: {
         lead: {
           select: {

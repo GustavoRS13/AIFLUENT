@@ -173,14 +173,26 @@ export default function AtendimentoPage() {
   // true = usuário está no fim da conversa (pode auto-descer). false = subiu p/ ler.
   const nearBottomRef = useRef(true);
   const conversationListRef = useRef<HTMLDivElement>(null);
+  // guarda a última conversa aberta — se ela sair da lista (recarga/limite),
+  // a tela NÃO some: cai de volta nessa referência.
+  const lastSelectedConvRef = useRef<Conversation | null>(null);
 
-  const selectedConv = conversations.find((c) => c.id === selectedId);
+  const foundConv = conversations.find((c) => c.id === selectedId);
+  const selectedConv =
+    foundConv ||
+    (selectedId && lastSelectedConvRef.current?.id === selectedId
+      ? lastSelectedConvRef.current
+      : undefined);
   const windowOpen = isWindowOpen(selectedConv?.lastInboundAt);
   const currentMessages = selectedId
     ? (allMessages[selectedId] ?? selectedConv?.messages ?? [])
     : [];
 
   const { input, setInput, showEmoji, setShowEmoji } = useChat([]);
+  // mantém a referência da conversa aberta (pra não sumir na recarga da lista)
+  useEffect(() => {
+    if (foundConv) lastSelectedConvRef.current = foundConv;
+  }, [foundConv]);
   // mensagem sendo respondida (citação), igual o WhatsApp
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
   // arquivos aguardando confirmação no modal de envio (drag&drop / anexo)
