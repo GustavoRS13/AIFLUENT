@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
   const { prisma } = await import("@/lib/prisma");
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  const convs = await prisma.conversation.findMany({
+  const raw = await prisma.conversation.findMany({
     where: {
       organizationId: orgId,
       channel: "whatsapp",
@@ -35,16 +35,34 @@ export async function POST(request: NextRequest) {
     select: {
       id: true,
       lead: { select: { whatsapp: true, phone: true } },
+      messages: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: { direction: true, content: true },
+      },
     },
     take: 800,
   });
 
+  // SÓ nudge onde NÓS mandamos a última mensagem (cliente ficou quieto).
+  // Quem escreveu por último (aguardando resposta) NÃO recebe — precisa de
+  // atendimento humano, não "bom dia" genérico. Pula também quem já recebeu este texto.
+  const convs = (
+    raw as Array<{
+      id: string;
+      lead: { whatsapp: string | null; phone: string | null } | null;
+      messages: Array<{ direction: string; content: string | null }>;
+    }>
+  ).filter((c) => {
+    const last = c.messages[0];
+    if (!last || last.direction !== "outbound") return false; // cliente escreveu por último → fora
+    if ((last.content || "").trim() === text) return false; // já recebeu o follow-up
+    return true;
+  });
+
   let sent = 0;
   let failed = 0;
-  for (const c of convs as Array<{
-    id: string;
-    lead: { whatsapp: string | null; phone: string | null } | null;
-  }>) {
+  for (const c of convs) {
     const to = c.lead?.whatsapp || c.lead?.phone;
     if (!to) {
       failed++;
