@@ -94,8 +94,16 @@ function SidebarContent({
   const { can } = useRBAC();
   const { data: session } = useSession();
   const sUser = session?.user as
-    | { name?: string | null; role?: string }
+    | { name?: string | null; role?: string; scopeGroup?: string | null }
     | undefined;
+  // Usuário com escopo de grupo (ex.: B2B) só vê as telas de leads.
+  const scopeGroup = sUser?.scopeGroup;
+  const SCOPED_ALLOWED = new Set([
+    "/pipeline",
+    "/leads",
+    "/deals",
+    "/atendimento",
+  ]);
   const sName = sUser?.name || "Usuário";
   const sRole =
     (
@@ -119,6 +127,8 @@ function SidebarContent({
     .map((section) => ({
       ...section,
       items: section.items.filter((item) => {
+        // escopo de grupo: só as telas de leads
+        if (scopeGroup && !SCOPED_ALLOWED.has(item.href)) return false;
         const permKey = `page:${item.href.slice(1)}` as Permission;
         // If the permission is not defined in RBAC, allow access by default
         if (!(permKey in PERMISSIONS)) return true;

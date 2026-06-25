@@ -25,8 +25,16 @@ export async function GET(request: NextRequest) {
 
   try {
     const { prisma } = await import("@/lib/prisma");
+    // escopo de grupo: usuário restrito só vê os funis do grupo dele (ex.: B2B)
+    const scopeGroup = (session!.user as Record<string, unknown>).scopeGroup as
+      | string
+      | null;
     const pipelines = await prisma.pipeline.findMany({
-      where: { organizationId: orgId, archived: false },
+      where: {
+        organizationId: orgId,
+        archived: false,
+        ...(scopeGroup ? { groupName: scopeGroup } : {}),
+      },
       orderBy: [{ order: "asc" }, { createdAt: "asc" }],
       select: {
         id: true,

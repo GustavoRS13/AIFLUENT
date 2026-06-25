@@ -20,7 +20,16 @@ export async function GET(request: Request) {
     const { prisma } = await import("@/lib/prisma");
     const where: Record<string, unknown> = { organizationId: orgId };
     // Lead PERDIDO / OPT-OUT sai do Atendimento (e dos "Não respondidos").
-    where.lead = canMessageLeadWhere();
+    // + escopo de grupo (B2B etc.): só conversas de leads do grupo do usuário.
+    const scopeGroup = (session!.user as Record<string, unknown>).scopeGroup as
+      | string
+      | null;
+    where.lead = scopeGroup
+      ? {
+          ...canMessageLeadWhere(),
+          stage: { pipeline: { groupName: scopeGroup } },
+        }
+      : canMessageLeadWhere();
     // Atendimento mostra só conversas onde o LEAD respondeu (enviou ao menos 1
     // mensagem). Disparos sem resposta não poluem o inbox; ao responder, o
     // webhook seta lastInboundAt e a conversa aparece automaticamente.

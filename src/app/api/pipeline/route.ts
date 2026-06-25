@@ -27,7 +27,12 @@ export async function GET(request: NextRequest) {
   const userTeamId = (session!.user as Record<string, unknown>).teamId as
     | string
     | undefined;
-  const leadFilter = leadVisibilityWhere(userRole, userId, userTeamId);
+  const leadFilter = leadVisibilityWhere(
+    userRole,
+    userId,
+    userTeamId,
+    (session!.user as Record<string, unknown>).scopeGroup as string | null,
+  );
 
   // Funil específico (?pipelineId=), o funil de um estágio (?stageId=) ou o padrão.
   const sp = new URL(request.url).searchParams;
@@ -42,11 +47,21 @@ export async function GET(request: NextRequest) {
     if (st?.pipelineId) pipelineId = st.pipelineId;
   }
 
+  // escopo de grupo (B2B etc.): só carrega funil do grupo do usuário
+  const scopeGroup = (session!.user as Record<string, unknown>).scopeGroup as
+    | string
+    | null;
   try {
     const pipeline = await prisma.pipeline.findFirst({
-      where: pipelineId
-        ? { id: pipelineId, organizationId: orgId }
-        : { isDefault: true, organizationId: orgId },
+      where: {
+        organizationId: orgId,
+        ...(pipelineId ? { id: pipelineId } : {}),
+        ...(scopeGroup
+          ? { groupName: scopeGroup }
+          : pipelineId
+            ? {}
+            : { isDefault: true }),
+      },
       include: {
         stages: {
           orderBy: { order: "asc" },

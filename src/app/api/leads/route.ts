@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
       const userTeamId = (session!.user as Record<string, unknown>).teamId as
         | string
         | undefined;
-      const vis = leadVisibilityWhere(userRole, userId, userTeamId);
+      const vis = leadVisibilityWhere(userRole, userId, userTeamId, (session!.user as Record<string, unknown>).scopeGroup as string | null);
       if (vis) where.AND = [vis];
       if (search) {
         where.OR = [

@@ -8,7 +8,13 @@ export function leadVisibilityWhere(
   role: string | undefined,
   userId: string | undefined,
   teamId: string | undefined | null,
+  scopeGroup?: string | null,
 ): Record<string, unknown> | undefined {
+  // Escopo de grupo (ex.: acesso B2B): só vê leads dos funis desse grupo.
+  // Tem prioridade sobre o papel (vê TODOS os leads do grupo).
+  if (scopeGroup) {
+    return { stage: { pipeline: { groupName: scopeGroup } } };
+  }
   if (!userId || role === "admin") return undefined;
   if (role === "gestor" || role === "supervisor") {
     return teamId

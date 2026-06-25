@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     const userTeamId = (session!.user as Record<string, unknown>).teamId as
       | string
       | undefined;
-    const vis = leadVisibilityWhere(userRole, userId, userTeamId);
+    const vis = leadVisibilityWhere(userRole, userId, userTeamId, (session!.user as Record<string, unknown>).scopeGroup as string | null);
     if (vis) {
       Object.assign(leadWhere, vis);
       dealWhere.lead = {

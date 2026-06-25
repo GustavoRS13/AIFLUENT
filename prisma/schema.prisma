@@ -52,6 +52,7 @@ model User {
   role         String    @default("agent")
   phone        String?
   isActive     Boolean   @default(true)
+  scopeGroup   String?   // se setado, só enxerga funis/leads desse grupo (ex.: "B2B - Alumni by better")
   twoFactorEnabled Boolean @default(false)
   twoFactorSecret  String?
   lastLoginAt  DateTime?
