@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback, Fragment } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
+  ChevronDown,
   Search,
   ArrowLeft,
   MessageCircle,
@@ -193,6 +194,13 @@ export default function AtendimentoPage() {
   useEffect(() => {
     if (foundConv) lastSelectedConvRef.current = foundConv;
   }, [foundConv]);
+  // fecha o menu "..." ao clicar em qualquer lugar
+  useEffect(() => {
+    if (!menuConvId) return;
+    const close = () => setMenuConvId(null);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, [menuConvId]);
   // mensagem sendo respondida (citação), igual o WhatsApp
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
   // arquivos aguardando confirmação no modal de envio (drag&drop / anexo)
@@ -200,6 +208,21 @@ export default function AtendimentoPage() {
   // quantas conversas carregar (cresce com "Carregar mais")
   const [listLimit, setListLimit] = useState(200);
   const [hasMore, setHasMore] = useState(false);
+  // menu "..." de uma conversa (marcar como não lida)
+  const [menuConvId, setMenuConvId] = useState<string | null>(null);
+
+  // Marca conversa como NÃO LIDA → volta pros "Não lidos" pra responder depois.
+  const markUnread = useCallback(async (id: string) => {
+    setMenuConvId(null);
+    setConversations((prev) =>
+      prev.map((c) =>
+        c.id === id ? { ...c, unreadCount: c.unreadCount || 1 } : c,
+      ),
+    );
+    await fetch(`/api/conversations/${id}/unread`, { method: "POST" }).catch(
+      () => {},
+    );
+  }, []);
 
   // Fetch conversations from API (q = busca por nome/telefone/conteúdo de msg)
   const fetchConversations = useCallback(async (q?: string, limit = 200) => {
@@ -832,9 +855,38 @@ export default function AtendimentoPage() {
                           <p className="text-sm font-medium text-gray-900 truncate">
                             {conv.name}
                           </p>
-                          <span className="text-[10px] text-gray-400 shrink-0">
-                            {formatTime(conv.lastMessageAt)}
+                          <span className="flex shrink-0 items-center gap-1">
+                            <span className="text-[10px] text-gray-400">
+                              {formatTime(conv.lastMessageAt)}
+                            </span>
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              title="Mais"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setMenuConvId(
+                                  menuConvId === conv.id ? null : conv.id,
+                                );
+                              }}
+                              className="rounded p-0.5 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                            >
+                              <ChevronDown className="h-3.5 w-3.5" />
+                            </span>
                           </span>
+                          {menuConvId === conv.id && (
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                void markUnread(conv.id);
+                              }}
+                              className="absolute right-2 top-8 z-10 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-lg hover:bg-gray-50"
+                            >
+                              Marcar como não lida
+                            </span>
+                          )}
                         </div>
                         <p className="text-xs text-gray-500 truncate mt-0.5">
                           {conv.lastMessage}
