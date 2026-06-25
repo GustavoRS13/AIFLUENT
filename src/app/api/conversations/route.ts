@@ -74,7 +74,13 @@ export async function GET(request: Request) {
     const conversations = await prisma.conversation.findMany({
       where,
       orderBy: { lastMessageAt: "desc" },
-      take: 200,
+      take: Math.min(
+        3000,
+        Math.max(
+          50,
+          parseInt(url.searchParams.get("limit") || "200", 10) || 200,
+        ),
+      ),
       include: {
         lead: {
           select: {

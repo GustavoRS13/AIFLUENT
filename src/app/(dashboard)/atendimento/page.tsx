@@ -197,15 +197,17 @@ export default function AtendimentoPage() {
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
   // arquivos aguardando confirmação no modal de envio (drag&drop / anexo)
   const [pendingFiles, setPendingFiles] = useState<File[] | null>(null);
+  // quantas conversas carregar (cresce com "Carregar mais")
+  const [listLimit, setListLimit] = useState(200);
+  const [hasMore, setHasMore] = useState(false);
 
   // Fetch conversations from API (q = busca por nome/telefone/conteúdo de msg)
-  const fetchConversations = useCallback(async (q?: string) => {
+  const fetchConversations = useCallback(async (q?: string, limit = 200) => {
     try {
-      const res = await fetch(
-        q
-          ? `/api/conversations?q=${encodeURIComponent(q)}`
-          : "/api/conversations",
-      );
+      const qs = new URLSearchParams();
+      if (q) qs.set("q", q);
+      qs.set("limit", String(limit));
+      const res = await fetch(`/api/conversations?${qs.toString()}`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       const items = data.conversations || [];
@@ -244,6 +246,7 @@ export default function AtendimentoPage() {
           },
         );
         setConversations(mapped);
+        setHasMore(items.length >= limit); // veio "cheio" → pode ter mais
       }
     } catch {
       // API unavailable — keep empty state
@@ -252,9 +255,9 @@ export default function AtendimentoPage() {
     }
   }, []);
 
-  // Carrega a lista no mount + atualiza a cada 6s
+  // Carrega a lista no mount + atualiza a cada 6s (respeitando o limite carregado)
   useEffect(() => {
-    const run = () => fetchConversations(searchTerm || undefined);
+    const run = () => fetchConversations(searchTerm || undefined, listLimit);
     // busca com debounce; sem busca carrega na hora. Poll a cada 6s mantém vivo.
     const debounce = setTimeout(run, searchTerm ? 350 : 0);
     const interval = setInterval(run, 6000);
@@ -262,7 +265,7 @@ export default function AtendimentoPage() {
       clearTimeout(debounce);
       clearInterval(interval);
     };
-  }, [fetchConversations, searchTerm]);
+  }, [fetchConversations, searchTerm, listLimit]);
 
   // Abre/cria a conversa do lead vindo do pipeline (?leadId=)
   const [leadParamDone, setLeadParamDone] = useState(false);
@@ -849,6 +852,16 @@ export default function AtendimentoPage() {
                   );
                 })}
               </div>
+            )}
+            {/* Carregar mais conversas (histórico completo) */}
+            {hasMore && !searchTerm && (
+              <button
+                onClick={() => setListLimit((n) => n + 200)}
+                className="m-3 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-indigo-600 hover:bg-indigo-50"
+                style={{ width: "calc(100% - 1.5rem)" }}
+              >
+                Carregar mais conversas
+              </button>
             )}
           </div>
 
