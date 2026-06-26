@@ -12,6 +12,7 @@ export interface ChatMessage {
   createdAt: string;
   sentAt?: string; // ISO completo (p/ separadores de dia: Hoje/Ontem/data)
   wamid?: string; // id da mensagem no WhatsApp (p/ responder/citar)
+  reaction?: string; // emoji de reação (WhatsApp)
   sender?: string;
   mediaId?: string;
   errorReason?: string; // motivo real da falha (ex.: erro/política da Meta)

@@ -114,6 +114,39 @@ export class WhatsAppService {
     }
   }
 
+  // Reage a uma mensagem do cliente (emoji). emoji vazio remove a reação.
+  async sendReaction(
+    to: string,
+    messageId: string,
+    emoji: string,
+  ): Promise<{ messageId: string } | { error: string }> {
+    if (!this.isConfigured) return { error: "WhatsApp nao configurado" };
+    try {
+      const res = await this.fetchWithRetry(
+        `${WHATSAPP_API_URL}/${this.config.phoneNumberId}/messages`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.config.accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messaging_product: "whatsapp",
+            recipient_type: "individual",
+            to,
+            type: "reaction",
+            reaction: { message_id: messageId, emoji },
+          }),
+        },
+      );
+      const data = await res.json();
+      if (data.messages?.[0]?.id) return { messageId: data.messages[0].id };
+      return { error: data.error?.message || "Falha ao reagir" };
+    } catch (err) {
+      return { error: err instanceof Error ? err.message : "Erro de conexao" };
+    }
+  }
+
   async sendTemplateMessage(
     to: string,
     templateName: string,

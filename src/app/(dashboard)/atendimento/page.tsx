@@ -78,9 +78,12 @@ function fmtTime(iso?: string): string {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapApiMessage(m: any): ChatMessage {
   let mediaId: string | undefined;
+  let reaction: string | undefined;
   if (m.metadata) {
     try {
-      mediaId = JSON.parse(m.metadata).mediaId || undefined;
+      const md = JSON.parse(m.metadata);
+      mediaId = md.mediaId || undefined;
+      reaction = md.reaction || undefined;
     } catch {
       /* metadata pode não ser JSON */
     }
@@ -98,6 +101,7 @@ function mapApiMessage(m: any): ChatMessage {
     createdAt: fmtTime(m.createdAt),
     sentAt: m.createdAt as string,
     wamid: (m.externalId as string) || undefined,
+    reaction,
     mediaId,
     errorReason:
       m.status === "failed"
@@ -434,6 +438,25 @@ export default function AtendimentoPage() {
       /* otimista já exibido */
     }
   }, [input, selectedId, replyingTo, addMessage, setInput, setShowEmoji]);
+
+  // Reage (emoji) a uma mensagem — envia pelo WhatsApp + mostra na hora.
+  const handleReact = useCallback(
+    async (msg: ChatMessage, emoji: string) => {
+      if (!selectedId || !msg.wamid) return;
+      setAllMessages((prev) => ({
+        ...prev,
+        [selectedId]: (prev[selectedId] ?? []).map((m) =>
+          m.id === msg.id ? { ...m, reaction: emoji } : m,
+        ),
+      }));
+      await fetch(`/api/conversations/${selectedId}/react`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wamid: msg.wamid, emoji }),
+      }).catch(() => {});
+    },
+    [selectedId],
+  );
 
   // Exclui a mensagem do CRM (não apaga no WhatsApp do cliente).
   const handleDeleteMessage = useCallback(
@@ -1114,10 +1137,14 @@ export default function AtendimentoPage() {
                         type={msg.type}
                         mediaId={msg.mediaId}
                         errorReason={msg.errorReason}
+                        reaction={msg.reaction}
                         onReply={
                           msg.wamid ? () => setReplyingTo(msg) : undefined
                         }
                         onDelete={() => handleDeleteMessage(msg.id)}
+                        onReact={
+                          msg.wamid ? (e) => handleReact(msg, e) : undefined
+                        }
                       />
                     </Fragment>
                   );
