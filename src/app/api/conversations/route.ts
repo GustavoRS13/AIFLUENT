@@ -24,12 +24,7 @@ export async function GET(request: Request) {
     const scopeGroup = (session!.user as Record<string, unknown>).scopeGroup as
       | string
       | null;
-    where.lead = scopeGroup
-      ? {
-          ...canMessageLeadWhere(),
-          stage: { pipeline: { groupName: scopeGroup } },
-        }
-      : canMessageLeadWhere();
+    where.lead = canMessageLeadWhere();
     // Atendimento mostra só conversas onde o LEAD respondeu (enviou ao menos 1
     // mensagem). Disparos sem resposta não poluem o inbox; ao responder, o
     // webhook seta lastInboundAt e a conversa aparece automaticamente.
@@ -50,7 +45,13 @@ export async function GET(request: Request) {
       { lead: { consultantId: userId } },
     ];
     let visibilityOR: Record<string, unknown>[] | null = null;
-    if (userRole === "operador" && userId) {
+    if (scopeGroup) {
+      // usuário escopado (B2B): vê TUDO do grupo dele + o que for atribuído a ele
+      visibilityOR = [
+        { lead: { stage: { pipeline: { groupName: scopeGroup } } } },
+        { assigneeId: userId },
+      ];
+    } else if (userRole === "operador" && userId) {
       visibilityOR = ownConvos;
     } else if ((userRole === "gestor" || userRole === "supervisor") && userId) {
       visibilityOR = userTeamId
