@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
         role: true,
         phone: true,
         isActive: true,
+        scopeGroup: true,
         lastLoginAt: true,
         createdAt: true,
         organization: { select: { id: true, name: true } },

@@ -7,7 +7,6 @@ import {
   Plus,
   Mail,
   Phone,
-  MoreHorizontal,
   Shield,
   ShieldCheck,
   UserCog,
@@ -15,6 +14,9 @@ import {
   Target,
   MessageSquare,
   X,
+  KeyRound,
+  Copy,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +28,7 @@ type TeamMember = {
   role: "admin" | "gestor" | "supervisor" | "operador";
   avatar?: string;
   isActive: boolean;
+  scopeGroup?: string | null;
   stats: { leads: number; conversions: number; rate: number; messages: number };
 };
 
@@ -64,6 +67,7 @@ export default function TeamPage() {
   const [loading, setLoading] = useState(true);
   const [showAddMember, setShowAddMember] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
+  const [manageUser, setManageUser] = useState<TeamMember | null>(null);
 
   const loadTeam = useCallback(async () => {
     try {
@@ -85,6 +89,7 @@ export default function TeamPage() {
                   | "supervisor"
                   | "operador") || "operador",
               isActive: (u.isActive as boolean) ?? true,
+              scopeGroup: (u.scopeGroup as string | null) ?? null,
               stats: { leads: 0, conversions: 0, rate: 0, messages: 0 },
             })),
           );
@@ -235,10 +240,19 @@ export default function TeamPage() {
                     </div>
                   </div>
                 </div>
-                <button className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <MoreHorizontal className="w-4 h-4 text-gray-400 hover:text-gray-900" />
+                <button
+                  onClick={() => setManageUser(member)}
+                  title="Gerenciar acesso"
+                  className="flex items-center gap-1 rounded-lg border border-gray-200 px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100"
+                >
+                  <UserCog className="h-3.5 w-3.5" /> Acesso
                 </button>
               </div>
+              {member.scopeGroup && (
+                <p className="mb-3 inline-block rounded-md bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
+                  Escopo: {member.scopeGroup}
+                </p>
+              )}
 
               <div className="space-y-2 mb-4">
                 <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -307,6 +321,20 @@ export default function TeamPage() {
           <AddMemberModal
             onClose={() => setShowAddMember(false)}
             onSave={handleMemberCreated}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Gerenciar acesso (ADM) */}
+      <AnimatePresence>
+        {manageUser && (
+          <ManageAccessModal
+            user={manageUser}
+            onClose={() => setManageUser(null)}
+            onSaved={() => {
+              setManageUser(null);
+              loadTeam();
+            }}
           />
         )}
       </AnimatePresence>
@@ -509,6 +537,198 @@ function AddMemberModal({
             )}
           >
             {loading ? "Criando..." : "Adicionar"}
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ── Gerenciar acesso (ADM master) ─────────────────────────────────────────
+// Resetar senha, mudar papel, escopo de grupo e ativar/desativar.
+
+function ManageAccessModal({
+  user,
+  onClose,
+  onSaved,
+}: {
+  user: TeamMember;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [role, setRole] = useState(user.role);
+  const [scopeGroup, setScopeGroup] = useState(user.scopeGroup || "");
+  const [isActive, setIsActive] = useState(user.isActive);
+  const [newPassword, setNewPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [err, setErr] = useState("");
+
+  const genPassword = () => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+    let p = "";
+    for (let i = 0; i < 10; i++)
+      p += chars[Math.floor(Math.random() * chars.length)];
+    setNewPassword(p + "@1");
+  };
+
+  const save = async () => {
+    setSaving(true);
+    setErr("");
+    const payload: Record<string, unknown> = {
+      role,
+      isActive,
+      scopeGroup, // "" limpa o escopo
+    };
+    if (newPassword.trim()) {
+      if (newPassword.trim().length < 6) {
+        setErr("A senha deve ter no mínimo 6 caracteres.");
+        setSaving(false);
+        return;
+      }
+      payload.password = newPassword.trim();
+    }
+    try {
+      const res = await fetch(`/api/users/${user.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({}));
+        setErr(e.error || "Falha ao salvar (precisa ser ADM).");
+        setSaving(false);
+        return;
+      }
+      onSaved();
+    } catch {
+      setErr("Erro de conexão.");
+      setSaving(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <motion.div
+        initial={{ scale: 0.95, y: 10 }}
+        animate={{ scale: 1, y: 0 }}
+        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-semibold text-gray-900">
+              Gerenciar acesso
+            </h3>
+            <p className="text-xs text-gray-500">
+              {user.name} · {user.email}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          {/* Reset de senha */}
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-700">
+              Nova senha (deixe em branco para não alterar)
+            </label>
+            <div className="flex gap-2">
+              <input
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="••••••••"
+                className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
+              />
+              <button
+                onClick={genPassword}
+                className="flex items-center gap-1 rounded-lg border border-gray-200 px-2 text-xs font-medium text-gray-600 hover:bg-gray-50"
+              >
+                <KeyRound className="h-3.5 w-3.5" /> Gerar
+              </button>
+              {newPassword && (
+                <button
+                  onClick={() => {
+                    navigator.clipboard?.writeText(newPassword);
+                    setCopied(true);
+                  }}
+                  className="flex items-center rounded-lg border border-gray-200 px-2 text-xs text-gray-600 hover:bg-gray-50"
+                  title="Copiar"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+            {copied && (
+              <p className="mt-1 text-[11px] text-emerald-600">
+                Senha copiada — envie ao usuário.
+              </p>
+            )}
+          </div>
+
+          {/* Papel */}
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-700">
+              Papel
+            </label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value as TeamMember["role"])}
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
+            >
+              <option value="admin">Admin</option>
+              <option value="gestor">Gestor</option>
+              <option value="supervisor">Supervisor</option>
+              <option value="operador">Operador</option>
+            </select>
+          </div>
+
+          {/* Escopo de grupo */}
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-700">
+              Escopo de grupo (opcional — restringe a um grupo de funis)
+            </label>
+            <input
+              value={scopeGroup}
+              onChange={(e) => setScopeGroup(e.target.value)}
+              placeholder="ex.: B2B - Alumni by better (vazio = vê tudo)"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
+            />
+          </div>
+
+          {/* Ativo */}
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={isActive}
+              onChange={(e) => setIsActive(e.target.checked)}
+              className="h-4 w-4 rounded"
+            />
+            Acesso ativo (desmarcar bloqueia o login)
+          </label>
+
+          {err && <p className="text-xs text-rose-600">{err}</p>}
+
+          <button
+            onClick={save}
+            disabled={saving}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+          >
+            {saving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              "Salvar acesso"
+            )}
           </button>
         </div>
       </motion.div>
