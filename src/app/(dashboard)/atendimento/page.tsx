@@ -235,7 +235,9 @@ export default function AtendimentoPage() {
       const qs = new URLSearchParams();
       if (q) qs.set("q", q);
       qs.set("limit", String(limit));
-      const res = await fetch(`/api/conversations?${qs.toString()}`);
+      const res = await fetch(`/api/conversations?${qs.toString()}`, {
+        cache: "no-store",
+      });
       if (!res.ok) throw new Error();
       const data = await res.json();
       const items = data.conversations || [];
@@ -334,7 +336,9 @@ export default function AtendimentoPage() {
     let cancelled = false;
     const load = async () => {
       try {
-        const res = await fetch(`/api/conversations/${selectedId}`);
+        const res = await fetch(`/api/conversations/${selectedId}`, {
+          cache: "no-store",
+        });
         if (!res.ok) return;
         const { conversation } = await res.json();
         if (cancelled) return;
@@ -347,7 +351,7 @@ export default function AtendimentoPage() {
       }
     };
     load();
-    const t = setInterval(load, 5000);
+    const t = setInterval(load, 3000);
     return () => {
       cancelled = true;
       clearInterval(t);
@@ -426,7 +430,9 @@ export default function AtendimentoPage() {
         body: JSON.stringify({ conversationId: selectedId, content, replyTo }),
       });
       // Recarrega do servidor (mensagem real + status de entrega)
-      const res = await fetch(`/api/conversations/${selectedId}`);
+      const res = await fetch(`/api/conversations/${selectedId}`, {
+        cache: "no-store",
+      });
       if (res.ok) {
         const { conversation } = await res.json();
         const msgs: ChatMessage[] = (conversation.messages || []).map(

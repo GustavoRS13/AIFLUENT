@@ -6,6 +6,9 @@ import { logger } from "@/lib/logger";
 import { whatsapp } from "@/lib/whatsapp";
 import { canMessageLeadWhere } from "@/lib/lead-optout";
 
+// Nunca cacheia — polling do Atendimento precisa de dados em tempo real.
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   const rl = checkRateLimit(request, apiLimiter);
   if (rl) return rl;
