@@ -1,13 +1,22 @@
 // "Não perturbe": leads que NÃO podem receber mensagem (perdido / opt-out).
 // Usado tanto nos disparos quanto no Atendimento (some da lista / não respondidos).
 
-// Tags que significam "parar de enviar" / perdido (não incluir listas de disparo
-// como "PARA DISPARAR").
+// Tags que significam "parar de enviar" / perdido / número inválido / errado
+// (não incluir listas de disparo como "PARA DISPARAR").
+// IMPORTANTE: tag NÃO é a única fonte de opt-out — o sinal mais confiável é o
+// conteúdo da conversa (lead que respondeu "não quero/agora não/número errado").
+// Esses são tratados marcando a tag STOP_TAG após leitura das conversas.
 export const OPTOUT_TAGS = [
   "PARAR ENVIO MSG",
   "PARAR MSG MSI",
   "Perdido 1",
   "número inválido",
+  // variações de número inválido/errado/sem contato (mesma semântica):
+  "Numero Invalido",
+  "telefone inválido",
+  "Telefone de Outra Pessoa",
+  "sem wpp",
+  "sem tel",
 ];
 
 // Tag aplicada automaticamente quando o cliente pede pra parar.

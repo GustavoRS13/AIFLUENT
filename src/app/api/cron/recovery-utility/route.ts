@@ -23,10 +23,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "não autorizado" }, { status: 401 });
   }
 
-  // 0) Modo descanso: pausa a recuperação por blast frio. O próprio disparo de
-  //    recuperação pode trabalhar CONTRA o número (quem não quer bloqueia). Quem
-  //    realmente recupera é o descanso + conversa de mão dupla com engajados.
+  // 0) Modo descanso: o blast frio pra leads NOVOS fica pausado (pode trabalhar
+  //    contra o número — quem não quer bloqueia). Mas, com REENGAGE_DRIP=1,
+  //    mandamos um lote pequeno de UTILITY só pra lista CURADA: já contatados,
+  //    ENTREGUE, que NÃO responderam (logo nunca disseram não), fora de
+  //    opt-out/cancelados, sem repetir quem já entrou. UTILITY entrega bem mesmo
+  //    no RED e lote pequeno não cria pico de bloqueio.
   if (isNumberResting()) {
+    if (process.env.REENGAGE_DRIP === "1") {
+      return await reengageDrip();
+    }
     logger.info("recovery_cron_skip_resting", {
       until: restingUntil()?.toISOString(),
     });
@@ -134,4 +140,101 @@ export async function GET(request: NextRequest) {
     result,
   });
   return NextResponse.json({ job: job.id, recipients: inserted, result });
+}
+
+// Drip diário de RE-ENGAJAMENTO (rest-safe). Lote pequeno de UTILITY pra lista
+// curada de NÃO-respondentes que receberam e nunca voltaram. Avança sozinho
+// (nunca repete quem já entrou em um job "Re-engajamento%").
+async function reengageDrip() {
+  const { prisma } = await import("@/lib/prisma");
+  const org = await prisma.organization.findFirst({ select: { id: true } });
+  const admin = await prisma.user.findFirst({
+    where: { role: "admin" },
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+  if (!org || !admin) {
+    return NextResponse.json(
+      { error: "org/admin não encontrados" },
+      { status: 500 },
+    );
+  }
+  const orgId = org.id;
+
+  const job = await prisma.broadcastJob.create({
+    data: {
+      name: "Re-engajamento não-respondentes (UTILITY)",
+      templateName: TEMPLATE,
+      languageCode: "pt_BR",
+      params: JSON.stringify(["{nome}"]),
+      // rest-safe: pode rodar durante o descanso do número.
+      filters: JSON.stringify({ restSafe: true, kind: "reengage" }),
+      dryRun: false,
+      status: "running",
+      startedAt: new Date(),
+      total: 0,
+      organizationId: orgId,
+      createdById: admin.id,
+    },
+    select: { id: true },
+  });
+
+  // Curadoria: entregue + sem resposta (nunca disse não) + não opt-out/inválido
+  // (canMessageSql) + não cancelado + ainda não re-engajado. Lote = RECOVERY_DAILY.
+  const inserted = await prisma.$executeRawUnsafe(
+    `INSERT INTO "BroadcastRecipient" (id,"jobId","leadId",phone,status,"updatedAt")
+     SELECT gen_random_uuid()::text, $1, l.id,
+            regexp_replace(coalesce(l.whatsapp,l.phone,''),'\\D','','g'), 'pending', now()
+     FROM "Lead" l
+     WHERE l."organizationId" = $2
+       AND l.whatsapp IS NOT NULL
+       AND ${canMessageSql("l")}
+       AND length(regexp_replace(coalesce(l.whatsapp,l.phone,''),'\\D','','g')) >= 10
+       AND NOT EXISTS (SELECT 1 FROM "LeadTag" lt JOIN "Tag" t ON t.id=lt."tagId"
+                       WHERE lt."leadId"=l.id AND t.name IN ('CANCELADO','DISPARO FE - CANCELADOS'))
+       AND EXISTS (SELECT 1 FROM "Conversation" c JOIN "ConversationMessage" m
+                   ON m."conversationId"=c.id
+                   WHERE c."leadId"=l.id AND m.direction='outbound'
+                     AND m.metadata LIKE '%broadcast%' AND m.status IN ('delivered','read'))
+       AND NOT EXISTS (SELECT 1 FROM "Conversation" c JOIN "ConversationMessage" m
+                       ON m."conversationId"=c.id
+                       WHERE c."leadId"=l.id AND m.direction='inbound')
+       AND NOT EXISTS (SELECT 1 FROM "BroadcastRecipient" r JOIN "BroadcastJob" j
+                       ON j.id=r."jobId"
+                       WHERE r."leadId"=l.id AND j.name LIKE 'Re-engajamento%')
+     ORDER BY l."updatedAt" DESC
+     LIMIT ${DAILY}`,
+    job.id,
+    orgId,
+  );
+
+  if (!inserted) {
+    await prisma.broadcastJob.update({
+      where: { id: job.id },
+      data: { status: "completed", completedAt: new Date() },
+    });
+    return NextResponse.json({
+      job: job.id,
+      recipients: 0,
+      note: "re-engajamento concluído — sem mais não-respondentes na fila",
+    });
+  }
+
+  await prisma.broadcastJob.update({
+    where: { id: job.id },
+    data: { total: Number(inserted) },
+  });
+
+  const result = await runBroadcastBatch(prisma, job.id, 50000);
+  logger.info("reengage_drip_done", {
+    job: job.id,
+    recipients: inserted,
+    result,
+  });
+  return NextResponse.json({
+    mode: "reengage_drip",
+    job: job.id,
+    recipients: inserted,
+    result,
+  });
 }
