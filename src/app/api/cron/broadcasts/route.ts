@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
 import { runBroadcastBatch } from "@/lib/broadcast-worker";
+import { isNumberResting, isRestSafeJob } from "@/lib/number-rest";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -18,12 +19,22 @@ async function run(request: NextRequest) {
 
   try {
     const { prisma } = await import("@/lib/prisma");
-    const running = await prisma.broadcastJob.findMany({
+    const all = await prisma.broadcastJob.findMany({
       where: { status: "running" },
-      select: { id: true },
+      select: { id: true, filters: true },
       orderBy: { startedAt: "asc" },
       take: 10,
     });
+
+    // Em descanso, só drena jobs rest-safe (direcionados a quentes/quem
+    // respondeu). Blast frio fica parado até a janela de descanso passar.
+    const resting = isNumberResting();
+    const running = resting ? all.filter((j) => isRestSafeJob(j.filters)) : all;
+    if (resting && running.length < all.length) {
+      logger.info("broadcasts_cron_resting_skip_cold", {
+        held: all.length - running.length,
+      });
+    }
 
     const start = Date.now();
     const results: Record<string, unknown>[] = [];

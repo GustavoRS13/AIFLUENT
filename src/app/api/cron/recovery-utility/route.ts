@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runBroadcastBatch } from "@/lib/broadcast-worker";
 import { canMessageSql } from "@/lib/lead-optout";
+import { isNumberResting, restingUntil } from "@/lib/number-rest";
 import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const GRAPH = "https://graph.facebook.com/v21.0";
-const DAILY = 250; // volume moderado de recuperação por dia
+// Volume diário de recuperação. Configurável por env (sem redeploy de código)
+// para "reduzir" o ritmo na retomada pós-descanso.
+const DAILY = Number(process.env.RECOVERY_DAILY) || 250;
 const TEMPLATE = "retomar_atendimento"; // UTILITY
 
 // Cron de RECUPERAÇÃO do número: 1x/dia dispara UTILITY pra leads novos (gera
@@ -18,6 +21,19 @@ export async function GET(request: NextRequest) {
   const auth = request.headers.get("authorization");
   if (secret && auth !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "não autorizado" }, { status: 401 });
+  }
+
+  // 0) Modo descanso: pausa a recuperação por blast frio. O próprio disparo de
+  //    recuperação pode trabalhar CONTRA o número (quem não quer bloqueia). Quem
+  //    realmente recupera é o descanso + conversa de mão dupla com engajados.
+  if (isNumberResting()) {
+    logger.info("recovery_cron_skip_resting", {
+      until: restingUntil()?.toISOString(),
+    });
+    return NextResponse.json({
+      skipped: "número em descanso — recuperação por blast pausada",
+      restingUntil: restingUntil()?.toISOString(),
+    });
   }
 
   const pid = process.env.WHATSAPP_PHONE_NUMBER_ID || "";
