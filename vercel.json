@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/cron/recovery-utility",
-      "schedule": "0 13 * * *"
+      "schedule": "25 15 * * *"
     }
   ]
 }
