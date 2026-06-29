@@ -23,6 +23,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "não autorizado" }, { status: 401 });
   }
 
+  // ?check=1 → só lê a saúde do número na Meta (quality + tier), NÃO dispara.
+  // Path autenticado por cron secret pra inspeção sem sessão de admin.
+  if (new URL(request.url).searchParams.get("check") === "1") {
+    const pnId = process.env.WHATSAPP_PHONE_NUMBER_ID || "";
+    const tk = process.env.WHATSAPP_ACCESS_TOKEN || "";
+    const data = await fetch(
+      `${GRAPH}/${pnId}?fields=display_phone_number,quality_rating,messaging_limit_tier,status,name_status,throughput&access_token=${encodeURIComponent(tk)}`,
+    )
+      .then((r) => r.json())
+      .catch((e) => ({ error: String(e) }));
+    return NextResponse.json({ check: true, number: data });
+  }
+
   // 0) Modo descanso: o blast frio pra leads NOVOS fica pausado (pode trabalhar
   //    contra o número — quem não quer bloqueia). Mas, com REENGAGE_DRIP=1,
   //    mandamos um lote pequeno de UTILITY só pra lista CURADA: já contatados,
