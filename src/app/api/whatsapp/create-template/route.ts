@@ -6,6 +6,32 @@ export const dynamic = "force-dynamic";
 
 const GRAPH = "https://graph.facebook.com/v21.0";
 
+// Lê o status de um template (?name=...). Cron-authed. Usado pra monitorar a
+// aprovação na Meta (PENDING → APPROVED/REJECTED).
+export async function GET(request: NextRequest) {
+  const secret = process.env.CRON_SECRET;
+  const auth = request.headers.get("authorization");
+  if (secret && auth !== `Bearer ${secret}`) {
+    return NextResponse.json({ error: "não autorizado" }, { status: 401 });
+  }
+  const name = new URL(request.url).searchParams.get("name") || "";
+  const waba = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID || "";
+  const token = process.env.WHATSAPP_ACCESS_TOKEN || "";
+  const data = await fetch(
+    `${GRAPH}/${waba}/message_templates?name=${encodeURIComponent(name)}&access_token=${encodeURIComponent(token)}`,
+  )
+    .then((r) => r.json())
+    .catch((e) => ({ error: String(e) }));
+  const t = Array.isArray(data?.data) ? data.data[0] : null;
+  return NextResponse.json({
+    name,
+    status: t?.status || null,
+    category: t?.category || null,
+    id: t?.id || null,
+    raw: t ? undefined : data,
+  });
+}
+
 // Cria/submete um template de mensagem do WhatsApp na WABA, via Meta Cloud API.
 // Autenticado por CRON_SECRET (permite submeter sem sessão de admin). O template
 // entra como PENDING e precisa da aprovação da Meta antes de poder ser enviado.
