@@ -283,9 +283,14 @@ export async function runBroadcastBatch(
           await prisma.conversation.update({
             where: { id: conv.id },
             data: {
-              lastMessageAt: new Date(),
+              // NÃO bumpa lastMessageAt num disparo: a conversa não deve subir
+              // no Atendimento só por ter RECEBIDO o template. Ela sobe quando o
+              // lead RESPONDER (o webhook de inbound bumpa lastMessageAt +
+              // lastInboundAt). Sem isso, disparo a quem não respondeu poluía o
+              // topo da caixa. A mensagem fica no thread, lá embaixo.
               // re-oculta a conversa de disparo se o lead NUNCA respondeu;
-              // se já tem inbound, é atendimento real → mantém visível.
+              // se já tem inbound, é atendimento real → mantém visível (na
+              // posição antiga, sem bumpar).
               ...(conv.lastInboundAt ? {} : { status: "broadcast" }),
             },
           });
