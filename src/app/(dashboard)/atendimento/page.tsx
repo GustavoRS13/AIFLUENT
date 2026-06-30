@@ -1228,7 +1228,11 @@ export default function AtendimentoPage() {
               className="hidden lg:block border-l border-gray-200 overflow-hidden shrink-0 bg-white"
             >
               <div className="w-[340px] h-full">
+                {/* key por conversa: remonta o painel ao trocar de conversa, pra
+                    não mostrar o lead/negócio/Copiloto da conversa anterior
+                    (estado interno preso = lead errado no painel). */}
                 <LeadOperationPanel
+                  key={selectedConv.id}
                   leadId={selectedConv.leadId || null}
                   className="h-full"
                 />
