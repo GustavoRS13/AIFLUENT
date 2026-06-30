@@ -17,6 +17,24 @@ export async function GET(request: NextRequest) {
   const name = new URL(request.url).searchParams.get("name") || "";
   const waba = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID || "";
   const token = process.env.WHATSAPP_ACCESS_TOKEN || "";
+  // ?waba=1 → qual WABA/conta + números esta credencial alcança
+  if (new URL(request.url).searchParams.get("waba") === "1") {
+    const info = await fetch(
+      `${GRAPH}/${waba}?fields=name,id&access_token=${encodeURIComponent(token)}`,
+    )
+      .then((r) => r.json())
+      .catch((e) => ({ error: String(e) }));
+    const nums = await fetch(
+      `${GRAPH}/${waba}/phone_numbers?fields=display_phone_number,verified_name,quality_rating&access_token=${encodeURIComponent(token)}`,
+    )
+      .then((r) => r.json())
+      .catch((e) => ({ error: String(e) }));
+    return NextResponse.json({
+      waba_id: waba,
+      conta: info,
+      numeros: nums?.data || nums,
+    });
+  }
   const data = await fetch(
     `${GRAPH}/${waba}/message_templates?name=${encodeURIComponent(name)}&access_token=${encodeURIComponent(token)}`,
   )
