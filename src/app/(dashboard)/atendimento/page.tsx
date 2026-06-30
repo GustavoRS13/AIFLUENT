@@ -181,6 +181,12 @@ export default function AtendimentoPage() {
   // guarda a última conversa aberta — se ela sair da lista (recarga/limite),
   // a tela NÃO some: cai de volta nessa referência.
   const lastSelectedConvRef = useRef<Conversation | null>(null);
+  // Guard de corrida: o poll (3s) e o envio fazem fetch concorrente. Sem isso,
+  // um fetch do poll que começou ANTES do envio voltava depois e sobrescrevia o
+  // estado SEM a msg recém-enviada → a resposta "sumia". Cada fetch pega um seq
+  // crescente; só aplica se for >= ao último aplicado (o mais novo vence).
+  const fetchSeqRef = useRef(0);
+  const appliedSeqRef = useRef(0);
 
   const foundConv = conversations.find((c) => c.id === selectedId);
   const selectedConv =
@@ -335,6 +341,7 @@ export default function AtendimentoPage() {
     if (!selectedId) return;
     let cancelled = false;
     const load = async () => {
+      const seq = ++fetchSeqRef.current;
       try {
         const res = await fetch(`/api/conversations/${selectedId}`, {
           cache: "no-store",
@@ -345,7 +352,7 @@ export default function AtendimentoPage() {
         const msgs: ChatMessage[] = (conversation.messages || []).map(
           mapApiMessage,
         );
-        setAllMessages((prev) => ({ ...prev, [selectedId]: msgs }));
+        applyServerMessages(selectedId, msgs, seq);
       } catch {
         /* mantém estado anterior */
       }
@@ -404,6 +411,29 @@ export default function AtendimentoPage() {
     [selectedId],
   );
 
+  // Aplica mensagens do servidor com guard de sequência: descarta respostas de
+  // fetches "velhos" (que voltaram fora de ordem) e PRESERVA mensagens otimistas
+  // (tmp-) que o servidor ainda não refletiu — assim a resposta recém-enviada
+  // não some enquanto o servidor não a devolve.
+  const applyServerMessages = useCallback(
+    (convId: string, serverMsgs: ChatMessage[], seq: number) => {
+      if (seq < appliedSeqRef.current) return;
+      appliedSeqRef.current = seq;
+      setAllMessages((prev) => {
+        const local = prev[convId] ?? [];
+        const pending = local.filter(
+          (m) =>
+            m.id.startsWith("tmp-") &&
+            !serverMsgs.some(
+              (s) => s.direction === m.direction && s.content === m.content,
+            ),
+        );
+        return { ...prev, [convId]: [...serverMsgs, ...pending] };
+      });
+    },
+    [],
+  );
+
   const handleSend = useCallback(async () => {
     const content = input.trim();
     if (!content || !selectedId) return;
@@ -429,7 +459,10 @@ export default function AtendimentoPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ conversationId: selectedId, content, replyTo }),
       });
-      // Recarrega do servidor (mensagem real + status de entrega)
+      // Recarrega do servidor (mensagem real + status de entrega). Usa o guard
+      // de sequência: este fetch começa DEPOIS do envio, então tem o seq mais
+      // alto e vence qualquer poll concorrente que tenha começado antes.
+      const seq = ++fetchSeqRef.current;
       const res = await fetch(`/api/conversations/${selectedId}`, {
         cache: "no-store",
       });
@@ -438,12 +471,20 @@ export default function AtendimentoPage() {
         const msgs: ChatMessage[] = (conversation.messages || []).map(
           mapApiMessage,
         );
-        setAllMessages((prev) => ({ ...prev, [selectedId]: msgs }));
+        applyServerMessages(selectedId, msgs, seq);
       }
     } catch {
       /* otimista já exibido */
     }
-  }, [input, selectedId, replyingTo, addMessage, setInput, setShowEmoji]);
+  }, [
+    input,
+    selectedId,
+    replyingTo,
+    addMessage,
+    setInput,
+    setShowEmoji,
+    applyServerMessages,
+  ]);
 
   // Reage (emoji) a uma mensagem — envia pelo WhatsApp + mostra na hora.
   const handleReact = useCallback(
@@ -518,19 +559,20 @@ export default function AtendimentoPage() {
             "Não consegui enviar este arquivo pelo WhatsApp. Tente novamente.",
           );
         }
+        const seq = ++fetchSeqRef.current;
         const res = await fetch(`/api/conversations/${selectedId}`);
         if (res.ok) {
           const { conversation } = await res.json();
           const msgs: ChatMessage[] = (conversation.messages || []).map(
             mapApiMessage,
           );
-          setAllMessages((prev) => ({ ...prev, [selectedId]: msgs }));
+          applyServerMessages(selectedId, msgs, seq);
         }
       } catch {
         /* otimista já exibido */
       }
     },
-    [selectedId, addMessage],
+    [selectedId, addMessage, applyServerMessages],
   );
 
   const handleFileUpload = useCallback((file: File) => {
@@ -601,19 +643,20 @@ export default function AtendimentoPage() {
             `Não consegui enviar o template${r?.error ? `: ${r.error}` : ""}.`,
           );
         }
+        const seq = ++fetchSeqRef.current;
         const res = await fetch(`/api/conversations/${selectedId}`);
         if (res.ok) {
           const { conversation } = await res.json();
-          setAllMessages((prev) => ({
-            ...prev,
-            [selectedId]: (conversation.messages || []).map(mapApiMessage),
-          }));
+          const msgs: ChatMessage[] = (conversation.messages || []).map(
+            mapApiMessage,
+          );
+          applyServerMessages(selectedId, msgs, seq);
         }
       } catch {
         /* otimista exibido */
       }
     },
-    [selectedId, addMessage],
+    [selectedId, addMessage, applyServerMessages],
   );
 
   // Cria lead + conversa nova a partir do Atendimento
