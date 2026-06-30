@@ -27,6 +27,7 @@ export interface ChatBubbleProps {
   mediaId?: string;
   errorReason?: string;
   reaction?: string;
+  quoted?: { content: string; direction: "inbound" | "outbound" };
   onReply?: () => void;
   onDelete?: () => void;
   onReact?: (emoji: string) => void;
@@ -43,6 +44,7 @@ export function ChatMessageBubble({
   mediaId,
   errorReason,
   reaction,
+  quoted,
   onReply,
   onDelete,
   onReact,
@@ -135,6 +137,16 @@ export function ChatMessageBubble({
         )}
         {senderName && !aiGenerated && direction === "outbound" && (
           <p className="text-[10px] text-emerald-700 mb-1">{senderName}</p>
+        )}
+        {quoted && (
+          <div className="mb-1 rounded-md border-l-4 border-emerald-500 bg-black/5 px-2 py-1">
+            <p className="text-[10px] font-medium text-emerald-700">
+              {quoted.direction === "inbound" ? "Cliente" : "Você"}
+            </p>
+            <p className="line-clamp-2 text-xs text-gray-600 whitespace-pre-wrap">
+              {quoted.content}
+            </p>
+          </div>
         )}
         {type === "image" && mediaSrc ? (
           <a href={mediaSrc} target="_blank" rel="noopener noreferrer">

@@ -79,11 +79,19 @@ function fmtTime(iso?: string): string {
 function mapApiMessage(m: any): ChatMessage {
   let mediaId: string | undefined;
   let reaction: string | undefined;
+  let quoted: ChatMessage["quoted"] | undefined;
   if (m.metadata) {
     try {
       const md = JSON.parse(m.metadata);
       mediaId = md.mediaId || undefined;
       reaction = md.reaction || undefined;
+      if (md.quoted?.content) {
+        quoted = {
+          content: String(md.quoted.content),
+          direction:
+            md.quoted.direction === "outbound" ? "outbound" : "inbound",
+        };
+      }
     } catch {
       /* metadata pode não ser JSON */
     }
@@ -102,6 +110,7 @@ function mapApiMessage(m: any): ChatMessage {
     sentAt: m.createdAt as string,
     wamid: (m.externalId as string) || undefined,
     reaction,
+    quoted,
     mediaId,
     errorReason:
       m.status === "failed"
@@ -438,11 +447,14 @@ export default function AtendimentoPage() {
     const content = input.trim();
     if (!content || !selectedId) return;
     const replyTo = replyingTo?.wamid;
+    const optimisticQuote = replyingTo
+      ? { content: replyingTo.content, direction: replyingTo.direction }
+      : undefined;
     setInput("");
     setShowEmoji(false);
     setReplyingTo(null);
     nearBottomRef.current = true; // ao enviar, desce p/ mostrar sua mensagem
-    // Exibe otimista enquanto envia
+    // Exibe otimista enquanto envia (com a citação, se for resposta)
     addMessage({
       id: `tmp-${Date.now()}`,
       direction: "outbound",
@@ -451,6 +463,7 @@ export default function AtendimentoPage() {
       status: "sent",
       aiGenerated: false,
       createdAt: now(),
+      quoted: optimisticQuote,
     });
     try {
       // Envia de verdade pelo WhatsApp + persiste
@@ -1164,6 +1177,7 @@ export default function AtendimentoPage() {
                         mediaId={msg.mediaId}
                         errorReason={msg.errorReason}
                         reaction={msg.reaction}
+                        quoted={msg.quoted}
                         onReply={
                           msg.wamid ? () => setReplyingTo(msg) : undefined
                         }

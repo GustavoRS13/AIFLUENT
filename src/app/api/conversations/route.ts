@@ -185,6 +185,27 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Se é resposta a uma mensagem (replyTo = wamid), guarda o trecho citado no
+    // metadata pra renderizar a citação no thread (igual ao WhatsApp).
+    let metadata: string | undefined;
+    if (parsed.data.replyTo) {
+      const quotedMsg = await prisma.conversationMessage.findFirst({
+        where: {
+          conversationId: parsed.data.conversationId,
+          externalId: parsed.data.replyTo,
+        },
+        select: { content: true, direction: true },
+      });
+      if (quotedMsg) {
+        metadata = JSON.stringify({
+          quoted: {
+            content: quotedMsg.content.slice(0, 300),
+            direction: quotedMsg.direction,
+          },
+        });
+      }
+    }
+
     const message = await prisma.conversationMessage.create({
       data: {
         conversationId: parsed.data.conversationId,
@@ -194,6 +215,7 @@ export async function POST(request: NextRequest) {
         status,
         externalId,
         senderId: userId,
+        metadata,
       },
     });
 
