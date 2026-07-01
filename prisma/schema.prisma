@@ -426,6 +426,10 @@ model Conversation {
   unreadCount   Int       @default(0)
   aiSuggestion  String?
   metadata      String?
+  // Multi-número: qual número de WhatsApp (phone_number_id da Meta) é dono desta
+  // conversa. null = número padrão (env). Separa a caixa por número + envia pelo
+  // número certo.
+  phoneNumberId String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -444,6 +448,7 @@ model Conversation {
   @@index([lastMessageAt])
   @@index([leadId])
   @@index([status])
+  @@index([phoneNumberId])
 }
 
 model ConversationMessage {

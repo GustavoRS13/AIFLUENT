@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, requireOrgId } from "@/lib/api-auth";
-import { whatsapp } from "@/lib/whatsapp";
+import { whatsappFor } from "@/lib/whatsapp-numbers";
 
 export const runtime = "nodejs";
 
@@ -26,7 +26,10 @@ export async function POST(
   const { prisma } = await import("@/lib/prisma");
   const conv = await prisma.conversation.findFirst({
     where: { id, organizationId: orgId },
-    select: { lead: { select: { whatsapp: true, phone: true } } },
+    select: {
+      phoneNumberId: true,
+      lead: { select: { whatsapp: true, phone: true } },
+    },
   });
   if (!conv) {
     return NextResponse.json(
@@ -35,6 +38,7 @@ export async function POST(
     );
   }
   const to = conv.lead?.whatsapp || conv.lead?.phone;
+  const whatsapp = await whatsappFor(prisma, orgId, conv.phoneNumberId);
   if (to && whatsapp.isConfigured) {
     await whatsapp.sendReaction(to, wamid, emoji).catch(() => null);
   }

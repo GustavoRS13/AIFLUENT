@@ -57,7 +57,13 @@ export async function persistInboundMessage(
   orgId: string,
   msg: InboundMessage,
   contactName?: string,
+  phoneNumberId?: string,
 ): Promise<PersistInboundResult> {
+  // Número padrão (env) → guardamos null (não fragmenta as conversas existentes).
+  // Número não-padrão (ex.: 1874) → guarda o phone_number_id → caixa separada.
+  const envId = process.env.WHATSAPP_PHONE_NUMBER_ID || "";
+  const numId =
+    !phoneNumberId || phoneNumberId === envId ? null : phoneNumberId;
   // 0. idempotência: mesma mensagem entregue 2x pela Meta
   const already = await prisma.conversationMessage.findFirst({
     where: { externalId: msg.externalId },
@@ -77,7 +83,12 @@ export async function persistInboundMessage(
 
   // 2. conversa aberta do canal whatsapp para esse lead
   let conversation = await prisma.conversation.findFirst({
-    where: { organizationId: orgId, leadId: lead.id, channel: "whatsapp" },
+    where: {
+      organizationId: orgId,
+      leadId: lead.id,
+      channel: "whatsapp",
+      phoneNumberId: numId,
+    },
     orderBy: { createdAt: "desc" },
     select: { id: true },
   });
@@ -88,6 +99,7 @@ export async function persistInboundMessage(
         status: "open",
         leadId: lead.id,
         organizationId: orgId,
+        phoneNumberId: numId,
       },
       select: { id: true },
     });

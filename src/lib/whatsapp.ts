@@ -19,8 +19,15 @@ function getConfig(): WhatsAppConfig {
 export class WhatsAppService {
   private config: WhatsAppConfig;
 
-  constructor() {
-    this.config = getConfig();
+  // Sem override → usa o número padrão (env, ex.: 94742). Com override
+  // (phoneNumberId/accessToken/businessAccountId) → opera OUTRO número. Assim o
+  // número padrão nunca muda de comportamento; multi-número roteia por override.
+  constructor(configOverride?: Partial<WhatsAppConfig>) {
+    this.config = { ...getConfig(), ...configOverride };
+  }
+
+  get phoneNumberId(): string {
+    return this.config.phoneNumberId;
   }
 
   get isConfigured(): boolean {

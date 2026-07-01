@@ -197,6 +197,17 @@ export default function AtendimentoPage() {
   >([]);
   const [convSearching, setConvSearching] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
+  // Multi-número: números de WhatsApp da org + qual está selecionado ("todos" ou
+  // um phone_number_id). Filtra a caixa por número.
+  const [numbers, setNumbers] = useState<
+    {
+      phoneNumberId: string;
+      displayPhone: string;
+      displayName: string;
+      isDefault: boolean;
+    }[]
+  >([]);
+  const [selectedNumber, setSelectedNumber] = useState<string>("todos");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesBoxRef = useRef<HTMLDivElement>(null);
   // true = usuário está no fim da conversa (pode auto-descer). false = subiu p/ ler.
@@ -260,64 +271,77 @@ export default function AtendimentoPage() {
   }, [menuConvId]);
 
   // Fetch conversations from API (q = busca por nome/telefone/conteúdo de msg)
-  const fetchConversations = useCallback(async (q?: string, limit = 200) => {
-    try {
-      const qs = new URLSearchParams();
-      if (q) qs.set("q", q);
-      qs.set("limit", String(limit));
-      const res = await fetch(`/api/conversations?${qs.toString()}`, {
-        cache: "no-store",
-      });
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-      const items = data.conversations || [];
-      if (Array.isArray(items)) {
-        const mapped: Conversation[] = items.map(
-          (c: Record<string, unknown>) => {
-            const lead = c.lead as Record<string, unknown> | null;
-            const messages = c.messages as
-              | Array<Record<string, unknown>>
-              | undefined;
-            const lastMsg = messages?.[0];
-            return {
-              id: c.id as string,
-              leadId: (lead?.id as string) || "",
-              name:
-                [lead?.firstName, lead?.lastName].filter(Boolean).join(" ") ||
-                "Sem nome",
-              avatar:
-                ((lead?.firstName as string)?.[0] || "?").toUpperCase() +
-                ((lead?.lastName as string)?.[0] || "").toUpperCase(),
-              phone: (lead?.phone || lead?.whatsapp) as string | undefined,
-              lastMessage: (lastMsg?.content as string) || "",
-              lastMessageAt: (c.lastMessageAt ||
-                c.updatedAt ||
-                new Date().toISOString()) as string,
-              lastInboundAt: (c.lastInboundAt as string | null) ?? null,
-              unreadCount: (c.unreadCount as number) || 0,
-              // última msg é do CLIENTE → aguardando resposta do time
-              awaitingReply: (lastMsg?.direction as string) === "inbound",
-              channel: (c.channel as ConversationChannel) || "whatsapp",
-              assignee: (c.assignee as Record<string, unknown>)?.name as
-                | string
-                | undefined,
-              messages: [],
-            };
-          },
-        );
-        setConversations(mapped);
-        setHasMore(items.length >= limit); // veio "cheio" → pode ter mais
+  const fetchConversations = useCallback(
+    async (q?: string, limit = 200, number?: string) => {
+      try {
+        const qs = new URLSearchParams();
+        if (q) qs.set("q", q);
+        qs.set("limit", String(limit));
+        if (number && number !== "todos") qs.set("number", number);
+        const res = await fetch(`/api/conversations?${qs.toString()}`, {
+          cache: "no-store",
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const items = data.conversations || [];
+        if (Array.isArray(items)) {
+          const mapped: Conversation[] = items.map(
+            (c: Record<string, unknown>) => {
+              const lead = c.lead as Record<string, unknown> | null;
+              const messages = c.messages as
+                | Array<Record<string, unknown>>
+                | undefined;
+              const lastMsg = messages?.[0];
+              return {
+                id: c.id as string,
+                leadId: (lead?.id as string) || "",
+                name:
+                  [lead?.firstName, lead?.lastName].filter(Boolean).join(" ") ||
+                  "Sem nome",
+                avatar:
+                  ((lead?.firstName as string)?.[0] || "?").toUpperCase() +
+                  ((lead?.lastName as string)?.[0] || "").toUpperCase(),
+                phone: (lead?.phone || lead?.whatsapp) as string | undefined,
+                lastMessage: (lastMsg?.content as string) || "",
+                lastMessageAt: (c.lastMessageAt ||
+                  c.updatedAt ||
+                  new Date().toISOString()) as string,
+                lastInboundAt: (c.lastInboundAt as string | null) ?? null,
+                unreadCount: (c.unreadCount as number) || 0,
+                // última msg é do CLIENTE → aguardando resposta do time
+                awaitingReply: (lastMsg?.direction as string) === "inbound",
+                channel: (c.channel as ConversationChannel) || "whatsapp",
+                assignee: (c.assignee as Record<string, unknown>)?.name as
+                  | string
+                  | undefined,
+                messages: [],
+              };
+            },
+          );
+          setConversations(mapped);
+          setHasMore(items.length >= limit); // veio "cheio" → pode ter mais
+        }
+      } catch {
+        // API unavailable — keep empty state
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      // API unavailable — keep empty state
-    } finally {
-      setLoading(false);
-    }
+    },
+    [],
+  );
+
+  // Carrega os números de WhatsApp da org (pro seletor multi-número)
+  useEffect(() => {
+    fetch("/api/whatsapp/numbers")
+      .then((r) => r.json())
+      .then((d) => setNumbers(Array.isArray(d.numbers) ? d.numbers : []))
+      .catch(() => {});
   }, []);
 
   // Carrega a lista no mount + atualiza a cada 6s (respeitando o limite carregado)
   useEffect(() => {
-    const run = () => fetchConversations(searchTerm || undefined, listLimit);
+    const run = () =>
+      fetchConversations(searchTerm || undefined, listLimit, selectedNumber);
     // busca com debounce; sem busca carrega na hora. Poll a cada 6s mantém vivo.
     const debounce = setTimeout(run, searchTerm ? 350 : 0);
     const interval = setInterval(run, 6000);
@@ -325,7 +349,7 @@ export default function AtendimentoPage() {
       clearTimeout(debounce);
       clearInterval(interval);
     };
-  }, [fetchConversations, searchTerm, listLimit]);
+  }, [fetchConversations, searchTerm, listLimit, selectedNumber]);
 
   // Abre/cria a conversa do lead vindo do pipeline (?leadId=)
   const [leadParamDone, setLeadParamDone] = useState(false);
@@ -884,6 +908,36 @@ export default function AtendimentoPage() {
             >
               <Plus className="h-4 w-4" /> Nova conversa
             </button>
+
+            {/* Seletor de número (multi-número) — só aparece com 2+ números */}
+            {numbers.length > 1 && (
+              <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
+                {[
+                  {
+                    phoneNumberId: "todos",
+                    displayName: "Todos",
+                    displayPhone: "",
+                  },
+                  ...numbers,
+                ].map((n) => (
+                  <button
+                    key={n.phoneNumberId}
+                    onClick={() => setSelectedNumber(n.phoneNumberId)}
+                    title={n.displayPhone || n.displayName}
+                    className={cn(
+                      "shrink-0 rounded-full px-3 py-1 text-[11px] font-medium transition-colors",
+                      selectedNumber === n.phoneNumberId
+                        ? "bg-emerald-600 text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200",
+                    )}
+                  >
+                    {n.phoneNumberId === "todos"
+                      ? "Todos os números"
+                      : n.displayPhone || n.displayName}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Filter tabs */}
             <div className="flex items-center gap-1">

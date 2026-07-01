@@ -4,6 +4,7 @@ import { apiLimiter } from "@/lib/rate-limit";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
 import { whatsapp } from "@/lib/whatsapp";
+import { whatsappFor } from "@/lib/whatsapp-numbers";
 
 // Nunca cacheia — polling do Atendimento precisa de dados em tempo real.
 export const dynamic = "force-dynamic";
@@ -85,6 +86,13 @@ export async function GET(request: Request) {
     if (visibilityOR) ands.push({ OR: visibilityOR });
     if (searchOR) ands.push({ OR: searchOR });
     if (ands.length) where.AND = ands;
+    // Multi-número: filtro por número (?number=phone_number_id). O número PADRÃO
+    // (env) guarda phoneNumberId=null nas conversas → seleciona por IS NULL.
+    const numberFilter = url.searchParams.get("number");
+    if (numberFilter && numberFilter !== "todos") {
+      const envId = process.env.WHATSAPP_PHONE_NUMBER_ID || "";
+      where.phoneNumberId = numberFilter === envId ? null : numberFilter;
+    }
     const conversations = await prisma.conversation.findMany({
       where,
       // Ordena por RESPOSTA DO CLIENTE (lastInboundAt), NÃO por lastMessageAt.
@@ -160,6 +168,7 @@ export async function POST(request: NextRequest) {
       select: {
         organizationId: true,
         channel: true,
+        phoneNumberId: true,
         lead: { select: { phone: true, whatsapp: true } },
       },
     });
@@ -170,14 +179,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Multi-número: envia pelo número DONO da conversa (padrão env se null).
+    const wa = await whatsappFor(prisma, orgId, conversation.phoneNumberId);
+
     // Envio real pelo canal WhatsApp (quando configurado): guarda o wamid como
     // externalId para que os webhooks de status (entregue/lido/falhou) casem.
     let externalId: string | undefined;
     let status = "sent";
-    if (conversation.channel === "whatsapp" && whatsapp.isConfigured) {
+    if (conversation.channel === "whatsapp" && wa.isConfigured) {
       const to = conversation.lead?.whatsapp || conversation.lead?.phone;
       if (to) {
-        const result = await whatsapp.sendTextMessage(
+        const result = await wa.sendTextMessage(
           to,
           parsed.data.content,
           parsed.data.replyTo,

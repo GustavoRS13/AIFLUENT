@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, checkRateLimit, requireOrgId } from "@/lib/api-auth";
 import { apiLimiter } from "@/lib/rate-limit";
-import { whatsapp } from "@/lib/whatsapp";
+import { whatsappFor } from "@/lib/whatsapp-numbers";
 import { logger } from "@/lib/logger";
 
 // Envia um template aprovado numa conversa e persiste a mensagem.
@@ -39,6 +39,7 @@ export async function POST(
       select: {
         organizationId: true,
         channel: true,
+        phoneNumberId: true,
         lead: { select: { phone: true, whatsapp: true } },
       },
     });
@@ -48,6 +49,13 @@ export async function POST(
         { status: 404 },
       );
     }
+
+    // Multi-número: envia pelo número dono da conversa (padrão env se null).
+    const whatsapp = await whatsappFor(
+      prisma,
+      orgId,
+      conversation.phoneNumberId,
+    );
 
     let externalId: string | undefined;
     let status = "sent";

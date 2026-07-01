@@ -7,6 +7,7 @@ import {
   persistInboundMessage,
   persistStatusUpdate,
 } from "@/lib/whatsapp-inbound";
+import { isKnownWhatsappNumber } from "@/lib/whatsapp-numbers";
 import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
@@ -59,22 +60,19 @@ export async function POST(request: NextRequest) {
 
     try {
       const parsed = parseWebhook(body);
-      // FILTRO CRÍTICO: o app pode estar inscrito numa WABA com vários números
-      // (ex.: o número do Clint). Só processamos as mensagens do NOSSO número.
-      const ourPhoneId = process.env.WHATSAPP_PHONE_NUMBER_ID || "";
-      if (
-        ourPhoneId &&
-        parsed.phoneNumberId &&
-        parsed.phoneNumberId !== ourPhoneId
-      ) {
-        logger.info("[WhatsApp Webhook] ignorado (outro numero)", {
-          recebidoEm: parsed.phoneNumberId,
-          nosso: ourPhoneId,
-        });
-        return NextResponse.json({ status: "ignored" }, { status: 200 });
-      }
       if (parsed.messages.length || parsed.statuses.length) {
         const { prisma } = await import("@/lib/prisma");
+        // Multi-número: só processa números NOSSOS (padrão env OU registrado numa
+        // Integration). A WABA pode ter números de terceiros — esses são ignorados.
+        if (
+          parsed.phoneNumberId &&
+          !(await isKnownWhatsappNumber(prisma, parsed.phoneNumberId))
+        ) {
+          logger.info("[WhatsApp Webhook] ignorado (numero nao registrado)", {
+            recebidoEm: parsed.phoneNumberId,
+          });
+          return NextResponse.json({ status: "ignored" }, { status: 200 });
+        }
         const orgId = await resolveOrgForPhoneNumber(
           prisma,
           parsed.phoneNumberId,
@@ -86,7 +84,13 @@ export async function POST(request: NextRequest) {
         } else {
           for (const m of parsed.messages) {
             try {
-              await persistInboundMessage(prisma, orgId, m, parsed.contactName);
+              await persistInboundMessage(
+                prisma,
+                orgId,
+                m,
+                parsed.contactName,
+                parsed.phoneNumberId,
+              );
             } catch (e) {
               logger.error("[WhatsApp Webhook] falha ao persistir mensagem", {
                 error: e instanceof Error ? e.message : String(e),
