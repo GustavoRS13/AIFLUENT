@@ -182,6 +182,21 @@ export default function AtendimentoPage() {
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [creatingConv, setCreatingConv] = useState(false);
+  // "Nova conversa": busca-ou-cria (estilo Clint) — acha o contato existente e,
+  // se não achar, cria na hora.
+  const [convSearch, setConvSearch] = useState("");
+  const [convResults, setConvResults] = useState<
+    {
+      id: string;
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+      whatsapp?: string;
+      email?: string;
+    }[]
+  >([]);
+  const [convSearching, setConvSearching] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesBoxRef = useRef<HTMLDivElement>(null);
   // true = usuário está no fim da conversa (pode auto-descer). false = subiu p/ ler.
@@ -672,6 +687,98 @@ export default function AtendimentoPage() {
     [selectedId, addMessage, applyServerMessages],
   );
 
+  // Abre uma conversa garantindo que ela apareça mesmo se ainda não está na
+  // lista (conversa nova ou oculta): injeta um objeto mínimo e seleciona.
+  const openConversation = useCallback(
+    (
+      convId: string,
+      info: { leadId: string; name: string; phone?: string },
+    ) => {
+      const conv: Conversation = {
+        id: convId,
+        leadId: info.leadId,
+        name: info.name || "Sem nome",
+        avatar: (info.name?.trim()?.[0] || "?").toUpperCase(),
+        phone: info.phone,
+        lastMessage: "",
+        lastMessageAt: new Date().toISOString(),
+        lastInboundAt: null,
+        unreadCount: 0,
+        channel: "whatsapp",
+        messages: [],
+      };
+      lastSelectedConvRef.current = conv;
+      setConversations((prev) =>
+        prev.some((c) => c.id === convId) ? prev : [conv, ...prev],
+      );
+      setSelectedId(convId);
+      setNewConvOpen(false);
+    },
+    [],
+  );
+
+  // Busca contatos existentes enquanto digita no "Nova conversa" (debounce 300ms).
+  useEffect(() => {
+    if (!newConvOpen) return;
+    const q = convSearch.trim();
+    if (q.length < 2) {
+      setConvResults([]);
+      setConvSearching(false);
+      return;
+    }
+    setConvSearching(true);
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/leads?search=${encodeURIComponent(q)}&limit=8`,
+          { cache: "no-store" },
+        );
+        const data = await res.json();
+        setConvResults(Array.isArray(data.leads) ? data.leads : []);
+      } catch {
+        setConvResults([]);
+      } finally {
+        setConvSearching(false);
+      }
+    }, 300);
+    return () => clearTimeout(t);
+  }, [convSearch, newConvOpen]);
+
+  // Abre a conversa de um contato existente encontrado na busca.
+  async function startWithExistingLead(lead: {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    whatsapp?: string;
+  }) {
+    if (creatingConv) return;
+    setCreatingConv(true);
+    try {
+      const res = await fetch("/api/conversations/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leadId: lead.id }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.conversationId) {
+        alert(data.error || "Não foi possível abrir a conversa.");
+        return;
+      }
+      openConversation(data.conversationId, {
+        leadId: lead.id,
+        name:
+          [lead.firstName, lead.lastName].filter(Boolean).join(" ") ||
+          "Sem nome",
+        phone: lead.phone || lead.whatsapp,
+      });
+    } catch {
+      alert("Falha ao abrir conversa.");
+    } finally {
+      setCreatingConv(false);
+    }
+  }
+
   // Cria lead + conversa nova a partir do Atendimento
   async function handleStartConversation() {
     if (!newName.trim() || !newPhone.trim() || creatingConv) return;
@@ -687,41 +794,14 @@ export default function AtendimentoPage() {
         alert(data.error || "Não foi possível iniciar a conversa.");
         return;
       }
-      setNewConvOpen(false);
+      openConversation(data.conversationId, {
+        leadId: (data.leadId as string) || "",
+        name: newName,
+        phone: newPhone,
+      });
       setNewName("");
       setNewPhone("");
-      // recarrega a lista e abre a conversa nova
-      const list = await fetch("/api/conversations").then((r) => r.json());
-      const items = (list.conversations || []) as Record<string, unknown>[];
-      const mapped: Conversation[] = items.map((c) => {
-        const lead = c.lead as Record<string, unknown> | null;
-        const msgs = c.messages as Array<Record<string, unknown>> | undefined;
-        return {
-          id: c.id as string,
-          leadId: (lead?.id as string) || "",
-          name:
-            [lead?.firstName, lead?.lastName].filter(Boolean).join(" ") ||
-            "Sem nome",
-          avatar:
-            ((lead?.firstName as string)?.[0] || "?").toUpperCase() +
-            ((lead?.lastName as string)?.[0] || "").toUpperCase(),
-          phone: (lead?.phone || lead?.whatsapp) as string | undefined,
-          lastMessage: (msgs?.[0]?.content as string) || "",
-          lastMessageAt: (c.lastMessageAt ||
-            c.updatedAt ||
-            new Date().toISOString()) as string,
-          lastInboundAt: (c.lastInboundAt as string | null) ?? null,
-          unreadCount: (c.unreadCount as number) || 0,
-          channel: (c.channel as ConversationChannel) || "whatsapp",
-          assignee: (c.assignee as Record<string, unknown>)?.name as
-            | string
-            | undefined,
-          messages: [],
-        };
-      });
-      setConversations(mapped);
-      setSelectedId(data.conversationId);
-      // abre o seletor de modelos (1º envio a lead novo exige template)
+      // 1º envio a contato novo exige template (regra de 24h do WhatsApp)
       setTimeout(() => setTemplateOpen(true), 300);
     } catch {
       alert("Falha ao iniciar conversa.");
@@ -792,7 +872,14 @@ export default function AtendimentoPage() {
             </div>
 
             <button
-              onClick={() => setNewConvOpen(true)}
+              onClick={() => {
+                setConvSearch("");
+                setConvResults([]);
+                setShowAddForm(false);
+                setNewName("");
+                setNewPhone("");
+                setNewConvOpen(true);
+              }}
               className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#25d366] py-2 text-sm font-medium text-white transition-colors hover:bg-[#20bd5a]"
             >
               <Plus className="h-4 w-4" /> Nova conversa
@@ -1299,54 +1386,145 @@ export default function AtendimentoPage() {
         </AnimatePresence>
       </div>
 
-      {/* Modal: Nova conversa */}
+      {/* Modal: Nova conversa (buscar contato existente OU criar novo) */}
       {newConvOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 p-4 pt-24"
           onClick={() => setNewConvOpen(false)}
         >
           <div
-            className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"
+            className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="mb-3 text-sm font-bold text-gray-900">
               Nova conversa
             </h3>
-            <label className="text-xs text-gray-500">Nome</label>
-            <input
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="Nome do contato"
-              className="mt-1 mb-3 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none"
-            />
+
             <label className="text-xs text-gray-500">
-              WhatsApp (com DDD e país)
+              Pesquise o contato (nome, telefone ou e-mail)
             </label>
             <input
-              value={newPhone}
-              onChange={(e) => setNewPhone(e.target.value)}
-              placeholder="Ex.: 5511999998888"
+              autoFocus
+              value={convSearch}
+              onChange={(e) => {
+                setConvSearch(e.target.value);
+                setShowAddForm(false);
+              }}
+              placeholder="Ex.: Maria, 5511999998888, maria@email.com"
               className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none"
             />
-            <p className="mt-2 text-[11px] text-gray-400">
-              A 1ª mensagem a um contato novo é enviada por <b>modelo</b> (regra
-              de 24h do WhatsApp). O seletor de Modelos abre em seguida.
-            </p>
-            <div className="mt-4 flex justify-end gap-2">
-              <button
-                onClick={() => setNewConvOpen(false)}
-                className="rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleStartConversation}
-                disabled={creatingConv || !newName.trim() || !newPhone.trim()}
-                className="rounded-lg bg-[#25d366] px-4 py-2 text-sm font-medium text-white hover:bg-[#20bd5a] disabled:opacity-50"
-              >
-                {creatingConv ? "Criando..." : "Iniciar"}
-              </button>
-            </div>
+
+            {/* Resultados da busca + opção de adicionar */}
+            {!showAddForm && (
+              <div className="mt-2 max-h-64 overflow-y-auto">
+                {convSearching && (
+                  <p className="px-1 py-2 text-xs text-gray-400">Buscando…</p>
+                )}
+                {!convSearching &&
+                  convSearch.trim().length >= 2 &&
+                  convResults.length === 0 && (
+                    <p className="px-1 py-2 text-xs text-gray-400">
+                      Nenhum contato encontrado.
+                    </p>
+                  )}
+                {convResults.map((l) => {
+                  const nome =
+                    [l.firstName, l.lastName].filter(Boolean).join(" ") ||
+                    "Sem nome";
+                  const tel = l.phone || l.whatsapp || "";
+                  return (
+                    <button
+                      key={l.id}
+                      onClick={() => startWithExistingLead(l)}
+                      disabled={creatingConv}
+                      className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-emerald-50 disabled:opacity-50"
+                    >
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-700">
+                        {(nome[0] || "?").toUpperCase()}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm text-gray-900">
+                          {nome}
+                        </span>
+                        {tel && (
+                          <span className="block truncate text-xs text-gray-500">
+                            {tel}
+                          </span>
+                        )}
+                      </span>
+                    </button>
+                  );
+                })}
+
+                <button
+                  onClick={() => {
+                    const q = convSearch.trim();
+                    const isPhone = /^[\d\s()+-]{8,}$/.test(q);
+                    setNewName(isPhone ? "" : q);
+                    setNewPhone(isPhone ? q.replace(/\D/g, "") : "");
+                    setShowAddForm(true);
+                  }}
+                  className="mt-1 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium text-emerald-700 hover:bg-emerald-50"
+                >
+                  <Plus className="h-4 w-4" /> Adicionar novo contato
+                </button>
+              </div>
+            )}
+
+            {/* Formulário de novo contato */}
+            {showAddForm && (
+              <div className="mt-3">
+                <label className="text-xs text-gray-500">Nome</label>
+                <input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="Nome do contato"
+                  className="mt-1 mb-3 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none"
+                />
+                <label className="text-xs text-gray-500">
+                  WhatsApp (com DDD e país)
+                </label>
+                <input
+                  value={newPhone}
+                  onChange={(e) => setNewPhone(e.target.value)}
+                  placeholder="Ex.: 5511999998888"
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none"
+                />
+                <p className="mt-2 text-[11px] text-gray-400">
+                  A 1ª mensagem a um contato novo é enviada por <b>modelo</b>{" "}
+                  (regra de 24h do WhatsApp). O seletor de Modelos abre em
+                  seguida.
+                </p>
+                <div className="mt-3 flex justify-between">
+                  <button
+                    onClick={() => setShowAddForm(false)}
+                    className="rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100"
+                  >
+                    ← Voltar à busca
+                  </button>
+                  <button
+                    onClick={handleStartConversation}
+                    disabled={
+                      creatingConv || !newName.trim() || !newPhone.trim()
+                    }
+                    className="rounded-lg bg-[#25d366] px-4 py-2 text-sm font-medium text-white hover:bg-[#20bd5a] disabled:opacity-50"
+                  >
+                    {creatingConv ? "Criando…" : "Criar e iniciar"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!showAddForm && (
+              <div className="mt-3 flex justify-end">
+                <button
+                  onClick={() => setNewConvOpen(false)}
+                  className="rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100"
+                >
+                  Fechar
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
