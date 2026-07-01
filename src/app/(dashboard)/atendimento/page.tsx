@@ -909,8 +909,8 @@ export default function AtendimentoPage() {
               <Plus className="h-4 w-4" /> Nova conversa
             </button>
 
-            {/* Seletor de número (multi-número) — só aparece com 2+ números */}
-            {numbers.length > 1 && (
+            {/* Seletor de número (multi-número) */}
+            {numbers.length > 0 && (
               <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
                 {[
                   {
