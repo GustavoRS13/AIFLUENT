@@ -87,7 +87,14 @@ export async function GET(request: Request) {
     if (ands.length) where.AND = ands;
     const conversations = await prisma.conversation.findMany({
       where,
-      orderBy: { lastMessageAt: "desc" },
+      // Ordena por RESPOSTA DO CLIENTE (lastInboundAt), NÃO por lastMessageAt.
+      // Assim NADA que a gente envia (disparo em massa OU template manual do
+      // time) sobe a conversa no topo — só a resposta do cliente sobe. Conversa
+      // sem resposta nova não borbulha/aparece como se precisasse de atenção.
+      orderBy: [
+        { lastInboundAt: { sort: "desc", nulls: "last" } },
+        { lastMessageAt: "desc" },
+      ],
       take: Math.min(
         3000,
         Math.max(
