@@ -45,6 +45,7 @@ interface Conversation {
   awaitingReply?: boolean;
   channel: ConversationChannel;
   assignee?: string;
+  phoneNumberId?: string | null;
   messages: ChatMessage[];
 }
 
@@ -208,6 +209,9 @@ export default function AtendimentoPage() {
     }[]
   >([]);
   const [selectedNumber, setSelectedNumber] = useState<string>("todos");
+  // Número escolhido pra "Nova conversa" (de qual número enviar). Default = o
+  // número do filtro atual (se específico) ou o padrão.
+  const [newConvNumber, setNewConvNumber] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesBoxRef = useRef<HTMLDivElement>(null);
   // true = usuário está no fim da conversa (pode auto-descer). false = subiu p/ ler.
@@ -314,6 +318,7 @@ export default function AtendimentoPage() {
                 assignee: (c.assignee as Record<string, unknown>)?.name as
                   | string
                   | undefined,
+                phoneNumberId: (c.phoneNumberId as string | null) ?? null,
                 messages: [],
               };
             },
@@ -716,7 +721,12 @@ export default function AtendimentoPage() {
   const openConversation = useCallback(
     (
       convId: string,
-      info: { leadId: string; name: string; phone?: string },
+      info: {
+        leadId: string;
+        name: string;
+        phone?: string;
+        phoneNumberId?: string | null;
+      },
     ) => {
       const conv: Conversation = {
         id: convId,
@@ -729,6 +739,7 @@ export default function AtendimentoPage() {
         lastInboundAt: null,
         unreadCount: 0,
         channel: "whatsapp",
+        phoneNumberId: info.phoneNumberId ?? null,
         messages: [],
       };
       lastSelectedConvRef.current = conv;
@@ -782,7 +793,7 @@ export default function AtendimentoPage() {
       const res = await fetch("/api/conversations/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leadId: lead.id }),
+        body: JSON.stringify({ leadId: lead.id, phoneNumberId: newConvNumber }),
       });
       const data = await res.json();
       if (!res.ok || !data.conversationId) {
@@ -795,6 +806,7 @@ export default function AtendimentoPage() {
           [lead.firstName, lead.lastName].filter(Boolean).join(" ") ||
           "Sem nome",
         phone: lead.phone || lead.whatsapp,
+        phoneNumberId: data.phoneNumberId,
       });
     } catch {
       alert("Falha ao abrir conversa.");
@@ -811,7 +823,11 @@ export default function AtendimentoPage() {
       const res = await fetch("/api/conversations/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName: newName, phone: newPhone }),
+        body: JSON.stringify({
+          firstName: newName,
+          phone: newPhone,
+          phoneNumberId: newConvNumber,
+        }),
       });
       const data = await res.json();
       if (!res.ok || !data.conversationId) {
@@ -822,6 +838,7 @@ export default function AtendimentoPage() {
         leadId: (data.leadId as string) || "",
         name: newName,
         phone: newPhone,
+        phoneNumberId: data.phoneNumberId,
       });
       setNewName("");
       setNewPhone("");
@@ -902,6 +919,14 @@ export default function AtendimentoPage() {
                 setShowAddForm(false);
                 setNewName("");
                 setNewPhone("");
+                // default = número do filtro atual (se específico) ou o padrão
+                const def =
+                  selectedNumber !== "todos"
+                    ? selectedNumber
+                    : numbers.find((n) => n.isDefault)?.phoneNumberId ||
+                      numbers[0]?.phoneNumberId ||
+                      "";
+                setNewConvNumber(def);
                 setNewConvOpen(true);
               }}
               className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#25d366] py-2 text-sm font-medium text-white transition-colors hover:bg-[#20bd5a]"
@@ -1453,6 +1478,27 @@ export default function AtendimentoPage() {
             <h3 className="mb-3 text-sm font-bold text-gray-900">
               Nova conversa
             </h3>
+
+            {/* De qual número enviar (obrigatório escolher) */}
+            {numbers.length > 0 && (
+              <div className="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 p-2">
+                <label className="mb-1 block text-xs font-medium text-emerald-800">
+                  📱 Enviar deste número:
+                </label>
+                <select
+                  value={newConvNumber}
+                  onChange={(e) => setNewConvNumber(e.target.value)}
+                  className="w-full rounded-md border border-emerald-300 bg-white px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none"
+                >
+                  {numbers.map((n) => (
+                    <option key={n.phoneNumberId} value={n.phoneNumberId}>
+                      {n.displayPhone}
+                      {n.isDefault ? " (padrão)" : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <label className="text-xs text-gray-500">
               Pesquise o contato (nome, telefone ou e-mail)

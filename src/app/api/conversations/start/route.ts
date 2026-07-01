@@ -56,9 +56,19 @@ export async function POST(request: NextRequest) {
       leadId = result.lead.id;
     }
 
-    // 2. cria/reutiliza a conversa de WhatsApp
+    // Multi-número: de qual número esta conversa é (null = padrão env).
+    const envPhoneId = process.env.WHATSAPP_PHONE_NUMBER_ID || "";
+    const reqNum = (body.phoneNumberId as string)?.trim();
+    const numId = !reqNum || reqNum === envPhoneId ? null : reqNum;
+
+    // 2. cria/reutiliza a conversa de WhatsApp DO NÚMERO escolhido
     let conversation = await prisma.conversation.findFirst({
-      where: { organizationId: orgId, leadId, channel: "whatsapp" },
+      where: {
+        organizationId: orgId,
+        leadId,
+        channel: "whatsapp",
+        phoneNumberId: numId,
+      },
       select: { id: true },
     });
     if (!conversation) {
@@ -69,12 +79,17 @@ export async function POST(request: NextRequest) {
           channel: "whatsapp",
           status: "open",
           lastMessageAt: new Date(),
+          phoneNumberId: numId,
         },
         select: { id: true },
       });
     }
 
-    return NextResponse.json({ conversationId: conversation.id, leadId });
+    return NextResponse.json({
+      conversationId: conversation.id,
+      leadId,
+      phoneNumberId: numId,
+    });
   } catch (err) {
     logger.error("POST /api/conversations/start error", err);
     return NextResponse.json(
