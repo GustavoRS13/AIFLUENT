@@ -4,7 +4,6 @@ import { apiLimiter } from "@/lib/rate-limit";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
 import { whatsapp } from "@/lib/whatsapp";
-import { canMessageLeadWhere } from "@/lib/lead-optout";
 
 // Nunca cacheia — polling do Atendimento precisa de dados em tempo real.
 export const dynamic = "force-dynamic";
@@ -22,12 +21,14 @@ export async function GET(request: Request) {
     const q = (url.searchParams.get("q") || "").trim();
     const { prisma } = await import("@/lib/prisma");
     const where: Record<string, unknown> = { organizationId: orgId };
-    // Lead PERDIDO / OPT-OUT sai do Atendimento (e dos "Não respondidos").
-    // + escopo de grupo (B2B etc.): só conversas de leads do grupo do usuário.
+    // NÃO filtramos por opt-out/perdido aqui: RESPOSTA de cliente tem que
+    // aparecer no Atendimento mesmo se o lead está "perdido"/opt-out — responder
+    // = re-engajou. O canMessageLeadWhere() vale só pra DISPARO, não pro inbox
+    // (antes, um lead 'lost' que respondia sumia da caixa).
+    // O escopo de grupo (B2B etc.) é aplicado abaixo via visibilityOR.
     const scopeGroup = (session!.user as Record<string, unknown>).scopeGroup as
       | string
       | null;
-    where.lead = canMessageLeadWhere();
     // Atendimento mostra só conversas onde o LEAD respondeu (enviou ao menos 1
     // mensagem). Disparos sem resposta não poluem o inbox; ao responder, o
     // webhook seta lastInboundAt e a conversa aparece automaticamente.
