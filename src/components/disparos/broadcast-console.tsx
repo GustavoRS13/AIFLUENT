@@ -122,6 +122,16 @@ export function BroadcastConsole() {
   const [params, setParams] = useState<string[]>([]);
   const [dryRun, setDryRun] = useState(false);
   const [creating, setCreating] = useState(false);
+  // Multi-número: de qual número sai o disparo (obrigatório escolher 1).
+  const [numbers, setNumbers] = useState<
+    {
+      phoneNumberId: string;
+      displayPhone: string;
+      displayName: string;
+      isDefault: boolean;
+    }[]
+  >([]);
+  const [dispatchNumber, setDispatchNumber] = useState<string>("");
 
   // job em execução
   const [job, setJob] = useState<{
@@ -334,12 +344,38 @@ export function BroadcastConsole() {
     loadJobs();
   }, []);
 
+  // Carrega os números de WhatsApp e escolhe o padrão como origem inicial.
+  useEffect(() => {
+    fetch("/api/whatsapp/numbers")
+      .then((r) => r.json())
+      .then((d) => {
+        const ns = Array.isArray(d.numbers) ? d.numbers : [];
+        setNumbers(ns);
+        const def =
+          ns.find((n: { isDefault: boolean }) => n.isDefault) || ns[0];
+        if (def) setDispatchNumber(def.phoneNumberId);
+      })
+      .catch(() => {});
+  }, []);
+
   async function startBroadcast() {
     if (!templateName || !preview) return;
     if (params.some((p) => !p.trim())) {
       alert(
         "Este modelo tem variáveis. Preencha todos os campos de variável antes de disparar.",
       );
+      return;
+    }
+    // Confirmação clara: de qual número sai + pra quantos.
+    const numLabel =
+      numbers.find((n) => n.phoneNumberId === dispatchNumber)?.displayPhone ||
+      "número padrão";
+    if (
+      !dryRun &&
+      !confirm(
+        `Confirmar disparo?\n\nSairá DO NÚMERO: ${numLabel}\nPara: ${preview} contato(s)\nModelo: ${templateName}\n\n(Já foram excluídos: perdidos, opt-out, "não contatar" e quem respondeu que não quer.)`,
+      )
+    ) {
       return;
     }
     setCreating(true);
@@ -353,6 +389,7 @@ export function BroadcastConsole() {
           languageCode: language,
           params: params.length ? params : undefined,
           dryRun,
+          phoneNumberId: dispatchNumber || undefined,
           segment: segment(),
         }),
       });
@@ -672,6 +709,28 @@ export function BroadcastConsole() {
 
       {/* DISPARAR */}
       <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5">
+        {numbers.length > 0 && (
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              📱 De qual número enviar?
+            </label>
+            <select
+              value={dispatchNumber}
+              onChange={(e) => setDispatchNumber(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none"
+            >
+              {numbers.map((n) => (
+                <option key={n.phoneNumberId} value={n.phoneNumberId}>
+                  {n.displayPhone}
+                  {n.isDefault ? " (padrão)" : ""}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-[11px] text-gray-400">
+              O disparo sai desse número; as respostas caem na caixa dele.
+            </p>
+          </div>
+        )}
         <label className="flex items-center gap-2 text-sm text-gray-700">
           <input
             type="checkbox"

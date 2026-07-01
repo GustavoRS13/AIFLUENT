@@ -787,6 +787,9 @@ model BroadcastJob {
   languageCode String    @default("pt_BR")
   params       String?   // JSON: parâmetros do template (iguais p/ todos)
   filters      String?   // JSON: segmentação usada (auditoria/preview)
+  // Multi-número: de QUAL número este disparo sai (phone_number_id). null =
+  // número padrão (env). Conversas criadas herdam esse número.
+  phoneNumberId String?
   status       String    @default("pending") // pending|running|paused|completed|cancelled
   dryRun       Boolean   @default(false)
   total        Int       @default(0)

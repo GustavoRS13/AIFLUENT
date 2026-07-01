@@ -2,7 +2,7 @@
 // /cron/broadcasts (agendador externo). Processa em lotes até esvaziar o job
 // ou estourar o orçamento de tempo. Idempotente e seguro contra concorrência.
 
-import { whatsapp } from "@/lib/whatsapp";
+import { whatsappFor } from "@/lib/whatsapp-numbers";
 
 const BATCH_REAL = 20;
 const BATCH_DRY = 500;
@@ -111,6 +111,18 @@ export async function runBroadcastBatch(
 
   const orgId = job.organizationId as string;
   const senderId = job.createdById as string;
+  // Multi-número: envia pelo número do disparo (padrão env se null). As conversas
+  // criadas herdam esse número (jobNumId; null p/ o padrão, não fragmenta o 94742).
+  const wa = await whatsappFor(
+    prisma,
+    orgId,
+    job.phoneNumberId as string | null,
+  );
+  const envPhoneId = process.env.WHATSAPP_PHONE_NUMBER_ID || "";
+  const jobNumId =
+    !job.phoneNumberId || job.phoneNumberId === envPhoneId
+      ? null
+      : (job.phoneNumberId as string);
   const batch = job.dryRun ? BATCH_DRY : BATCH_REAL;
   const langParams = job.params ? (JSON.parse(job.params) as string[]) : null;
   const buildComponents = (vals: string[] | null | undefined) =>
@@ -129,7 +141,7 @@ export async function runBroadcastBatch(
   // Corpo do template (texto real) — pra salvar a MENSAGEM enviada, não só o nome.
   let templateBody = "";
   try {
-    const tpls = await whatsapp.listTemplates();
+    const tpls = await wa.listTemplates();
     const list = "templates" in tpls ? tpls.templates : [];
     const t = list.find(
       (x) => x.name === job.templateName && x.language === job.languageCode,
@@ -238,6 +250,7 @@ export async function runBroadcastBatch(
               organizationId: orgId,
               leadId: r.leadId,
               channel: "whatsapp",
+              phoneNumberId: jobNumId,
             },
             select: { id: true, lastInboundAt: true },
           });
@@ -251,6 +264,7 @@ export async function runBroadcastBatch(
                 channel: "whatsapp",
                 status: "broadcast",
                 lastMessageAt: new Date(),
+                phoneNumberId: jobNumId,
               },
               select: { id: true, lastInboundAt: true },
             });
@@ -260,7 +274,7 @@ export async function runBroadcastBatch(
               ? fillParams(langParams, leadMap.get(r.leadId))
               : langParams;
           const comp = buildComponents(vals);
-          const res = await whatsapp.sendTemplateMessage(
+          const res = await wa.sendTemplateMessage(
             r.phone,
             job.templateName,
             job.languageCode,

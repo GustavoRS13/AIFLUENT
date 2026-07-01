@@ -134,6 +134,8 @@ export async function POST(request: NextRequest) {
     const params = (body.params as string[]) || undefined;
     const dryRun = body.dryRun === true;
     const segment = (body.segment as BroadcastSegment) || {};
+    // Multi-número: de qual número sai o disparo (null = padrão env).
+    const phoneNumberId = (body.phoneNumberId as string)?.trim() || null;
     if (!templateName) {
       return NextResponse.json(
         { error: "templateName obrigatório" },
@@ -169,6 +171,7 @@ export async function POST(request: NextRequest) {
         languageCode,
         params: params ? JSON.stringify(params) : null,
         filters: JSON.stringify(segment),
+        phoneNumberId,
         dryRun,
         total: leads.length,
         status: "pending",
