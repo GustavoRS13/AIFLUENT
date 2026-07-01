@@ -32,24 +32,48 @@ export function isOptOutMessage(text?: string | null): boolean {
   );
 }
 
+// ETAPAS de pipeline que significam "NÃO CONTATAR" — o usuário move o lead pra
+// cá e ele sai de TODO disparo automaticamente (sem precisar taguear). Match por
+// nome, case-insensitive, parcial. Somado a isLost/isWon abaixo.
+export const DO_NOT_CONTACT_STAGE_PATTERNS = [
+  "não quer mais receber",
+  "nao quer mais receber",
+  "cancelado",
+  "opt-out",
+  "parar msg",
+  "parar mensagem",
+  "retorno futuro",
+  "aluno ativo",
+];
+
 // Fragmento Prisma (nível Lead) p/ quem PODE receber mensagem.
 // Combine com AND no where do Lead, ou use como `where.lead = canMessageLeadWhere()`.
 export function canMessageLeadWhere(): Record<string, unknown> {
   return {
     status: { not: "lost" },
     NOT: [
+      // perdido, ganho (cliente fechado) e etapas de "não contatar"
       { stage: { isLost: true } },
+      { stage: { isWon: true } },
+      ...DO_NOT_CONTACT_STAGE_PATTERNS.map((p) => ({
+        stage: { name: { contains: p, mode: "insensitive" } },
+      })),
       { tags: { some: { tag: { name: { in: OPTOUT_TAGS } } } } },
     ],
   };
 }
 
 // Versão SQL (para queries raw): condições a colocar no WHERE, referenciando o
-// alias do Lead (ex.: "l"). Não envia pra perdido/opt-out.
+// alias do Lead (ex.: "l"). Não envia pra perdido / ganho / etapa "não contatar"
+// / opt-out.
 export function canMessageSql(leadAlias = "l"): string {
   const l = `"${leadAlias}"`;
   const tags = OPTOUT_TAGS.map((t) => `'${t.replace(/'/g, "''")}'`).join(",");
+  const stageLike = DO_NOT_CONTACT_STAGE_PATTERNS.map(
+    (p) => `lower(s.name) LIKE '%${p.replace(/'/g, "''")}%'`,
+  ).join(" OR ");
   return `${l}.status <> 'lost'
-    AND NOT EXISTS (SELECT 1 FROM "PipelineStage" s WHERE s.id=${l}."stageId" AND s."isLost"=true)
+    AND NOT EXISTS (SELECT 1 FROM "PipelineStage" s WHERE s.id=${l}."stageId"
+      AND (s."isLost"=true OR s."isWon"=true OR ${stageLike}))
     AND NOT EXISTS (SELECT 1 FROM "LeadTag" lt JOIN "Tag" t ON t.id=lt."tagId" WHERE lt."leadId"=${l}.id AND t.name IN (${tags}))`;
 }
