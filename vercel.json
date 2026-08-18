@@ -9,8 +9,16 @@
       "schedule": "0 4 * * *"
     },
     {
-      "path": "/api/cron/recovery-utility",
-      "schedule": "25 15 * * *"
+      "path": "/api/cron/clint-b2c",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/followup-interessados",
+      "schedule": "30 11 * * *"
+    },
+    {
+      "path": "/api/cron/clint-nurture",
+      "schedule": "0 13 * * *"
     }
   ]
 }
