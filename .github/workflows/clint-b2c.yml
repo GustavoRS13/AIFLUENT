@@ -1,0 +1,27 @@
+name: Clint B2C Auto
+
+# Auto-disparo dos leads novos B2C do Clint (origens Leads B2C + Remarketing B2C).
+# Importa + dispara UTILITY (retomar_atendimento) pelo número padrão. Roda de hora
+# em hora no horário comercial BRT (08h–20h = 11–23 UTC) para o 1º contato sair em
+# ~1h em vez de esperar até 24h. O Vercel Cron nativo (12 UTC) segue como fallback.
+# O endpoint é idempotente/resumível; chamamos 3x por execução para drenar o import
+# quando o teto de tempo trunca (importTruncated).
+on:
+  schedule:
+    - cron: "0 11-23 * * *"
+  workflow_dispatch:
+
+jobs:
+  drive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ingest + dispatch new Clint B2C leads
+        run: |
+          for i in 1 2 3; do
+            code=$(curl -s -o /tmp/out.json -w "%{http_code}" \
+              "https://aifluent-pink.vercel.app/api/cron/clint-b2c" \
+              -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+            echo "call $i → HTTP $code"
+            cat /tmp/out.json; echo
+            test "$code" = "200" || exit 1
+          done
