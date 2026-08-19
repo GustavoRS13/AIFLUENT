@@ -1,0 +1,25 @@
+name: Orphan Inbounds Alert
+
+# Alerta de INTERESSADOS aguardando resposta (sem atendente). Roda de hora em
+# hora no horário comercial BRT (08h–20h = 11–23 UTC) e notifica os admins in-app
+# sobre quem nos escreveu e ficou sem resposta — destacando quem ainda está
+# dentro da janela de 24h da Meta. NÃO envia nada; só alerta (a resposta é do
+# humano, ou do /api/cron/reply com texto aprovado). O Vercel Cron nativo (14 UTC)
+# segue como fallback diário.
+on:
+  schedule:
+    - cron: "0 11-23 * * *"
+  workflow_dispatch:
+
+jobs:
+  alert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Detect orphan inbounds and notify admins
+        run: |
+          code=$(curl -s -o /tmp/out.json -w "%{http_code}" \
+            "https://aifluent-pink.vercel.app/api/cron/orphan-inbounds" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          echo "HTTP $code"
+          cat /tmp/out.json
+          test "$code" = "200"
