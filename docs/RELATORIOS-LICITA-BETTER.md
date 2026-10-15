@@ -6,7 +6,7 @@ O cron adicionado é `0 10,15,21 * * *`: 07h, 12h e 18h em Brasília. O cron é 
 
 ## Configuração de servidor
 
-- No Licita Better: `LICITA_GESTAO_EMPRESA_ID` da Better e `LICITA_GESTAO_REPORT_TOKEN` (aleatório, mínimo 32 caracteres), além do banco existente. Aplicar a migração de gestão antes da ativação.
+- No Licita Better: `LICITA_GESTAO_EMPRESA_ID` da Better e `LICITA_GESTAO_REPORT_TOKEN` (aleatório, mínimo 32 caracteres), além do banco existente. A leitura funciona sem a migração, marcando a cobertura como não verificada. A escrita de evidências exige a migração de gestão.
 - No CRM: o mesmo `LICITA_GESTAO_REPORT_TOKEN` e `LICITA_REPORT_TO` em E.164. `LICITA_REPORT_ORG_ID` é opcional apenas quando a organização puder ser resolvida com segurança pelo número existente ou por existir uma única organização. Em instalações com várias organizações, fixar essa variável.
 - Não é necessário configurar Twilio. Manter desativado o workflow alternativo de envios no repositório do Licita Better para evitar dois motores enviando o mesmo relatório.
 
@@ -27,3 +27,9 @@ O conteúdo vem das obrigações registradas no Licita Better. Isso não impleme
 Testes: `npx vitest run src/app/api/__tests__/licita-better.test.ts`. O build local requer `AUTH_SECRET` de teste; não extrair a chave real para compilar.
 
 Para parar somente esta rotina, remover sua entrada de `vercel.json` e publicar, ou remover `LICITA_GESTAO_REPORT_TOKEN` do CRM. Preservar mensagens e recibos. Não desativar os outros crons nem alterar a configuração WhatsApp existente.
+
+## Referência de publicação
+
+Esta alteração parte de `d74b346`, confirmado como código da implantação CRM em produção. O `main` remoto estava 22 commits atrás dessa implantação. A referência `production-baseline-2026-10-15` preserva exatamente esse código e permite revisar só a integração no PR #2. Não publicar o diretório original com alterações locais pendentes nem promover o antigo `main` sobre a versão em uso.
+
+A prévia falhou porque `AUTH_SECRET` existe apenas no ambiente Production. O build com configuração local de teste passou. Não copiar a chave real para previews nem enfraquecer o guard de autenticação para contornar isso.
