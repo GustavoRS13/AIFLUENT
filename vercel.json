@@ -23,6 +23,10 @@
     {
       "path": "/api/cron/orphan-inbounds",
       "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/licita-better",
+      "schedule": "0 10,15,21 * * *"
     }
   ]
 }
